@@ -166,7 +166,7 @@ nav.tabs button.on{color:var(--ink);font-weight:600}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='3.5';
+const APP_VERSION='3.6';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_FULL=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
@@ -206,6 +206,11 @@ const WEEKS=[[["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",60],["bana
 const TIMES={pre:'09:30',bf_S:'11:30',bf_W:'10:00',bf_R:'10:00',lunch:'16:00',snack:'19:30',dinner:'22:30',late:'00:30'};
 const NORM={k:[1900,2000],p:[160,180],f:[55,65],c:[120,150]};
 const LEGACY=[["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["thigh",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["shrimp",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["squid",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["fish",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["chicken",200],["veg",200],["oil",5]]],["late",[["tofu",150]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["shrimp",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["banana",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["R",[["bf",[["egg",4],["oats",60],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",150]]]]]]; // базовое меню, по которому была закупка до 6 окт
+// разовые замены приёмов по датам: {дата:{приём:[[продукт,кол-во],...]}}
+const OVERRIDES={
+ '2026-09-30':{dinner:[['squid',200],['veg',200],['oil',5]]},
+ '2026-10-01':{dinner:[['fish',200],['veg',200],['oil',5]]}
+};
 const EPOCH=new Date(2026,9,6); // вторник, 6 окт 2026 — меню 1
 
 /* ===== Состояние ===== */
@@ -229,7 +234,8 @@ function menuName(cs){return cs<EPOCH?'базовое меню':'меню '+(cyc
 function cycleIdx(cs){const n=Math.round((cs-EPOCH)/864e5/7);return ((n%4)+4)%4}
 function dayPlan(date){
   const cs=cycleStart(date),di=Math.round((date-cs)/864e5),raw=(cs<EPOCH?LEGACY:WEEKS[cycleIdx(cs)])[di],type=raw[0];
-  return {type,meals:raw[1].map(([slot,items])=>({slot,time:slot==='bf'?TIMES['bf_'+type]:TIMES[slot],items:items.map(([p,q])=>({p,q}))}))};
+  const ov=OVERRIDES[dkey(date)]||{};
+  return {type,meals:raw[1].map(([slot,items])=>({slot,time:slot==='bf'?TIMES['bf_'+type]:TIMES[slot],items:(ov[slot]||items).map(([p,q])=>({p,q}))}))};
 }
 function mealAt(date,m){const t=tmin(m.time);return new Date(date.getFullYear(),date.getMonth(),date.getDate(),Math.floor(t/60),t%60)}
 
