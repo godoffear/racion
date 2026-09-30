@@ -132,6 +132,14 @@ details.card[open] summary{margin-bottom:8px}
 .spark .pt{fill:var(--accent)}
 .spark .tg{stroke:var(--now);stroke-width:2;stroke-dasharray:6 5}
 .spk{display:flex;justify-content:space-between}
+.il{list-style:none;margin:4px 0 0;padding:0}
+.il li{display:flex;justify-content:space-between;gap:12px;padding:3px 0;border-top:1px dashed var(--line);font-size:.95rem}
+.il li:first-child{border-top:0}
+.il li b{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.hero .il li{border-top-color:rgba(42,30,0,.25)}
+.eaten .il{opacity:.55}
+.card ul.tasks .il{margin-top:4px}
+.card ul.tasks .il li{font-size:.86rem}
 .eatbox{padding:10px 12px}
 .eatbox .eh{display:flex;justify-content:space-between;align-items:baseline;font-size:.82rem;font-weight:600;margin-bottom:6px}
 .eatbox .eh span{font-weight:400;color:var(--muted);font-size:.75rem}
@@ -158,7 +166,7 @@ nav.tabs button.on{color:var(--ink);font-weight:600}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='3.4';
+const APP_VERSION='3.5';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_FULL=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
@@ -239,6 +247,8 @@ function plural(n,f){const a=n%10,b=n%100;if(a===1&&b!==11)return f[0];if(a>=2&&
 function fmtMeasure(units,key){const f=MEASURES[key],nn=niceNum(units);return nn.s+' '+(nn.int?plural(nn.n,f):f[3])}
 function fq(q,u){const v=Math.round(q*10)/10;return (u==='г'&&v>=1000?String(Math.round(v/100)/10)+' кг':v+' '+u).replace('.',',')}
 function qtyText(i){const p=PR[i.p];if(S.grams||!p.m){if(i.p==='rice')return i.q+' г сухого (≈ '+Math.round(i.q*2.8/10)*10+' г варёного)';return fq(i.q,p.u)}return fmtMeasure(i.q/p.mg,p.m)}
+function cap(t){return t.charAt(0).toUpperCase()+t.slice(1)}
+function itemsList(items){return `<ul class="il">${items.map(i=>`<li><span>${esc(cap(PR[i.p].s))}</span><b>${esc(qtyText(i))}</b></li>`).join('')}</ul>`}
 function itemsText(items){return items.map(i=>PR[i.p].s+' '+qtyText(i)).join(', ')}
 function chips(m){return `<div class="chips"><span>${r0(m.k)} ккал</span><span class="p">Б ${r0(m.p)}</span><span class="f">Ж ${r0(m.f)}</span><span class="c">У ${r0(m.c)}</span></div>`}
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -266,7 +276,7 @@ function prepFor(date){
 }
 function thawFor(date){
   const tm=addDays(date,1),twd=wd(tm);if(twd===1||twd===2)return []; // Вт и Ср — свежее с закупки
-  const out=[];dayPlan(tm).meals.forEach(m=>{if(m.slot!=='lunch'&&m.slot!=='dinner')return;m.items.forEach(i=>{if(PR[i.p].how&&i.p!=='tofu')out.push(PR[i.p].s+' '+qtyText(i)+' ('+SLOTS[m.slot].toLowerCase()+')')})});
+  const out=[];dayPlan(tm).meals.forEach(m=>{if(m.slot!=='lunch'&&m.slot!=='dinner')return;m.items.forEach(i=>{if(PR[i.p].how&&i.p!=='tofu')out.push({name:PR[i.p].s,q:qtyText(i),slot:SLOTS[m.slot].toLowerCase()})})});
   return out;
 }
 
@@ -322,7 +332,7 @@ function vToday(){
   // следующий приём
   const next=isToday?meals.find(m=>!done(m)):null;
   if(next){const diff=tmin(next.time)-nowMin(),eta=diff>0?'через '+(diff>=60?Math.floor(diff/60)+' ч ':'')+(diff%60)+' мин':diff>-30?'сейчас':'время прошло';
-    h+=`<section class="hero"><div class="when">${next.time}</div><div class="what">${SLOTS[next.slot]}</div><div class="items">${esc(itemsText(next.items))}</div><div class="how">${esc(howTo(next))}</div><div class="row"><span class="eta">${eta}</span><button class="btn" data-a="eat" data-s="${next.slot}">Съел</button></div></section>`}
+    h+=`<section class="hero"><div class="when">${next.time}</div><div class="what">${SLOTS[next.slot]}</div>${itemsList(next.items)}<div class="how">${esc(howTo(next))}</div><div class="row"><span class="eta">${eta}</span><button class="btn" data-a="eat" data-s="${next.slot}">Съел</button></div></section>`}
   else if(isToday)h+=`<div class="card"><b>Все приёмы на сегодня отмечены.</b></div>`;
   // съедено за день
   {const e={k:0,p:0,f:0,c:0};meals.forEach(m=>{if(done(m)){const x=macros(m.items);['k','p','f','c'].forEach(k=>e[k]+=x[k])}});
@@ -330,12 +340,12 @@ function vToday(){
    h+=`<section class="card eatbox" aria-label="Съедено за день"><div class="eh">${isToday?'Съедено сегодня':'Съедено за день'}<span>по отметкам «Съел»</span></div><div class="ng">${cell('k','ккал','accent')}${cell('p','белки','p')}${cell('f','жиры','f')}${cell('c','углев.','c')}</div></section>`}
   // заготовки
   const prep=prepFor(date),thaw=hr>=16||!isToday?thawFor(date):[];
-  if(prep.length||thaw.length)h+=`<section class="card prep"><h3>${isToday?'Заготовки сегодня':'Заготовки'}</h3><ul class="tasks small">${prep.map(t=>`<li>${esc(t)}</li>`).join('')}${thaw.length?`<li>Вечером переложи из морозилки в холодильник на завтра: ${esc(thaw.join(', '))}.</li>`:''}</ul></section>`;
+  if(prep.length||thaw.length)h+=`<section class="card prep"><h3>${isToday?'Заготовки сегодня':'Заготовки'}</h3><ul class="tasks small">${prep.map(t=>`<li>${esc(t)}</li>`).join('')}${thaw.length?`<li>Вечером переложи из морозилки в холодильник на завтра:<ul class="il">${thaw.map(t=>`<li><span>${esc(cap(t.name))}</span><b>${esc(t.q)} · ${esc(t.slot)}</b></li>`).join('')}</ul></li>`:''}</ul></section>`;
   // план
   let tot={k:0,p:0,f:0,c:0},ate={k:0,p:0,f:0,c:0};
   h+=`<h2 class="h2row"><span>План дня</span><button class="link" data-a="grams">${S.grams?'Показать в мерах':'Показать в граммах'}</button></h2><ul class="tl">`;
   meals.forEach(m=>{const e=done(m),mm=macros(m.items);['k','p','f','c'].forEach(k=>{tot[k]+=mm[k];if(e)ate[k]+=mm[k]});
-    h+=`<li class="${e?'eaten':''} ${next===m?'next':''}"><div class="meal"><div class="t">${m.time}</div><div class="body"><div class="name">${SLOTS[m.slot]}</div><div class="items">${esc(itemsText(m.items))}</div><div class="how">${esc(howTo(m))}</div>${chips(mm)}</div><button class="check" data-a="eat" data-s="${m.slot}" aria-pressed="${e}" aria-label="${e?'Снять отметку':'Съел'}: ${SLOTS[m.slot]}">${e?'✓':''}</button></div></li>`;
+    h+=`<li class="${e?'eaten':''} ${next===m?'next':''}"><div class="meal"><div class="t">${m.time}</div><div class="body"><div class="name">${SLOTS[m.slot]}</div>${itemsList(m.items)}<div class="how">${esc(howTo(m))}</div>${chips(mm)}</div><button class="check" data-a="eat" data-s="${m.slot}" aria-pressed="${e}" aria-label="${e?'Снять отметку':'Съел'}: ${SLOTS[m.slot]}">${e?'✓':''}</button></div></li>`;
     if(plan.type==='W'&&m.slot==='snack')h+=`</ul><div class="walk"><b>Ходьба 45–60 мин.</b> Пульс 110–130. До ужина (закончить до 22:00) или через 1–1,5 ч после него.</div><ul class="tl">`});
   h+=`</ul><div class="daytot">За день по плану: ${r0(tot.k)} ккал, Б ${r0(tot.p)}, Ж ${r0(tot.f)}, У ${r0(tot.c)}.${ate.k?' Съедено '+r0(ate.k)+' ккал.':''}</div>`;
   return h;
