@@ -187,6 +187,27 @@ details.card[open] summary{margin-bottom:8px}
 .bc{display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:2px}
 .bc i{display:block;width:100%;border-radius:4px 4px 0 0;min-height:3px}
 .bc span{font-size:.68rem;color:var(--muted)}
+.skipx{flex:none;width:26px;height:26px;border-radius:50%;border:0;background:transparent;color:var(--muted);font-size:.8rem;opacity:.6}
+.skipx[aria-pressed="true"]{opacity:1;background:var(--sunk);color:var(--warn)}
+.hero .hb{display:flex;align-items:center;gap:8px}
+.hero .hx{color:var(--now-ink);opacity:.55}
+.tl>li.skipped .il,.tl>li.skipped .steps,.tl>li.skipped .chips{opacity:.35;text-decoration:line-through}
+.tl>li.skipped::before{background:var(--sunk);border-style:dashed}
+.mh .name small{font-weight:400;color:var(--warn);font-size:.75rem}
+.edbox{background:var(--sunk);border-radius:var(--r-sm);padding:6px 10px 10px;margin:6px 0}
+.edbox .list>li{border-top-color:var(--line)}
+.btn.crav{display:flex;justify-content:space-between;align-items:center;border-style:solid;border-color:var(--f);color:var(--ink)}
+.btn.crav span{font-weight:400;font-size:.8rem;color:var(--muted)}
+.cravc{border-left:4px solid var(--f)}
+.cravc .bh h3{margin:0}
+.lim .prog{margin-top:10px}
+.wait{background:var(--sunk);border-radius:var(--r-sm);padding:10px 12px;margin:10px 0;text-align:center}
+.wait>b{font:700 2rem/1.1 var(--display);font-variant-numeric:tabular-nums}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:10px 0 4px}
+.seg3 button{border:0;background:var(--surface);padding:8px 4px;font-size:.85rem}
+.seg3 button.on{background:var(--ink);color:var(--bg);font-weight:600}
+.kc{font-size:.8rem;color:var(--f);font-weight:600;white-space:nowrap}
+.srow .btn.sm{align-self:center}
 .eatbox{padding:10px 12px}
 .eatbox .eh{display:flex;justify-content:space-between;align-items:baseline;font-size:.82rem;font-weight:600;margin-bottom:6px}
 .eatbox .eh span{font-weight:400;color:var(--muted);font-size:.75rem}
@@ -213,7 +234,7 @@ nav.tabs button.on{color:var(--ink);font-weight:600}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='3.9';
+const APP_VERSION='4.0';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_FULL=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
@@ -249,7 +270,7 @@ const SECS=[['veg','Овощи (rau củ)'],['fruit','Фрукты (trái cây)'
 const VEGMIX=[['Rau muống','водяной шпинат'],['Bắp cải','капуста'],['Bông cải xanh','брокколи'],['Đậu que','стручковая фасоль'],['Cà rốt','морковь']];
 const BULK=['rice','oats','protein','nuts','oil','salt','spice','garlic'];
 // 4 недельных меню, дни со вторника по понедельник
-const WEEKS=[[["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",60],["banana",1]]],["lunch",[["chicken",150],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",10]]],["dinner",[["shrimp",150],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["thigh",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",10]]],["dinner",[["fish",200],["veg",200],["oil",0]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",150],["sweet",1],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1],["nuts",10]]],["dinner",[["squid",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["fish",150],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["chicken",200],["veg",200],["oil",10]]],["late",[["tofu",150]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["pork",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",10]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["R",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1],["nuts",20]]],["dinner",[["shrimp",200],["veg",200],["oil",10]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",60],["banana",1]]],["lunch",[["chicken",150],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["fish",150],["veg",200],["oil",0]]],["late",[["egg",3]]]]]],[["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["pork",150],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",10]]],["dinner",[["fish",200],["veg",200],["oil",10]]],["late",[["tofu",200]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1],["nuts",10]]],["dinner",[["shrimp",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["thigh",200],["sweet",1],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",10]]],["dinner",[["fish",200],["veg",200],["oil",0]]],["late",[["tofu",150]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",150],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",10]]],["dinner",[["squid",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["fish",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1],["nuts",10]]],["dinner",[["chicken",200],["veg",200],["oil",10]]],["late",[["tofu",200]]]]],["R",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",10]]],["dinner",[["fish",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["shrimp",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",20]]],["dinner",[["chicken",150],["veg",200],["oil",10]]],["late",[["tofu",200]]]]]],[["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",150],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1],["nuts",10]]],["dinner",[["squid",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",40],["apple",1]]],["lunch",[["fish",200],["sweet",1],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["chicken",200],["veg",200],["oil",10]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["pork",150],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",10]]],["dinner",[["shrimp",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",150],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",10]]],["late",[["tofu",150]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["thigh",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",10]]],["dinner",[["fish",200],["veg",200],["oil",0]]],["late",[["tofu",200]]]]],["R",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",20]]],["dinner",[["shrimp",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["fish",150],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1],["nuts",20]]],["dinner",[["chicken",150],["veg",200],["oil",5]]],["late",[["egg",3]]]]]],[["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",60],["banana",1]]],["lunch",[["thigh",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",10]]],["dinner",[["fish",200],["veg",200],["oil",0]]],["late",[["tofu",100]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",10]]],["dinner",[["squid",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["fish",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1],["nuts",20]]],["dinner",[["chicken",150],["veg",200],["oil",10]]],["late",[["tofu",150]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["pork",150],["sweet",1],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",10]]],["dinner",[["shrimp",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",200]]]]],["R",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["shrimp",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1],["nuts",10]]],["dinner",[["chicken",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["fish",150],["veg",200],["oil",10]]],["late",[["tofu",150]]]]]]];
+const WEEKS=[[["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",60],["banana",1]]],["lunch",[["chicken",150],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1]]],["dinner",[["shrimp",150],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["thigh",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1]]],["dinner",[["fish",200],["veg",200],["oil",0]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",150],["sweet",1],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["squid",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["fish",150],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1]]],["dinner",[["chicken",200],["veg",200],["oil",10]]],["late",[["tofu",150]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["pork",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["R",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["shrimp",200],["veg",200],["oil",10]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",60],["banana",1]]],["lunch",[["chicken",150],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1]]],["dinner",[["fish",150],["veg",200],["oil",5]]],["late",[["egg",3]]]]]],[["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["pork",150],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1]]],["dinner",[["fish",200],["veg",200],["oil",10]]],["late",[["tofu",200]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["shrimp",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["thigh",200],["sweet",1],["veg",200]]],["snack",[["protein",30],["apple",1]]],["dinner",[["fish",200],["veg",200],["oil",0]]],["late",[["tofu",150]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",150],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1]]],["dinner",[["squid",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["fish",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["chicken",200],["veg",200],["oil",10]]],["late",[["tofu",200]]]]],["R",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1]]],["dinner",[["fish",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["shrimp",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1]]],["dinner",[["chicken",150],["veg",200],["oil",10]]],["late",[["tofu",200]]]]]],[["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",150],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["squid",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",40],["apple",1]]],["lunch",[["fish",200],["sweet",1],["veg",200]]],["snack",[["protein",30],["apple",1]]],["dinner",[["chicken",200],["veg",200],["oil",10]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["pork",150],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1]]],["dinner",[["shrimp",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",150],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["fish",200],["veg",200],["oil",10]]],["late",[["tofu",150]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["thigh",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1]]],["dinner",[["fish",200],["veg",200],["oil",0]]],["late",[["tofu",200]]]]],["R",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1]]],["dinner",[["shrimp",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["fish",150],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["chicken",150],["veg",200],["oil",5]]],["late",[["egg",3]]]]]],[["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",60],["banana",1]]],["lunch",[["thigh",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1]]],["dinner",[["fish",200],["veg",200],["oil",0]]],["late",[["tofu",100]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1]]],["dinner",[["squid",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["fish",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["chicken",150],["veg",200],["oil",10]]],["late",[["tofu",150]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["pork",150],["sweet",1],["veg",200]]],["snack",[["protein",30],["apple",1]]],["dinner",[["shrimp",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",200]]]]],["R",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["shrimp",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["chicken",200],["veg",200],["oil",10]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1]]],["dinner",[["fish",150],["veg",200],["oil",10]]],["late",[["tofu",150]]]]]]];
 const TIMES={pre:'09:30',bf_S:'11:30',bf_W:'10:00',bf_R:'10:00',lunch:'16:00',snack:'19:30',dinner:'22:30',late:'00:30'};
 const NORM={k:[1900,2000],p:[160,180],f:[55,65],c:[120,150]};
 const LEGACY=[["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["thigh",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["shrimp",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["squid",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["fish",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["chicken",200],["veg",200],["oil",5]]],["late",[["tofu",150]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1]]],["lunch",[["shrimp",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["banana",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["R",[["bf",[["egg",4],["oats",60],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",150]]]]]]; // базовое меню, по которому была закупка до 6 окт
@@ -259,7 +280,31 @@ const OVERRIDES={
  '2026-10-01':{dinner:[['fish',200],['veg',200],['oil',5]]}
 };
 const SWAPP=['chicken','thigh','fish','shrimp','squid','pork','tofu'];
-const PRESETS=[['Кофе со сгущёнкой и льдом','Cà phê sữa đá',150,2,4,26],['Чёрный кофе','Cà phê đen',5,0,0,1],['Кокосовая вода','Nước dừa',60,1,0,14],['Фруктовый смузи','Sinh tố',220,3,5,40],['Молочный чай с тапиокой','Trà sữa',350,3,8,65],['Сок сахарного тростника','Nước mía',180,0,0,45],['Багет с мясом','Bánh mì thịt',450,18,16,55],['Суп фо с говядиной','Phở bò',450,25,10,60],['Суп фо с курицей','Phở gà',400,24,8,58],['Свинина на гриле с лапшой','Bún chả',550,25,20,65],['Острый суп с говядиной','Bún bò Huế',500,28,14,60],['Рис со свининой на гриле','Cơm tấm',650,28,22,80],['Рис с курицей','Cơm gà',600,30,18,75],['Столовая: рис и 2–3 добавки','Cơm bình dân',650,25,22,85],['Свежие роллы с креветкой, 2 шт','Gỏi cuốn',180,10,3,28],['Жареные спринг-роллы, 3 шт','Chả giò',300,9,18,26],['Клейкий рис с добавками','Xôi',400,8,8,72],['Варёное яйцо, 1 шт','Trứng luộc',78,6,5,0],['Пиво, банка 330 мл','Bia',145,1,0,12],['Кола, банка 330 мл','Coca',140,0,0,35]];
+const TREAT_LIMIT=150;
+// [id, название, на ценнике, ккал, б, ж, у, как, что купить]
+const TREATS={sweet:[
+ ['banice','Банановое «мороженое»','Chuối (бананы)',105,1,0,27,'1 банан нарезать и заморозить заранее, потом размять вилкой или взбить','Бананы для заморозки — 3 шт'],
+ ['pudding','Протеиновый «пудинг»','Bột cacao không đường (какао без сахара)',70,12,1,3,'½ мерной ложки протеина + 1 ч. л. какао + 2–3 ложки воды, размешать до густоты','Какао без сахара — 1 пачка'],
+ ['choco','Тёмный шоколад 70%+, 2 дольки (10 г)','Socola đen (тёмный шоколад)',60,1,4,4,'Медленно, по кусочку — с чаем','Тёмный шоколад 70%+ — 1 плитка'],
+ ['mango','Манго, половина (150 г)','Xoài (манго)',90,1,0,22,'Можно заморозить кубиками','Манго — 2 шт'],
+ ['dragon','Драконий фрукт, половина (150 г)','Thanh long (драконий фрукт)',90,2,0,20,'Охлаждённый вкуснее','Драконий фрукт — 2 шт'],
+ ['papaya','Папайя (200 г)','Đu đủ (папайя)',85,1,0,21,'С соком лайма','Папайя — 1 шт'],
+ ['dates','Финики сушёные, 3 шт (25 г)','Chà là (финики)',70,1,0,18,'Сладко и долго жуются','Финики — 1 пачка']],
+ salty:[
+ ['popcorn','Попкорн без масла, 20 г (миска)','Bắp rang (попкорн) — без масла и сахара',75,2,1,15,'Или сделать самому: зёрна в кастрюлю под крышку на сухую','Попкорн или зёрна для попкорна — 1 пачка'],
+ ['seaweed','Солёные водоросли, пачка 5 г','Rong biển ăn liền (снэк из водорослей)',25,1,2,1,'Хрустят как чипсы','Снэк из водорослей — 3–4 пачки'],
+ ['cuke','Огурец с солью, чили и лаймом','Dưa leo (огурцы)',20,1,0,4,'Нарезать брусками','Огурцы для снэка — 2 шт'],
+ ['edamame','Эдамаме, 100 г в стручках','Đậu nành Nhật (эдамаме), замороженные',70,7,3,5,'Отварить 4 мин, посолить','Эдамаме замороженные — 1 пакет'],
+ ['squiddry','Сушёный кальмар, 15 г','Mực khô (сушёный кальмар) — без сахара',45,9,0,1,'Почти чистый белок','Сушёный кальмар — 1 пачка'],
+ ['egg1','Варёное яйцо','Trứng gà (яйца) — из запаса',78,6,5,0,'Из заготовки','']],
+ drink:[
+ ['zero','Кола зеро, банка','Coca Zero / Pepsi không calo (без калорий)',1,0,0,0,'Холодная со льдом','Кола зеро — 4 банки'],
+ ['tea','Чай с лаймом без сахара','Trà chanh không đường (чай с лаймом без сахара)',2,0,0,0,'Горячий или со льдом',''],
+ ['coffee','Чёрный кофе без сахара','Cà phê đen không đường (чёрный кофе без сахара)',5,0,0,1,'Глушит аппетит',''],
+ ['soda','Газированная вода с лаймом','Nước khoáng có ga (газированная вода)',0,0,0,0,'Стакан сразу — тяга часто проходит','']]};
+const TREAT_TABS=[['sweet','Сладкое'],['salty','Солёное'],['drink','Напитки']];
+const TALL=Object.values(TREATS).flat();
+const PRESETS=[['Чипсы, пачка 50 г','Snack khoai tây',270,3,17,26],['Печенье, 3 шт','Bánh quy',160,2,7,24],['Мороженое, рожок','Kem ốc quế',250,4,12,30],['Шоколадный батончик','Thanh socola',230,3,11,30],['Кофе со сгущёнкой и льдом','Cà phê sữa đá',150,2,4,26],['Чёрный кофе','Cà phê đen',5,0,0,1],['Кокосовая вода','Nước dừa',60,1,0,14],['Фруктовый смузи','Sinh tố',220,3,5,40],['Молочный чай с тапиокой','Trà sữa',350,3,8,65],['Сок сахарного тростника','Nước mía',180,0,0,45],['Багет с мясом','Bánh mì thịt',450,18,16,55],['Суп фо с говядиной','Phở bò',450,25,10,60],['Суп фо с курицей','Phở gà',400,24,8,58],['Свинина на гриле с лапшой','Bún chả',550,25,20,65],['Острый суп с говядиной','Bún bò Huế',500,28,14,60],['Рис со свининой на гриле','Cơm tấm',650,28,22,80],['Рис с курицей','Cơm gà',600,30,18,75],['Столовая: рис и 2–3 добавки','Cơm bình dân',650,25,22,85],['Свежие роллы с креветкой, 2 шт','Gỏi cuốn',180,10,3,28],['Жареные спринг-роллы, 3 шт','Chả giò',300,9,18,26],['Клейкий рис с добавками','Xôi',400,8,8,72],['Варёное яйцо, 1 шт','Trứng luộc',78,6,5,0],['Пиво, банка 330 мл','Bia',145,1,0,12],['Кола, банка 330 мл','Coca',140,0,0,35]];
 // исключённые продукты и чем их заменять
 const EXCLP=['chicken','thigh','fish','shrimp','squid','pork','tofu','sweet'];
 const FALLBACK={pork:['chicken','fish','thigh'],thigh:['chicken','pork','fish'],chicken:['fish','pork','thigh','shrimp'],fish:['chicken','shrimp','pork'],shrimp:['fish','squid','chicken'],squid:['shrimp','fish','chicken'],tofu:['egg'],sweet:['rice']};
@@ -270,8 +315,9 @@ const EPOCH=new Date(2026,9,6); // вторник, 6 окт 2026 — меню 1
 
 /* ===== Состояние ===== */
 const LS='racion-v3';
-function def(){return {v:3,done:{},w:[],left:{},bulk:{},chk:{},swaps:{},extra:{},excl:{},wswaps:{}}}
+function def(){return {v:3,done:{},skip:{},edits:{},w:[],left:{},bulk:{},chk:{},swaps:{},extra:{},excl:{},wswaps:{},treatBuy:{},grams:true,gv:2}}
 let S;try{S=Object.assign(def(),JSON.parse(localStorage.getItem(LS)||'null')||{})}catch(e){S=def()}
+if(S.gv!==2){S.grams=true;S.gv=2}
 function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast('Не удалось сохранить')}}
 
 /* ===== Даты ===== */
@@ -294,7 +340,8 @@ function dayPlan(date){
     its=applyExcl(its);let wsw=null;
     its=its.map(i=>{const to=ww[i.p];if(to&&!isExcl(to)){wsw={from:i.p,to};return {p:to,q:i.q}}return i});
     if(sw&&its.some(i=>i.p===sw.from))its=its.map(i=>i.p===sw.from?{p:sw.to,q:i.q}:i);
-    return {slot,time:slot==='bf'?TIMES['bf_'+type]:TIMES[slot],items:its,swap:sw&&its.some(i=>i.p===sw.to)?sw:null,wswap:wsw}})};
+    const ed=(S.edits||{})[dk+'|'+slot];if(ed)its=ed.map(([p,q])=>({p,q}));
+    return {slot,time:slot==='bf'?TIMES['bf_'+type]:TIMES[slot],items:its,swap:sw&&its.some(i=>i.p===sw.to)?sw:null,wswap:wsw,edited:!!ed}})};
 }
 function mealAt(date,m){const t=tmin(m.time);return new Date(date.getFullYear(),date.getMonth(),date.getDate(),Math.floor(t/60),t%60)}
 
@@ -311,7 +358,7 @@ function niceNum(x){let w=Math.floor(x+1e-9),r=x-w,best=FR[0],bd=9;FR.forEach(f=
 function plural(n,f){const a=n%10,b=n%100;if(a===1&&b!==11)return f[0];if(a>=2&&a<=4&&(b<10||b>=20))return f[1];return f[2]}
 function fmtMeasure(units,key){const f=MEASURES[key],nn=niceNum(units);return nn.s+' '+(nn.int?plural(nn.n,f):f[3])}
 function fq(q,u){const v=Math.round(q*10)/10;return (u==='г'&&v>=1000?String(Math.round(v/100)/10)+' кг':v+' '+u).replace('.',',')}
-function qtyText(i){const p=PR[i.p];if(S.grams||!p.m){if(i.p==='rice')return i.q+' г сухого (≈ '+Math.round(i.q*2.8/10)*10+' г варёного)';return fq(i.q,p.u)}return fmtMeasure(i.q/p.mg,p.m)}
+function qtyText(i){const p=PR[i.p];if(S.grams||!p.m){if(i.p==='rice')return i.q+' г сухого';return fq(i.q,p.u)}return fmtMeasure(i.q/p.mg,p.m)}
 function cap(t){return t.charAt(0).toUpperCase()+t.slice(1)}
 function itemsList(items){return `<ul class="il">${items.map(i=>`<li><span>${esc(cap(PR[i.p].s))}</span><b>${esc(qtyText(i))}</b></li>`).join('')}</ul>`}
 function itemsText(items){return items.map(i=>PR[i.p].s+' '+qtyText(i)).join(', ')}
@@ -326,7 +373,7 @@ function howTo(m){
   if(m.slot==='snack')return ['Протеин на воде, фрукт и орехи — готовить ничего не нужно'];
   if(m.slot==='late')return has('egg')?['Яйца варёные из запаса']:main?[PR[main.p].how]:[];
   const a=[];if(main)a.push(PR[main.p].how);
-  if(has('rice'))a.push('Рис из рисоварки');
+  if(has('rice')){const r=m.items.find(x=>x.p==='rice').q;a.push(S.grams?'Рис из рисоварки: '+r+' г сухого ≈ '+Math.round(r*2.8/10)*10+' г варёного':'Рис из рисоварки')}
   if(has('sweet'))a.push('Батат: 20–25 мин на пару в рисоварке или в кастрюле');
   if(has('veg'))a.push(m.slot==='dinner'?'Овощи на ту же сковороду на 4–5 мин'+(has('oil')?', масло в конце':', без масла'):'Овощи: на пару в рисоварке или 4–5 мин на сковороде');
   return a;
@@ -375,7 +422,7 @@ function gcal(title,days,time,details){
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title)+'&dates='+f(s)+'/'+f(e)+'&ctz='+encodeURIComponent(tz)+'&recur='+encodeURIComponent(days.length===7?'RRULE:FREQ=DAILY':'RRULE:FREQ=WEEKLY;BYDAY='+days.map(d=>BY[d]).join(','))+'&details='+encodeURIComponent(details)}
 
 /* ===== UI ===== */
-let tab='today',viewDate=dkey(appNow()),updReady=false,swapOpen='',swapAll=false,xOpen=false,X={n:'',k:'',p:'',f:'',c:'',por:'1',line:''};
+let tab='today',viewDate=dkey(appNow()),updReady=false,swapOpen='',swapAll=false,editOpen='',ED=null,cravOpen=false,cravTab='sweet',waitUntil=0,icsDays=30,xOpen=false,X={n:'',k:'',p:'',f:'',c:'',por:'1',line:''};
 const TABS=[['today','◷','Сегодня'],['shop','✓','Покупки'],['weight','⋯','Ещё']];
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>el.hidden=true,2200)}
 function render(){
@@ -396,15 +443,17 @@ function vToday(){
   h+=`<div class="weeknav"><button class="iconbtn" data-a="cyc" data-v="-7" aria-label="Прошлая неделя">‹</button><span class="lbl">${fmtDate(cs)} – ${fmtDate(addDays(cs,6))}${dkey(cs)===dkey(shopCycle())?' · следующая':''}</span><button class="iconbtn" data-a="cyc" data-v="7" aria-label="Следующая неделя">›</button></div><div class="strip">`;
   for(let i=0;i<7;i++){const d=addDays(cs,i),k=dkey(d);h+=`<button data-a="pick" data-v="${k}" class="${k===viewDate?'sel':''} ${k===tk?'today':''}"><b>${DAYS[wd(d)]}</b><span>${d.getDate()}</span></button>`}
   h+='</div>';
-  const next=isToday?meals.find(m=>!done(m)):null;
+  const skipped=m=>!!(S.skip||{})[dk_(viewDate,m.slot)];
+  const next=isToday?meals.find(m=>!done(m)&&!skipped(m)):null;
   if(next){const diff=tmin(next.time)-nowMin(),eta=diff>0?'через '+(diff>=60?Math.floor(diff/60)+' ч ':'')+(diff%60)+' мин':diff>-30?'сейчас':'время прошло';
-    h+=`<section class="hero"><div class="when">${next.time}</div><div class="what">${SLOTS[next.slot]}</div>${itemsList(next.items)}${stepsList(next)}<div class="row"><span class="eta">${eta}</span><button class="btn" data-a="eat" data-s="${next.slot}">Съел</button></div></section>`}
+    h+=`<section class="hero"><div class="when">${next.time}</div><div class="what">${SLOTS[next.slot]}</div>${itemsList(next.items)}${stepsList(next)}<div class="row"><span class="eta">${eta}</span><span class="hb"><button class="skipx hx" data-a="skip" data-s="${next.slot}" aria-label="Пропустил: ${SLOTS[next.slot]}">✕</button><button class="btn" data-a="eat" data-s="${next.slot}">Съел</button></span></div></section>`}
   else if(isToday)h+=`<div class="card"><b>Все приёмы на сегодня отмечены.</b></div>`;
   const extras=(S.extra||{})[viewDate]||[];
   {const e={k:0,p:0,f:0,c:0};meals.forEach(m=>{if(done(m)){const x=macros(m.items);['k','p','f','c'].forEach(k=>e[k]+=x[k])}});extras.forEach(x=>['k','p','f','c'].forEach(k=>e[k]+=x[k]||0));
    const cell=(k,l,cls)=>{const [lo,hi]=NORM[k],v=r0(e[k]),over=v>hi+(k==='k'?50:5);return `<div class="nt"><b class="${over?'over':''}">${v}</b><div class="nl">${l}</div><div class="nn">${lo}–${hi}</div><div class="nb"><i style="width:${Math.min(100,v/hi*100)}%;background:var(--${over?'warn':cls})"></i></div></div>`};
    h+=`<section class="card eatbox" aria-label="Съедено за день"><div class="eh">${isToday?'Съедено сегодня':'Съедено за день'}<span>«Съел» + вне плана</span></div><div class="ng">${cell('k','ккал','accent')}${cell('p','белки, г','p')}${cell('f','жиры, г','f')}${cell('c','углев., г','c')}</div></section>`}
   h+=xOpen?xForm():`<button class="btn wide" data-a="xopen">+ Съел что-то вне плана</button>`;
+  h+=cravCard(extras);
   const prep=prepFor(date),thaw=hr>=16||!isToday?thawFor(date):[];
   if(prep.length||thaw.length)h+=`<section class="card prep"><h3>${isToday?'Заготовки сегодня':'Заготовки'}</h3>${prep.map(t=>`<p class="task">${esc(t)}</p>`).join('')}${thaw.length?`<p class="task">Вечером переложи из морозилки в холодильник на завтра:</p><ul class="il">${thaw.map(t=>`<li><span>${esc(cap(t.name))} <i>${esc(t.slot)}</i></span><b>${esc(t.q)}</b></li>`).join('')}</ul>`:''}</section>`;
   let tot={k:0,p:0,f:0,c:0},ate={k:0,p:0,f:0,c:0};
@@ -413,16 +462,39 @@ function vToday(){
   ents.forEach(en=>{
     if(en.x){const x=en.x;ate.k+=x.k||0;
       h+=`<li class="extra"><div class="mh"><span class="t">${x.t}</span><span class="name">${esc(x.n)}</span><button class="check" data-a="xdel" data-id="${x.id}" aria-label="Удалить: ${esc(x.n)}">✕</button></div><div class="small muted">вне плана</div>${chips(x)}</li>`;return}
-    const m=en.m,e=done(m),mm=macros(m.items);['k','p','f','c'].forEach(k=>{tot[k]+=mm[k];if(e)ate[k]+=mm[k]});
+    const m=en.m,e=done(m),mm=macros(m.items);['k','p','f','c'].forEach(k=>{if(!skipped(m))tot[k]+=mm[k];if(e)ate[k]+=mm[k]});
     const main=m.items.find(i=>SWAPP.includes(i.p)),key=viewDate+'|'+m.slot;
     let sw='';
     if(main){sw=`<div class="mact"><button class="link" data-a="swapopen" data-s="${m.slot}">${swapOpen===key?'Скрыть замену':'Заменить белок'}</button>${m.swap?` <span class="muted">· было: ${esc(PR[m.swap.from].s)}</span> <button class="link" data-a="swapundo" data-s="${m.slot}">вернуть</button>`:m.wswap?` <span class="muted">· на неделю вместо: ${esc(PR[m.wswap.from].s)}</span> <button class="link" data-a="wswapundo" data-v="${m.wswap.from}">вернуть</button>`:''}</div>`;
       if(swapOpen===key){const base=mm.k;sw+=`<div class="picks"><button class="pick all ${swapAll?'on':''}" data-a="swapall" aria-pressed="${swapAll}">${swapAll?'☑':'☐'} На всю неделю</button></div><div class="picks">${SWAPP.filter(id=>id!==main.p&&!isExcl(id)).map(id=>{const d=r0(macros(m.items.map(i=>i===main?{p:id,q:i.q}:i)).k-base);return `<button class="pick" data-a="swapdo" data-s="${m.slot}" data-v="${id}">${esc(cap(PR[id].s))} <small>${d>0?'+':''}${d} ккал</small></button>`}).join('')}</div>`}}
-    h+=`<li class="${e?'eaten':''} ${next===m?'next':''}"><div class="mh"><span class="t">${m.time}</span><span class="name">${SLOTS[m.slot]}</span><button class="check" data-a="eat" data-s="${m.slot}" aria-pressed="${e}" aria-label="${e?'Снять отметку':'Съел'}: ${SLOTS[m.slot]}">${e?'✓':''}</button></div>${itemsList(m.items)}${sw}${stepsList(m)}${chips(mm)}</li>`;
+    const sk=skipped(m);if(sk){tot.k-=0}
+    const edl=`<div class="mact">${sw?'':''}<button class="link" data-a="editopen" data-s="${m.slot}">${editOpen===key?'Скрыть':'Изменить'}</button>${m.edited?` <span class="muted">· изменено</span> <button class="link" data-a="editundo" data-s="${m.slot}">вернуть</button>`:''}</div>${editOpen===key?editBox(m):''}`;
+    h+=`<li class="${e?'eaten':''} ${sk?'skipped':''} ${next===m?'next':''}"><div class="mh"><span class="t">${m.time}</span><span class="name">${SLOTS[m.slot]}${sk?' <small>пропущен</small>':''}</span><button class="skipx" data-a="skip" data-s="${m.slot}" aria-pressed="${sk}" aria-label="${sk?'Отменить пропуск':'Пропустил'}: ${SLOTS[m.slot]}">✕</button><button class="check" data-a="eat" data-s="${m.slot}" aria-pressed="${e}" aria-label="${e?'Снять отметку':'Съел'}: ${SLOTS[m.slot]}">${e?'✓':''}</button></div>${itemsList(m.items)}${edl}${sw}${stepsList(m)}${chips(mm)}</li>`;
     if(plan.type==='W'&&m.slot==='snack')h+=`</ul><div class="walk"><b>Ходьба 45–60 мин.</b> Пульс 110–130. До ужина (закончить до 22:00) или через 1–1,5 ч после него.</div><ul class="tl">`});
   h+=`</ul><div class="daytot">За день по плану: ${r0(tot.k)} ккал · Б ${r0(tot.p)} · Ж ${r0(tot.f)} · У ${r0(tot.c)}</div>`;
   return h;
 }
+function stepOf(p){return p.u==='шт'?1:(p===PR.oil?1:(p===PR.protein?5:10))}
+function editBox(m){
+  if(!ED||ED.key!==viewDate+'|'+m.slot)ED={key:viewDate+'|'+m.slot,items:m.items.map(i=>[i.p,i.q])};
+  const opts=Object.keys(PR).filter(id=>PR[id].k&&!ED.items.some(x=>x[0]===id));
+  const mm=macros(ED.items.map(([p,q])=>({p,q})));
+  return `<div class="edbox"><ul class="list">${ED.items.map(([p,q],i)=>{const pr=PR[p];return `<li class="lrow"><div class="grow"><div class="nm">${esc(cap(pr.s))}</div><div class="sub">${pr.u==='шт'?'штук':'граммов'}${pr.u==='г'&&!S.grams&&pr.m?' · ≈ '+fmtMeasure(q/pr.mg,pr.m):''}</div></div><div class="qty"><button data-a="edq" data-i="${i}" data-v="-1" aria-label="Меньше">−</button>${pr.u==='шт'?`<b>${q}</b>`:`<input class="gin" type="number" inputmode="numeric" min="0" step="${stepOf(pr)}" data-in="edg" data-i="${i}" value="${q}" aria-label="${esc(pr.s)}, граммов">`}<button data-a="edq" data-i="${i}" data-v="1" aria-label="Больше">+</button></div></li>`}).join('')}</ul>
+  <div class="field" style="margin-top:6px"><label for="edadd">Добавить продукт</label><select id="edadd" data-in="edadd"><option value="">— выбрать —</option>${opts.map(id=>`<option value="${id}">${esc(cap(PR[id].s))}</option>`).join('')}</select></div>
+  <div class="small muted">Станет: ${r0(mm.k)} ккал · Б ${r0(mm.p)} · Ж ${r0(mm.f)} · У ${r0(mm.c)}</div>
+  <div class="btns"><button class="btn pri sm" data-a="edsave" data-s="${m.slot}">Сохранить</button><button class="btn ghost sm" data-a="editopen" data-s="${m.slot}">Отмена</button></div></div>`}
+function treatsToday(ex){return ex.filter(x=>x.tr).reduce((a,x)=>a+(x.k||0),0)}
+function cravCard(ex){
+  const used=r0(treatsToday(ex)),left=TREAT_LIMIT-used;
+  if(!cravOpen)return `<button class="btn wide crav" data-a="crav">Тянет на вкусное? <span>${left>=0?'лимит: осталось '+left+' ккал':'лимит превышен на '+(-left)+' ккал'}</span></button>`;
+  const w=waitUntil-Date.now();
+  let h=`<section class="card cravc"><div class="bh"><h3>Хочется вкусного</h3><button class="link" data-a="crav">Свернуть</button></div>
+  <div class="lim"><div class="prog"><i style="width:${Math.min(100,used/TREAT_LIMIT*100)}%;background:var(--${left<0?'warn':'f'})"></i></div><div class="small">${left>=0?`На вкусное сегодня осталось <b>${left} ккал</b> из ${TREAT_LIMIT}. Это часть плана — съесть можно спокойно.`:`Лимит превышен на ${-left} ккал. Ничего страшного: завтра — по плану.`}</div></div>`;
+  h+=w>0?`<div class="wait"><b>${Math.floor(w/60000)}:${pad(Math.floor(w%60000/1000))}</b><div class="small">Выпей стакан воды или чая, займись чем-нибудь. Тяга часто проходит за 10 минут. Не прошла — выбери из списка ниже.</div><button class="link" data-a="waitstop">Остановить</button></div>`:`<div class="btns" style="margin-top:4px"><button class="btn sm" data-a="wait">Подожду 10 минут</button></div>`;
+  h+=`<div class="seg3">${TREAT_TABS.map(([k,l])=>`<button class="${cravTab===k?'on':''}" data-a="cravtab" data-v="${k}">${l}</button>`).join('')}</div><ul class="list">`;
+  TREATS[cravTab].forEach(t=>{h+=`<li class="srow"><div class="grow"><div class="nm"><b>${esc(t[1])}</b> <span class="kc">${t[3]} ккал</span></div><ul class="notes"><li>${esc(t[7])}</li><li>На ценнике: <b>${esc(t[2])}</b></li></ul></div><button class="btn sm" data-a="treat" data-v="${t[0]}">Съел</button></li>`});
+  h+=`</ul><div class="small muted" style="margin-top:8px">Сорвался на чипсы или сладкое? Запиши честно через «+ Съел что-то вне плана» — там есть чипсы, печенье, мороженое. Один раз не портит неделю.</div></section>`;
+  return h}
 function xForm(){
   return `<section class="card xf"><h3>Съел вне плана</h3>
   <div class="field"><label for="xp">Частое</label><select id="xp" data-in="xpre"><option value="">— выбрать —</option>${PRESETS.map((p,i)=>`<option value="${i}">${esc(p[0])} (${esc(p[1])}) — ${p[2]} ккал</option>`).join('')}</select></div>
@@ -433,24 +505,26 @@ function xForm(){
   <div class="btns"><button class="btn pri" data-a="xsave">Добавить</button><button class="btn ghost" data-a="xclose">Отмена</button></div></section>`;
 }
 const REM=[['Протеин до тренировки','09:30',[0,1,3,4],'Пн, Вт, Чт, Пт',0],['Завтрак','11:30',[0,1,3,4],'Пн, Вт, Чт, Пт',1],['Завтрак','10:00',[2,5,6],'Ср, Сб, Вс',1],['Обед','16:00',[0,1,2,3,4,5,6],'каждый день',1],['Перекус','19:30',[0,1,2,3,4,5,6],'каждый день',0],['Ужин','22:30',[0,1,2,3,4,5,6],'каждый день',1],['Поздний перекус','00:30',[0,1,2,3,4,5,6],'каждую ночь',1]];
-function icsFile(){
-  const tz='Asia/Ho_Chi_Minh',t0=new Date(),stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
-  const BY=['MO','TU','WE','TH','FR','SA','SU'],L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Racion//RU','CALSCALE:GREGORIAN','METHOD:PUBLISH',
+function icsFile(days){
+  const tz='Asia/Ho_Chi_Minh',stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,''),COOK={bf:1,lunch:1,dinner:1,late:1};
+  const esc2=t=>String(t).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Racion//RU','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Рацион',
    'BEGIN:VTIMEZONE','TZID:'+tz,'BEGIN:STANDARD','DTSTART:19700101T000000','TZOFFSETFROM:+0700','TZOFFSETTO:+0700','TZNAME:ICT','END:STANDARD','END:VTIMEZONE'];
-  REM.forEach(([name,time,days,,cook],i)=>{const [h,m]=time.split(':');let dd=days;if(time<'04:00')dd=days.map(d=>(d+1)%7);
-    let sd=addDays(t0,1);while(!dd.includes(wd(sd)))sd=addDays(sd,1);const st=dkey(sd).replace(/-/g,'');
-    const title=(cook?'🍳 ':'🍽 ')+name+' '+time,al=cook?'Через 30 мин '+name.toLowerCase()+' — начинай готовить':name+' — время';
-    L.push('BEGIN:VEVENT','UID:racion-'+i+'-'+time.replace(':','')+'@godoffear.github.io','DTSTAMP:'+stamp,'DTSTART;TZID='+tz+':'+st+'T'+h+m+'00','DURATION:PT15M',
-      'RRULE:'+(dd.length===7?'FREQ=DAILY':'FREQ=WEEKLY;BYDAY='+dd.map(d=>BY[d]).join(',')),'SUMMARY:'+title,'DESCRIPTION:Открой «Рацион»: что приготовить и сколько.',
-      'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+al,'TRIGGER:'+(cook?'-PT30M':'PT0M'),'END:VALARM','END:VEVENT')});
+  const start=appNow(),now=new Date();
+  for(let i=0;i<days;i++){const d=addDays(start,i),k=dkey(d);
+    dayPlan(d).meals.forEach(m=>{const at=mealAt(d,m);if(at<=now)return;const cook=COOK[m.slot]&&!(m.slot==='late'&&m.items.every(x=>x.p==='egg'));
+      const main=m.items.map(x=>PR[x.p].s+' '+qtyText(x)).join(', '),sd=dkey(at).replace(/-/g,'')+'T'+pad(at.getHours())+pad(at.getMinutes())+'00';
+      L.push('BEGIN:VEVENT','UID:racion-'+k.replace(/-/g,'')+'-'+m.slot+'@godoffear.github.io','DTSTAMP:'+stamp,'DTSTART;TZID='+tz+':'+sd,'DURATION:PT15M',
+        'SUMMARY:'+esc2((cook?'🍳 ':'🍽 ')+SLOTS[m.slot]+': '+main),'DESCRIPTION:'+esc2(howTo(m).join('. ')),
+        'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+esc2(cook?'Через 30 мин '+SLOTS[m.slot].toLowerCase()+' — начинай готовить':SLOTS[m.slot]+' — время'),'TRIGGER:'+(cook?'-PT30M':'PT0M'),'END:VALARM','END:VEVENT')})}
   L.push('END:VCALENDAR');
   const enc=new TextEncoder(),fold=l=>{let out='',cur='',n=0;for(const ch of l){const b=enc.encode(ch).length;if(n+b>73){out+=cur+'\r\n ';cur='';n=1}cur+=ch;n+=b}return out+cur};
   return L.map(fold).join('\r\n')+'\r\n'}
 function weekSummary(){
   const end=addDays(appNow(),-1),days=[];let cnt=0,ok=0,sk=0,sp=0;
-  for(let i=6;i>=0;i--){const d=addDays(end,-i),k=dkey(d),pl=dayPlan(d).meals,ex=(S.extra||{})[k]||[],dn=pl.filter(m=>S.done[dk_(k,m.slot)]);
+  for(let i=6;i>=0;i--){const d=addDays(end,-i),k=dkey(d),pl=dayPlan(d).meals,ex=(S.extra||{})[k]||[],dn=pl.filter(m=>S.done[dk_(k,m.slot)]),skn=pl.filter(m=>(S.skip||{})[dk_(k,m.slot)]).length;
     const e={k:0,p:0};dn.forEach(m=>{const x=macros(m.items);e.k+=x.k;e.p+=x.p});ex.forEach(x=>{e.k+=x.k||0;e.p+=x.p||0});
-    const full=dn.length>=pl.length-1||(dn.length>=3&&ex.length>0);
+    const full=dn.length+skn>=pl.length-1||(dn.length>=3&&ex.length>0);
     if(full){cnt++;sk+=e.k;sp+=e.p;const inN=e.k>=NORM.k[0]-100&&e.k<=NORM.k[1]+100&&e.p>=NORM.p[0]-10;if(inN)ok++}
     days.push({d,k:r0(e.k),p:r0(e.p),full,marks:dn.length+ex.length})}
   const ws=S.w.slice().sort((a,b)=>a.d<b.d?-1:1),l=ws[ws.length-1],p=ws.filter(x=>l&&x.d<=dkey(addDays(pkey(l.d),-6))).pop();
@@ -499,7 +573,10 @@ function vShop(){
       let extra='';if(r.id==='veg'){const each=Math.round(r.buy/VEGMIX.length/100)*100;extra=`<ul class="il sm">${VEGMIX.map(([v,ru])=>`<li><span>${esc(cap(ru))} <i>${esc(v)}</i></span><b>~${fq(each,'г')}</b></li>`).join('')}</ul><ul class="notes"><li>Можно менять на то, что свежее</li></ul>`}
       return row(r.id,!!C[r.id],nameOf(p),r.p.u==='шт'&&r.p.shop===10?r.buy+' шт':fq(r.buy,p.u),`<ul class="notes">${n.join('')}</ul>${extra}`)}).join('')}</ul>`});
   if(L.bulk.length)h+=`<div class="cat">Крупы, орехи, масло, специи</div><ul class="list">${L.bulk.map(id=>{const p=PR[id];return row(id,!!C[id],nameOf(p).replace(/:.*$/,''),esc(p.bulk),`<ul class="notes"><li>На ценнике: <b>${esc(p.vi)}</b></li>${p.pk?`<li>${esc(p.pk)}</li>`:''}</ul>`)}).join('')}</ul>`;
+  {const TB=S.treatBuy[ck]||{},sel=TALL.filter(t=>t[8]&&TB[t[0]]);
+   if(sel.length)h+=`<div class="cat">Вкусное на неделю</div><ul class="list">${sel.map(t=>{const on=!!C['t_'+t[0]];return row('t_'+t[0],on,t[8].split(' — ')[0],esc(t[8].split(' — ')[1]||''),`<ul class="notes"><li>На ценнике: <b>${esc(t[2])}</b></li></ul>`)}).join('')}</ul>`}
   if(nOn)h+=`<div class="btns"><button class="btn ghost" data-a="chkreset">Снять все галочки</button></div>`;
+  {const TB=S.treatBuy[ck]||{};h+=`</section><details class="card" ${window._openTreat?'open':''} id="treatbox"><summary><b>Вкусное на неделю</b><span class="muted small">${Object.keys(TB).length?'выбрано: '+Object.keys(TB).length:'выбери 1–2'}</span></summary><p class="small muted" style="margin-top:0">Лучше держать дома запланированное вкусное, чем покупать чипсы на эмоциях. Выбранное попадёт в список.</p><div class="picks">${TALL.filter(t=>t[8]).map(t=>`<button class="pick ${TB[t[0]]?'on':''}" data-a="tbuy" data-v="${t[0]}" aria-pressed="${!!TB[t[0]]}">${TB[t[0]]?'✓ ':''}${esc(t[8].split(' — ')[0])}</button>`).join('')}</div></details><section class="card small" style="display:none">`}
   h+=`</section><section class="card small"><h3>В GO!</h3><ul class="notes"><li>Список идёт примерно по залу: овощи и фрукты, мясо, рыба, яйца и тофу, потом крупы и специи</li><li>Если нужного нет: бёдра ↔ филе, рыба ↔ креветки, свинина ↔ курица</li></ul></section><section class="card small"><h3>После закупки</h3><ul class="notes"><li>Мясо и рыбу на Чт–Пн разложи по пакетам порциями и убери в морозилку</li><li>На Вт и Ср — в холодильник</li><li>Что разморозить на завтра, приложение напомнит вечером</li></ul></section>`;
   return h;
 }
@@ -519,10 +596,10 @@ function vWeight(){
   <div class="small muted" style="margin-top:6px">${wd(t)===4?'Сегодня пятница.':'Следующее взвешивание: пятница, '+fmtDate(nextFri)+'.'} <a class="link" href="${gcal('⚖️ Взвешивание натощак',4,'09:05','Взвесься до еды и воды и запиши вес в «Рационе».')}" target="_blank" rel="noopener">Напоминание в календарь</a></div></section>
   ${summaryCard()}
   <section class="card"><h3>Напоминания на телефон</h3>
-  <ul class="notes"><li>Завтрак, обед, ужин и поздний перекус — за 30 минут, чтобы успеть приготовить</li><li>Протеин до тренировки и перекус — ровно ко времени</li></ul>
-  <div class="btns"><button class="btn pri" data-a="ics">Скачать напоминания</button></div>
-  <p class="small muted" style="margin-bottom:0">Открой скачанный файл <b>racion.ics</b> → выбери <b>Календарь</b> (Samsung) → <b>Сохранить</b>. Все 7 напоминаний добавятся сразу. Делай это один раз, иначе будут дубли.</p>
-  <details style="margin-top:8px"><summary class="small muted">Через Google Календарь по одному</summary><ul class="list">${REM.map(r=>`<li><div class="grow"><div class="nm">${r[1]} · ${r[0]}</div><div class="sub">${r[3]}</div></div><a class="btn sm" href="${gcal('🍽 '+r[0],r[2],r[1],'Открой «Рацион» и отметь приём.')}" target="_blank" rel="noopener">В календарь</a></li>`).join('')}</ul><p class="small muted">Здесь напоминание будет в момент начала — время можно поменять в самом событии.</p></details></section>
+  <ul class="notes"><li>В каждом напоминании — что именно есть и сколько</li><li>Завтрак, обед, ужин и поздний перекус — за 30 минут, чтобы успеть приготовить</li><li>Протеин и перекус — ровно ко времени</li></ul>
+  <div class="seg3" style="margin-top:10px">${[[7,'Неделя'],[30,'Месяц'],[90,'3 месяца']].map(([d,l])=>`<button class="${icsDays===d?'on':''}" data-a="icsdays" data-v="${d}">${l}</button>`).join('')}</div>
+  <div class="btns"><button class="btn pri" data-a="ics">Скачать напоминания на ${icsDays===7?'неделю':icsDays===30?'месяц':'3 месяца'}</button></div>
+  <p class="small muted" style="margin-bottom:0">Открой файл <b>racion.ics</b> → <b>Календарь</b> (Samsung) → <b>Сохранить</b>. Если поменял меню или заменил продукт — скачай файл заново: напоминания с теми же датами обновятся. Если в календаре остались старые повторяющиеся «🍳 Обед 16:00» из прошлой версии — удали их.</p></section>
   <section class="card"><h3>Не ем / не покупаю</h3><div class="small muted">Отмеченное заменится во всех меню, список покупок пересчитается.</div>
   <div class="picks">${EXCLP.map(id=>{const on=isExcl(id);return `<button class="pick ${on?'off':''}" data-a="excl" data-v="${id}" aria-pressed="${on}">${on?'✕ ':''}${esc(cap(PR[id].s))}</button>`}).join('')}</div>
   ${Object.keys(S.excl||{}).length?`<ul class="notes">${Object.keys(S.excl).map(id=>{const to=(FALLBACK[id]||[]).find(x=>!isExcl(x));return `<li>${esc(cap(PR[id].s))} → ${to?esc(PR[to].s)+(id==='tofu'?' (3 шт)':''):'нечем заменить'}</li>`}).join('')}</ul>`:''}</section>
@@ -537,7 +614,7 @@ const A={
   tab:d=>{tab=d.v;if(tab==='today')viewDate=dkey(appNow());window._openLeft=false;window.scrollTo&&window.scrollTo(0,0)},
   pick:d=>{viewDate=d.v},
   cyc:d=>{viewDate=dkey(addDays(cycleStart(pkey(viewDate)),Number(d.v)))},
-  eat:d=>{const k=dk_(viewDate,d.s);if(S.done[k])delete S.done[k];else S.done[k]=1;
+  eat:d=>{const k=dk_(viewDate,d.s);if(S.done[k])delete S.done[k];else{S.done[k]=1;if(S.skip)delete S.skip[k]}
     const cut=dkey(addDays(appNow(),-30));Object.keys(S.done).forEach(x=>{if(x<cut)delete S.done[x]});save()},
   goleft:()=>{tab='shop';window._openLeft=true},
   left:d=>{const ck=dkey(shopCycle()),p=PR[d.p],L=S.left[ck]=S.left[ck]||{},cur=(L[d.p]&&L[d.p].q)||0,q=Math.max(0,Math.round((cur+Number(d.v)*leftStep(p))*10)/10);
@@ -551,8 +628,22 @@ const A={
   grams:d=>{S.grams=d.v==null?!S.grams:d.v==='1';save();toast(S.grams?'Порции в граммах':'Порции в ладонях и чашках')},
   swapopen:d=>{const k=viewDate+'|'+d.s;swapOpen=swapOpen===k?'':k;swapAll=false},
   swapall:()=>{swapAll=!swapAll},
+  skip:d=>{const k=dk_(viewDate,d.s);S.skip=S.skip||{};if(S.skip[k])delete S.skip[k];else{S.skip[k]=1;delete S.done[k]}save()},
+  editopen:d=>{const k=viewDate+'|'+d.s;editOpen=editOpen===k?'':k;ED=null},
+  editundo:d=>{delete S.edits[viewDate+'|'+d.s];editOpen='';ED=null;save();toast('Вернул как по плану')},
+  edq:d=>{const it=ED.items[+d.i],p=PR[it[0]];it[1]=Math.max(0,Math.round((it[1]+Number(d.v)*stepOf(p))*10)/10)},
+  edsave:d=>{const k=viewDate+'|'+d.s;S.edits=S.edits||{};S.edits[k]=ED.items.filter(x=>x[1]>0);editOpen='';ED=null;cleanOld();save();toast('Приём изменён')},
+  crav:()=>{cravOpen=!cravOpen},
+  cravtab:d=>{cravTab=d.v},
+  wait:()=>{waitUntil=Date.now()+10*60000;clearInterval(A._wt);A._wt=setInterval(()=>{if(Date.now()>=waitUntil){clearInterval(A._wt);toast('10 минут прошли. Всё ещё хочется? Выбери из списка')}if(tab==='today'&&cravOpen&&!document.activeElement.matches('input,select,textarea'))render()},1000)},
+  waitstop:()=>{waitUntil=0;clearInterval(A._wt)},
+  treat:d=>{const t=TALL.find(x=>x[0]===d.v);if(!t)return true;const L=S.extra[viewDate]=S.extra[viewDate]||[];
+    L.push({id:Date.now().toString(36),n:t[1],k:t[3],p:t[4],f:t[5],c:t[6],t:pad(new Date().getHours())+':'+pad(new Date().getMinutes()),tr:1});
+    const left=TREAT_LIMIT-treatsToday(L);save();toast(left>=0?'Записал. На вкусное осталось '+r0(left)+' ккал':'Записал. Лимит превышен — завтра по плану')},
+  tbuy:d=>{const ck=dkey(shopCycle()),B=S.treatBuy[ck]=S.treatBuy[ck]||{};if(B[d.v])delete B[d.v];else B[d.v]=1;save()},
   excl:d=>{S.excl=S.excl||{};if(S.excl[d.v])delete S.excl[d.v];else{if(EXCLP.filter(x=>SWAPP.includes(x)&&!isExcl(x)).length<=2&&SWAPP.includes(d.v)){toast('Оставь хотя бы два вида белка');return true}S.excl[d.v]=1}save()},
-  ics:()=>{const b=new Blob([icsFile()],{type:'text/calendar;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='racion.ics';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Файл скачан — открой его в Календаре');return true},
+  icsdays:d=>{icsDays=+d.v},
+  ics:()=>{const b=new Blob([icsFile(icsDays)],{type:'text/calendar;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='racion.ics';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Файл скачан — открой его в Календаре');return true},
   wswapundo:d=>{const ck=dkey(cycleStart(pkey(viewDate))),W=S.wswaps[ck]||{};delete W[d.v];if(!Object.keys(W).length)delete S.wswaps[ck];save();toast('Вернул как было на всю неделю')},
   swapdo:d=>{if(swapAll){const m=dayPlan(pkey(viewDate)).meals.find(x=>x.slot===d.s),cur=m.items.find(i=>SWAPP.includes(i.p)),ck=dkey(cycleStart(pkey(viewDate)));
       const W=S.wswaps[ck]=S.wswaps[ck]||{},from=m.wswap&&m.wswap.to===cur.p?m.wswap.from:cur.p;delete S.swaps[viewDate+'|'+d.s];
@@ -569,22 +660,24 @@ const A={
     const lines=parseLines(X.line);
     lines.forEach(x=>{if(x.plan){S.done[dk_(viewDate,x.plan)]=1;n++;return}L.push({id:Date.now().toString(36)+n,n:x.n,k:x.k,p:x.p,f:x.f,c:x.c,t:x.t||now});n++});
     if(!lines.length){const por=parseNum(X.por)||1,k=parseNum(X.k);if(!X.n.trim()||!k){toast('Нужны название и калории');return true}
-      L.push({id:Date.now().toString(36),n:X.n.trim()+(por!==1?' ×'+String(por).replace('.',','):''),k:r0(k*por),p:r0(parseNum(X.p)*por),f:r0(parseNum(X.f)*por),c:r0(parseNum(X.c)*por),t:now});n=1}
+      L.push({id:Date.now().toString(36),tr:X.tr?1:0,n:X.n.trim()+(por!==1?' ×'+String(por).replace('.',','):''),k:r0(k*por),p:r0(parseNum(X.p)*por),f:r0(parseNum(X.f)*por),c:r0(parseNum(X.c)*por),t:now});n=1}
     if(!L.length)delete S.extra[viewDate];xOpen=false;cleanOld();save();toast('Добавлено: '+n)},
   xdel:d=>{const L=(S.extra[viewDate]||[]).filter(x=>x.id!==d.id);if(L.length)S.extra[viewDate]=L;else delete S.extra[viewDate];save()},
   upd:()=>{doUpdate();return true},
   updcheck:()=>{checkUpdate(true);return true}
 };
-function cleanOld(){const cut=dkey(addDays(appNow(),-60));Object.keys(S.swaps).forEach(k=>{if(k<cut)delete S.swaps[k]});Object.keys(S.extra).forEach(k=>{if(k<cut)delete S.extra[k]})}
+function cleanOld(){const cut=dkey(addDays(appNow(),-60));['skip','edits'].forEach(n=>Object.keys(S[n]||{}).forEach(k=>{if(k<cut)delete S[n][k]}));Object.keys(S.swaps).forEach(k=>{if(k<cut)delete S.swaps[k]});Object.keys(S.extra).forEach(k=>{if(k<cut)delete S.extra[k]})}
 function clean(){const keep=dkey(addDays(shopCycle(),-14));['left','bulk','chk'].forEach(n=>Object.keys(S[n]).forEach(k=>{if(k<keep)delete S[n][k]}))}
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-a]');if(!el)return;const fn=A[el.dataset.a];if(!fn)return;
   const r=fn(el.dataset,el,e);if(r!==true)render();
 });
-document.addEventListener('toggle',e=>{if(e.target.id==='leftbox')window._openLeft=e.target.open;if(e.target.id==='bulkbox')window._openBulk=e.target.open},true);
+document.addEventListener('toggle',e=>{if(e.target.id==='treatbox')window._openTreat=e.target.open;if(e.target.id==='leftbox')window._openLeft=e.target.open;if(e.target.id==='bulkbox')window._openBulk=e.target.open},true);
 document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset.in;if(k==='xf')X[el.dataset.k]=el.value;
-  if(k==='xpre'&&el.value!==''){const p=PRESETS[+el.value];Object.assign(X,{n:p[0]+' ('+p[1]+')',k:String(p[2]),p:String(p[3]),f:String(p[4]),c:String(p[5])});render()}});
-document.addEventListener('change',e=>{const el=e.target;if(el.dataset&&el.dataset.in==='leftg'){const ck=dkey(shopCycle()),L=S.left[ck]=S.left[ck]||{},q=Math.max(0,Math.round(parseNum(el.value)));if(q>0)L[el.dataset.p]={q,at:Date.now()};else delete L[el.dataset.p];window._openLeft=true;clean();save();render()}});
+  if(k==='edg'&&ED){ED.items[+el.dataset.i][1]=Math.max(0,parseNum(el.value))}
+  if(k==='edadd'&&ED&&el.value){const p=PR[el.value];ED.items.push([el.value,p.u==='шт'?1:(el.value==='oil'?5:el.value==='protein'?30:100)]);render()}
+  if(k==='xpre'&&el.value!==''){const p=PRESETS[+el.value];Object.assign(X,{tr:+el.value<4?1:0,n:p[0]+' ('+p[1]+')',k:String(p[2]),p:String(p[3]),f:String(p[4]),c:String(p[5])});render()}});
+document.addEventListener('change',e=>{const el=e.target;if(el.dataset&&el.dataset.in==='edg'){render();return}if(el.dataset&&el.dataset.in==='leftg'){const ck=dkey(shopCycle()),L=S.left[ck]=S.left[ck]||{},q=Math.max(0,Math.round(parseNum(el.value)));if(q>0)L[el.dataset.p]={q,at:Date.now()};else delete L[el.dataset.p];window._openLeft=true;clean();save();render()}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='w-in'){A.wsave();render()}});
 
 /* ===== Офлайн и обновления ===== */
