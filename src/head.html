@@ -371,6 +371,38 @@ nav.tabs button.on{color:var(--ink);font-weight:600}
 .link.pr{font-size:inherit;font-variant-numeric:tabular-nums}
 .notes li span{overflow-wrap:anywhere}
 optgroup{font-weight:600}
+/* 4.9: календарь меню */
+.cal{padding:12px}
+.calh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:.85rem;color:var(--muted)}
+.calh .iconbtn{width:32px;height:32px}
+.cgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cwd{text-align:center;font-size:.72rem;color:var(--muted);padding-bottom:2px}
+.cday{position:relative;border:1px solid var(--line);background:var(--bg);border-radius:10px;min-height:44px;padding:4px 0 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;color:var(--ink);min-width:0}
+.cday b{font-size:.95rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.cday small{font-size:.6rem;color:var(--muted);line-height:1}
+.cday .dt{position:absolute;bottom:4px}
+.cday.past{opacity:.5}
+.cday.today{border:2px solid var(--accent)}
+.cday.sel{background:var(--ink);color:var(--bg);border-color:var(--ink);opacity:1}
+.cday.sel small{color:inherit;opacity:.75}
+.dt{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--muted)}
+.dt.S{background:var(--accent)} .dt.W{background:var(--c)} .dt.R{background:var(--line)}
+.cday.sel .dt.R{background:var(--bg)}
+.leg{display:flex;gap:14px;justify-content:center;margin-top:8px;font-size:.72rem;color:var(--muted)}
+.leg span{display:flex;align-items:center;gap:5px}
+.wkrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}
+.wkrow .small{min-width:0}
+.wkrow .btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.wl{list-style:none;margin:0;padding:0}
+.wl>li{border-top:1px solid var(--line)}
+.wl>li:first-child{border-top:0}
+.wlb{width:100%;display:flex;gap:10px;align-items:baseline;background:none;border:0;padding:7px 0;text-align:left;color:inherit;font:inherit}
+.wlb b{flex:none;width:44px;font-size:.85rem}
+.wlb span{flex:1;min-width:0;font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}
+.wlb em{flex:none;font-style:normal;font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.wlb.on b{color:var(--accent)}
+@media (orientation:landscape) and (max-height:540px){.cday{min-height:38px}}
+.mrow .grow{flex:1;min-width:0}
 </style>
 </head>
 <body>
