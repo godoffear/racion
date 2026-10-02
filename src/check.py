@@ -18,7 +18,7 @@ async def main():
             pg.on('pageerror', lambda e: errs.append(str(e)))
             if INIT: await pg.add_init_script(INIT)
             await pg.goto(FILE); await pg.wait_for_timeout(300)
-            for t in ['today', 'menu', 'shop', 'weight']:
+            for t in ['today', 'menu', 'shop', 'prep', 'weight']:
                 await pg.click(f'[data-a="tab"][data-v="{t}"]'); await pg.wait_for_timeout(150)
                 wide = await pg.evaluate("[...document.querySelectorAll('#app *')].filter(e=>e.getBoundingClientRect().right>innerWidth+1).slice(0,3).map(e=>e.tagName+'.'+e.className)")
                 await pg.screenshot(path=f'/tmp/racion-{tag}-{t}.png', full_page=True)

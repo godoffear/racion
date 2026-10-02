@@ -293,7 +293,7 @@ details:not(.card)[open]>summary::before{content:'▾ '}
 .bar-top{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--ink);color:var(--bg);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:12px;font-size:.9rem}
 .bar-top .btn{background:var(--bg);color:var(--ink);border:0;padding:7px 14px;font-size:.85rem;flex:none}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:40}
-nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
 nav.tabs button{background:none;border:0;padding:8px 0 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.75rem;color:var(--muted)}
 nav.tabs button .ic{position:relative;display:block;height:24px}
 nav.tabs button .ic svg{display:block}
@@ -410,6 +410,32 @@ optgroup{font-weight:600}
 .chkl input{margin-top:3px;flex:none}
 .prep .ph:first-of-type{margin-top:6px}
 .btn:disabled{opacity:.45}
+/* 5.2: заготовки */
+nav.tabs button{min-width:0;font-size:.7rem}
+.ptask{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.card .ptask:first-of-type,.pday .ptask:first-of-type{border-top:0}
+.pcb{flex:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center;font-size:.85rem;margin-top:1px;padding:0;color:inherit;position:relative}
+.pcb::after{content:"";position:absolute;inset:-8px}
+.ptask.done .pcb{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.ptask.done .tt{text-decoration:line-through;color:var(--muted)}
+.ptask .grow{flex:1;min-width:0}
+.ptask .tt{font-weight:600}
+.ptask .td{font-size:.84rem;color:var(--muted);margin-top:2px}
+.bags{width:100%;border-collapse:collapse;margin-top:6px;font-size:.86rem}
+.bags td{padding:6px 0;border-top:1px dashed var(--line);vertical-align:top}
+.bags td:last-child{text-align:right;white-space:nowrap;padding-left:8px}
+.tg{display:inline-block;font-size:.7rem;font-weight:600;padding:1px 7px;border-radius:999px}
+.tg.fr{background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--c)}
+.tg.fz{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)}
+.hint{font-size:.8rem;color:var(--muted);background:var(--sunk);border-radius:10px;padding:8px 10px;margin-top:8px}
+.evl{margin-left:4px}
+.pday{border-left:3px solid var(--line);padding:0 0 14px 12px;position:relative}
+.pday::before{content:"";position:absolute;left:-7px;top:4px;width:11px;height:11px;border-radius:50%;background:var(--bg);border:2px solid var(--line)}
+.pday.today{border-left-color:var(--now)}.pday.today::before{background:var(--now);border-color:var(--now)}
+.pday.past{opacity:.6}
+.pday .dh{font-weight:700;margin-bottom:2px}.pday .dh small{font-weight:400;color:var(--muted)}
+.prep .bh h3{margin:0}
+@media (orientation:landscape) and (max-height:540px){nav.tabs button{font-size:.66rem}}
 </style>
 </head>
 <body>
