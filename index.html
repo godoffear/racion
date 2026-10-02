@@ -443,7 +443,7 @@ nav.tabs button{min-width:0;font-size:.7rem}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='5.2';
+const APP_VERSION='5.2.1';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -605,7 +605,7 @@ const EPOCH=new Date(2026,9,6); // вторник, 6 окт 2026 — меню 1
 
 /* ===== Состояние ===== */
 const LS='racion-v3';
-function def(){return {rec:{},meth:{},dswap:{},wmenu:{},reviewed:{},v:3,done:{},skip:{},edits:{},w:[],left:{},bulk:{},chk:{},swaps:{},extra:{},excl:{},wswaps:{},treatBuy:{},grams:true,gv:2,cooked:false,stock:{},sv:0,pantry:{},price:{},homeAt:0,homeFor:'',huse:{},adaptOff:{},boiled:{q:0,at:0},riceBank:{q:0,at:0},prepDone:{}}}
+function def(){return {rec:{},meth:{},dswap:{},wmenu:{},reviewed:{},v:3,done:{},skip:{},edits:{},w:[],left:{},bulk:{},chk:{},swaps:{},extra:{},excl:{},wswaps:{},treatBuy:{},grams:true,gv:2,cooked:false,stock:{},sv:0,pantry:{},price:{},homeAt:0,homeFor:'',huse:{},adaptOff:{},boiled:{q:0,at:0},riceBank:{q:0,at:0},prepDone:{},dismiss:{}}}
 let S;try{S=Object.assign(def(),JSON.parse(localStorage.getItem(LS)||'null')||{})}catch(e){S=def()}
 // 4.8: отметки запасов больше не сбрасываются каждую неделю — переносим «Купить» из S.bulk
 function migrate(){if(S.gv!==2){S.grams=true;S.gv=2}if(S.sv!==1){S.stock=S.stock||{};Object.values(S.bulk||{}).forEach(B=>Object.keys(B||{}).forEach(id=>{S.stock[id]=1}));S.sv=1}}
@@ -841,10 +841,11 @@ function vToday(){
   const twd=wd(now),hr=new Date().getHours();
   if(isToday&&((twd===6&&hr>=18)||twd===0)&&leftEntered()&&!(S.reviewed||{})[dkey(shopCycle())])h+=`<div class="card due"><b>Шаг 2 — проверь меню на следующую неделю</b><div class="small muted">Не нравится блюдо или продукт — поменяй, список покупок пересчитается.</div><div class="btns"><button class="btn pri" data-a="gomenu">Открыть меню</button></div></div>`;
   if(isToday&&((twd===6&&hr>=18)||twd===0)&&!leftEntered())h+=`<div class="card due"><b>Шаг 1 — ${twd===6?'перед ужином внеси, что осталось дома':'перед закупкой внеси, что осталось дома'}</b><div class="small muted">Тогда в список попадёт только то, чего не хватает на новую неделю. Заодно проверь запасы: рис, протеин, масло, соль.</div><div class="btns"><button class="btn pri" data-a="goleft">Внести остатки</button></div></div>`;
-  if(isToday&&twd===6&&backupAge()>30)h+=`<div class="card due small"><b>Раз в месяц: сохрани копию данных</b><div class="btns"><button class="btn sm" data-a="bsave">Сохранить копию</button></div></div>`;
-  if(isToday&&twd===4&&(S.cal||[]).length&&Math.round((appNow()-pkey(S.cal.slice().sort((a,b)=>a.d<b.d?-1:1).pop().d))/864e5)>=13)h+=`<div class="card due small"><b>Сегодня замер калипером</b> — живот и бок. <button class="link" data-a="tab" data-v="weight">Записать</button></div>`;
+  const dis=k=>!!(S.dismiss||{})[k+'|'+tk],skipB=k=>`<button class="btn sm ghost" data-a="dismiss" data-v="${k}">Пропустить</button>`; // «Пропустить» скрывает карточку на сегодня
+  if(isToday&&twd===6&&backupAge()>30&&!dis('backup'))h+=`<div class="card due small"><b>Раз в месяц: сохрани копию данных</b><div class="btns"><button class="btn sm" data-a="bsave">Сохранить копию</button>${skipB('backup')}</div></div>`;
+  if(isToday&&twd===4&&(S.cal||[]).length&&Math.round((appNow()-pkey(S.cal.slice().sort((a,b)=>a.d<b.d?-1:1).pop().d))/864e5)>=13&&!dis('cal'))h+=`<div class="card due small"><b>Сегодня замер калипером</b> — живот и бок.<div class="btns"><button class="btn sm" data-a="tab" data-v="weight">Записать</button>${skipB('cal')}</div></div>`;
   if(isToday&&twd===0)h+=`<div class="card due"><b>Сегодня закупка</b><div class="small muted">На ${fmtDate(shopCycle())} – ${fmtDate(addDays(shopCycle(),6))}.</div><div class="btns"><button class="btn" data-a="tab" data-v="shop">Открыть список</button></div></div>`;
-  if(isToday&&twd===4&&!S.w.some(x=>x.d===dkey(new Date())))h+=`<div class="card due"><b>Пятница — взвешивание</b><div class="small muted">Утром натощак, до еды и воды.</div><div class="addrow" style="margin-top:8px"><input id="w-in" inputmode="decimal" placeholder="Вес, кг" aria-label="Вес, кг"><button class="btn pri" data-a="wsave">Записать</button></div></div>`;
+  if(isToday&&twd===4&&!S.w.some(x=>x.d===dkey(new Date()))&&!dis('weigh'))h+=`<div class="card due"><b>Пятница — взвешивание</b><div class="small muted">Утром натощак, до еды и воды.</div><div class="addrow" style="margin-top:8px"><input id="w-in" inputmode="decimal" placeholder="Вес, кг" aria-label="Вес, кг"><button class="btn pri" data-a="wsave">Записать</button></div><div class="btns">${skipB('weigh')}</div></div>`;
   if(isToday&&(twd===4||twd===5)&&S.w.some(x=>x.d>=dkey(addDays(new Date(),-(twd-4)))))h+=summaryCard();
   h+=`<div class="weeknav"><button class="iconbtn" data-a="cyc" data-v="-7" aria-label="Прошлая неделя">‹</button><span class="lbl">${fmtDate(cs)} – ${fmtDate(addDays(cs,6))}${dkey(cs)===dkey(shopCycle())?' · следующая':''}</span><button class="iconbtn" data-a="cyc" data-v="7" aria-label="Следующая неделя">›</button></div><div class="strip">`;
   for(let i=0;i<7;i++){const d=addDays(cs,i),k=dkey(d);h+=`<button data-a="pick" data-v="${k}" class="${k===viewDate?'sel':''} ${k===tk?'today':''}"><b>${DAYS[wd(d)]}</b><span>${d.getDate()}</span></button>`}
@@ -1132,6 +1133,7 @@ const A={
     HP.res.forEach(r=>{if(r.id==='egg')return;if(r.cooked){S.riceBank={q:Math.round(r.q/2.8),at:now};return}if(PR[r.id].bulk){if(r.have)delete S.stock[r.id];else S.stock[r.id]=1}else setHome(r.id,r.q)});
     S.homeFor=ck;S.homeAt=now;window._homeOpen=false;window._homeText='';const n=HP.res.length;HP=null;clean();save();toast('Сохранил: '+n+' '+plural(n,['продукт','продукта','продуктов'])+' — список покупок пересчитан')},
   ptab:d=>{prepTab=d.v},
+  dismiss:d=>{S.dismiss=S.dismiss||{};const cut=dkey(addDays(appNow(),-14));Object.keys(S.dismiss).forEach(k=>{if(k.split('|')[1]<cut)delete S.dismiss[k]});S.dismiss[d.v+'|'+dkey(appNow())]=1;save();toast(d.v==='weigh'?'Хорошо, взвесишься в следующую пятницу':'Скрыл до следующего раза')},
   ptask:d=>{const ck=d.d,D=(S.prepDone=S.prepDone||{})[ck]=(S.prepDone[ck]||{}),on=!D[d.v],M=prepModel(pkey(ck)),now=Date.now();
     if(on){D[d.v]=1;buzz();
       if(d.v==='big:rice'&&M.cook){if(!D._rice)D._rice=JSON.stringify(S.riceBank||{q:0,at:0});S.riceBank={q:M.bank+M.cook,at:now}}
