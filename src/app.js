@@ -1,4 +1,4 @@
-const APP_VERSION='4.9.1';
+const APP_VERSION='4.9.2';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_FULL=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
@@ -442,7 +442,20 @@ const SLOTW={pre:'предтрен',bf:'завтрак',lunch:'обед',snack:'
 function parseLines(t){const out=[];String(t||'').split(/\r?\n/).forEach(line=>{const m=line.replace(/[`*]/g,'').match(/РАЦИОН(-ПЛАН)?\s*:\s*(.+)$/i);if(!m)return;
   if(m[1]){const w=m[2].toLowerCase();const sl=Object.keys(SLOTW).find(k=>w.includes(SLOTW[k]));if(sl)out.push({plan:sl});return}
   const p=m[2].split('|').map(x=>x.trim()),n=v=>Math.max(0,Math.round(parseNum(String(v||'').replace(/[^\d.,]/g,''))));
-  const e={n:p[0].slice(0,80),k:n(p[1]),p:n(p[2]),f:n(p[3]),c:n(p[4])};p.slice(5).forEach(x=>{if(/^\d{1,2}:\d{2}$/.test(x))e.t=x.padStart(5,'0')});if(e.n&&e.k)out.push(e)});return out}
+  const e={n:p[0].slice(0,80),k:n(p[1]),p:n(p[2]),f:n(p[3]),c:n(p[4])};p.slice(5).forEach(x=>{if(/^\d{1,2}:\d{2}$/.test(x))e.t=x.padStart(5,'0')});if(e.n&&e.k)out.push(e)});
+  if(!out.length){const e=parseFree(t);if(e)out.push(e)}
+  return out}
+// свободный текст от Claude: «Салат с тунцом… Б ~41 г | Ж ~32 г | У ~5 г | ~470 ккал» — порядок и знаки «~» любые
+function parseFree(t){const s=String(t||'').replace(/[`*_]/g,''),num=re=>{const m=s.match(re);return m?Math.round(parseNum(m[1])):0};
+  const N='~?\\s*≈?\\s*(\\d+(?:[.,]\\d+)?)';
+  const k=num(new RegExp(N+'\\s*(?:ккал|kcal)','i'))||num(new RegExp('(?:ккал|калори\\S*|kcal)\\s*[:=—-]?\\s*'+N,'i'));if(!k)return null;
+  const mac=w=>num(new RegExp('(?:^|[^А-Яа-яЁё])'+w+'\\s*[:=—-]?\\s*'+N,'i'))||num(new RegExp(N+'\\s*г?\\s*'+w+'(?![а-яё])','i'));
+  const line=s.split(/\r?\n/).map(x=>x.trim()).find(x=>/[А-Яа-яЁёA-Za-z]{3}/.test(x)&&!/ккал|kcal/i.test(x)&&!/^(?:Б|Ж|У)\s*[~≈:\d]/.test(x))||(s.trim().split(/\r?\n/)[0].split(/\s+[—–-]\s+|\s*[:|(~≈]|,?\s*(?:примерно|около)?\s*\d/)[0].trim())||'Еда вне плана';
+  const tm=s.match(/\b(\d{1,2}:\d{2})\b/);
+  return {n:line.replace(/\s*\([^)]*\)\s*$/,'').replace(/^РАЦИОН\s*:\s*/i,'').slice(0,80),k,p:mac('Б(?:елк\\S*)?'),f:mac('Ж(?:ир\\S*)?'),c:mac('У(?:глев\\S*)?'),t:tm?tm[1].padStart(5,'0'):undefined}}
+// вставил строку — поля формы заполняются сами, их можно поправить перед «OK»
+function fillFromLine(){const L=parseLines(X.line);if(L.length!==1||L[0].plan)return false;const e=L[0];Object.assign(X,{n:e.n,k:String(e.k),p:String(e.p||''),f:String(e.f||''),c:String(e.c||''),por:'1'});if(e.t)X.t=e.t;X.auto=1;
+  [['xn','n'],['xk','k'],['xp','p'],['xf','f'],['xc','c'],['xpor','por']].forEach(([id,f])=>{const el=document.getElementById(id);if(el)el.value=X[f]});return true}
 function vShopMode(){
   const L=shopList(),ck=L.ck,C=S.chk[ck]||{};
   const items=L.rows.filter(r=>r.buy>0).map(r=>({id:r.id,n:nameOf(r.p),q:r.p.u==='шт'&&r.p.shop===10?r.buy+' шт':fq(r.buy,r.p.u),vi:r.p.vi,sec:r.p.sec}))
@@ -613,9 +626,9 @@ const A={
     const its=m.items.map(i=>[i.p,i.q]),it=its[+d.i];if(!it)return true;const st=stepOf(PR[it[0]]);
     it[1]=Math.max(st,Math.round((it[1]+Number(d.v)*st)*10)/10);S.edits=S.edits||{};S.edits[dk+'|'+d.s]=its;ED=null;cleanOld();save()},
   cooked:()=>{S.cooked=!S.cooked;save();toast(S.cooked?'В скобках — вес в готовом виде':'Вес в сыром и сухом виде')},
-  xclip:async()=>{try{X.line=await navigator.clipboard.readText()||'';X.more=true;render()}catch(_){toast('Нет доступа к буферу — вставь долгим нажатием')}return true},
+  xclip:async()=>{try{X.line=await navigator.clipboard.readText()||'';X.more=true;fillFromLine();render()}catch(_){toast('Нет доступа к буферу — вставь долгим нажатием')}return true},
   xsave:()=>{const L=S.extra[viewDate]=S.extra[viewDate]||[],now=viewDate===dkey(appNow())?pad(new Date().getHours())+':'+pad(new Date().getMinutes()):'13:00';let n=0;
-    const lines=parseLines(X.line);
+    let lines=parseLines(X.line);if(lines.length===1&&!lines[0].plan&&X.auto)lines=[]; // поля уже заполнены из строки (и, может, поправлены) — берём их
     lines.forEach(x=>{if(x.plan){S.done[dk_(viewDate,x.plan)]=1;n++;return}L.push({id:Date.now().toString(36)+n,n:x.n,k:x.k,p:x.p,f:x.f,c:x.c,t:x.t||X.t||now,s:X.s});n++});
     if(!lines.length){const por=parseNum(X.por)||1,k=parseNum(X.k);if(!X.n.trim()||!k){toast('Нужны название и калории');return true}
       L.push({id:Date.now().toString(36),n:X.n.trim()+(por!==1?' ×'+String(por).replace('.',','):''),k:r0(k*por),p:r0(parseNum(X.p)*por),f:r0(parseNum(X.f)*por),c:r0(parseNum(X.c)*por),t:X.t||now,s:X.s});n=1}
@@ -636,7 +649,7 @@ document.addEventListener('touchstart',e=>{if(tab!=='today'||e.touches.length!==
 document.addEventListener('touchend',e=>{if(!tsok)return;tsok=false;const t=e.changedTouches[0],dx=t.clientX-tsx,dy=t.clientY-tsy;
   if(Math.abs(dx)>70&&Math.abs(dy)<Math.abs(dx)*0.5){viewDate=dkey(addDays(pkey(viewDate),dx<0?1:-1));editOpen='';xOpen='';const app=document.getElementById('app');app.classList.remove('sl','sr');render();void app.offsetWidth;app.classList.add(dx<0?'sl':'sr')}},{passive:true});
 document.addEventListener('toggle',e=>{if(e.target.id&&e.target.id.startsWith('mo-'))moreOpen[e.target.id.slice(3)]=e.target.open;if(e.target.id==='wkbox')window._openWk=e.target.open;if(e.target.id==='xmore')X.more=e.target.open;if(e.target.id==='leftbox')window._openLeft=e.target.open;if(e.target.id==='bulkbox')window._openBulk=e.target.open},true);
-document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset.in;if(k==='xf')X[el.dataset.k]=el.value;
+document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset.in;if(k==='xf'){X[el.dataset.k]=el.value;if(el.dataset.k==='line')fillFromLine()}
   if(k==='recsel'){const dk=el.dataset.d,key=dk+'|'+el.dataset.s;if(!guard(dk)){render();return}S.rec=S.rec||{};if(el.value)S.rec[key]=el.value;else delete S.rec[key];delete S.edits[key];delete S.swaps[key];ED=null;save();render();toast(el.value?'Блюдо: '+RECBY[el.value][1]:'По плану')}
   if(k==='edg'&&ED){ED.items[+el.dataset.i][1]=Math.max(0,parseNum(el.value))}
   if(k==='edadd'&&ED&&el.value){const p=PR[el.value];ED.items.push([el.value,p.u==='шт'?1:(el.value==='oil'?5:el.value==='protein'?30:100)]);render()}
