@@ -1,4 +1,4 @@
-const APP_VERSION='4.9.2';
+const APP_VERSION='5.0';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_FULL=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
@@ -153,7 +153,7 @@ const EPOCH=new Date(2026,9,6); // вторник, 6 окт 2026 — меню 1
 
 /* ===== Состояние ===== */
 const LS='racion-v3';
-function def(){return {rec:{},meth:{},dswap:{},wmenu:{},reviewed:{},v:3,done:{},skip:{},edits:{},w:[],left:{},bulk:{},chk:{},swaps:{},extra:{},excl:{},wswaps:{},treatBuy:{},grams:true,gv:2,cooked:false,stock:{},sv:0,pantry:{},price:{}}}
+function def(){return {rec:{},meth:{},dswap:{},wmenu:{},reviewed:{},v:3,done:{},skip:{},edits:{},w:[],left:{},bulk:{},chk:{},swaps:{},extra:{},excl:{},wswaps:{},treatBuy:{},grams:true,gv:2,cooked:false,stock:{},sv:0,pantry:{},price:{},homeAt:0}}
 let S;try{S=Object.assign(def(),JSON.parse(localStorage.getItem(LS)||'null')||{})}catch(e){S=def()}
 // 4.8: отметки запасов больше не сбрасываются каждую неделю — переносим «Купить» из S.bulk
 function migrate(){if(S.gv!==2){S.grams=true;S.gv=2}if(S.sv!==1){S.stock=S.stock||{};Object.values(S.bulk||{}).forEach(B=>Object.keys(B||{}).forEach(id=>{S.stock[id]=1}));S.sv=1}}
@@ -225,7 +225,7 @@ function howTo(m){
   if(m.slot==='snack')return ['Протеин на воде, фрукт и орехи — готовить ничего не нужно'];
   if(m.slot==='late')return has('egg')?['Яйца варёные из запаса']:main?[mt?mt[2]:PR[main.p].how]:[];
   const a=[];if(main)a.push(mt?mt[2]:PR[main.p].how);
-  if(has('rice')){const r=m.items.find(x=>x.p==='rice').q;a.push(S.grams?'Рис из рисоварки: '+r+' г сухого ≈ '+Math.round(r*2.8/10)*10+' г варёного':'Рис из рисоварки')}
+  if(has('rice')){const r=m.items.find(x=>x.p==='rice').q;a.push(S.grams?'Рис из контейнера (варится раз в 3 дня): '+r+' г сухого ≈ '+Math.round(r*2.8/10)*10+' г готового, подогреть 1–2 мин':'Рис из контейнера, подогреть 1–2 мин')}
   if(has('sweet'))a.push('Батат: 20–25 мин на пару в рисоварке или в кастрюле');
   if(has('veg'))a.push(m.slot==='dinner'?'Овощи на ту же сковороду на 4–5 мин'+(has('oil')?', масло в конце':', без масла'):'Овощи: на пару в рисоварке или 4–5 мин на сковороде');
   return a;
@@ -233,13 +233,24 @@ function howTo(m){
 function stepsList(m){const a=howTo(m);return a.length?`<ul class="steps">${a.map(t=>`<li>${esc(t.replace(/\.$/,''))}</li>`).join('')}</ul>`:''}
 const nameOf=p=>p.n.replace(/\s*\(.*\)$/,'');
 // заготовки: рис на 2 дня (Вт, Чт, Сб, Пн), яйца на 3–4 дня (Вт, Пт)
+// рис варится раз в 3 дня подряд (от EPOCH, через границы недель), яйца — во вторник на Вт–Чт и в пятницу на Пт–Пн
+function riceDay(date){return ((Math.round((date-EPOCH)/864e5)%3)+3)%3}
 function prepFor(date){
   const cs=cycleStart(date),di=Math.round((date-cs)/864e5),out=[];
-  const sum=(from,to,id)=>{let t=0;for(let i=from;i<=to&&i<7;i++)dayPlan(addDays(cs,i)).meals.forEach(m=>m.items.forEach(x=>{if(x.p===id)t+=x.q}));return t};
-  if(di%2===0){const a=sum(di,di,'rice'),b=di<6?sum(di+1,di+1,'rice'):0,r=a+b;if(r)out.push(`Сварить рис: ${r0(r)} г сухого (≈ ${niceNum(r/150).s} мерки рисоварки) — ${a&&b?'на сегодня и завтра':a?'на сегодня':'на завтра'}. Храни в холодильнике.`)}
+  const sumD=(d,id)=>dayPlan(d).meals.reduce((t,m)=>t+m.items.reduce((a,x)=>a+(x.p===id?x.q:0),0),0);
+  const sum=(from,to,id)=>{let t=0;for(let i=from;i<=to&&i<7;i++)t+=sumD(addDays(cs,i),id);return t};
+  const rd=riceDay(date);
+  if(rd===0){const ds=[0,1,2].map(i=>addDays(date,i)),qs=ds.map(d=>sumD(d,'rice')),r=qs.reduce((a,b)=>a+b,0),used=ds.filter((d,i)=>qs[i]);
+    if(r)out.push(`Сварить рис на ${used.length>1?DAYS[wd(used[0])]+'–'+DAYS[wd(used[used.length-1])]:DAYS[wd(used[0])]}: ${r0(r)} г сухого (≈ ${niceNum(r/150).s} мерки рисоварки, готового ≈ ${Math.round(r*2.8/10)*10} г). Остудить, в контейнер и в холодильник — хранить до 3 дней.`)}
+  else{const r=sumD(date,'rice');if(r)out.push(`Рис из контейнера: ${r0(r)} г сухого ≈ ${Math.round(r*2.8/10)*10} г готового — подогреть 1–2 мин.`)}
   if(di===0||di===3){const e=sum(di,di===0?2:6,'egg');if(e)out.push(`Сварить яйца: ${e} шт на ${di===0?'Вт–Чт':'Пт–Пн'}. В кипящую воду на 9–10 мин, потом в холодную.`)}
   return out;
 }
+// на завтра: блюда, что приготовить с вечера к завтраку
+function tomorrowFor(date){const tm=addDays(date,1),pl=dayPlan(tm),out={dishes:[],eve:[]};
+  pl.meals.forEach(m=>{const r=m.rec||m.dish;if(m.slot!=='pre'&&m.slot!=='snack')out.dishes.push(r?RECBY[r][1]:m.items.filter(x=>PR[x.p].how||x.p==='egg').map(x=>cap(PR[x.p].s)).join(' и ')||SLOTS[m.slot]);
+    if(m.slot==='bf')m.items.forEach(x=>{if(['sweet','potato','pumpkin'].includes(x.p))out.eve.push(`${cap(PR[x.p].s)} ${qtyText(x)} — на пару в рисоварке 20–25 мин, к завтраку`)})});
+  return out}
 function thawFor(date){
   const tm=addDays(date,1),twd=wd(tm);if(twd===1||twd===2)return []; // Вт и Ср — свежее с закупки
   const out=[];dayPlan(tm).meals.forEach(m=>{if(m.slot!=='lunch'&&m.slot!=='dinner')return;m.items.forEach(i=>{if(PR[i.p].how&&i.p!=='tofu'&&!PR[i.p].keep)out.push({name:PR[i.p].s,q:qtyText(i),slot:SLOTS[m.slot].toLowerCase()})})});
@@ -318,7 +329,7 @@ function vMenu(){
   for(let i=0;i<28;i++){const d=addDays(c0,i),k=dkey(d),ty=rawDay(d)[0];
     h+=`<button class="cday ${k===menuSel?'sel':''} ${k===tk?'today':''} ${d<pkey(tk)?'past':''}" data-a="msel" data-v="${k}" aria-pressed="${k===menuSel}" aria-label="${DAYS_FULL[wd(d)]}, ${fmtDate(d)}, ${DTYPE[ty]}"><b>${d.getDate()}</b>${d.getDate()===1||i===0?`<small>${MONTHS[d.getMonth()]}</small>`:''}<i class="dt ${ty}"></i></button>`}
   h+=`</div><div class="leg"><span><i class="dt S"></i>силовая</span><span><i class="dt W"></i>ходьба</span><span><i class="dt R"></i>отдых</span></div></section>`;
-  if(dkey(cs)===dkey(shopCycle()))h+=rev?`<div class="card ok small">✓ Меню на ${fmtDate(cs)} – ${fmtDate(addDays(cs,6))} проверено. Список покупок собран по нему.</div>`:`<div class="card due"><b>Проверь меню на ${fmtDate(cs)} – ${fmtDate(addDays(cs,6))}</b><div class="small muted">Не нравится блюдо или продукт — нажми на приём. Список покупок пересчитается сам.</div><div class="btns"><button class="btn pri" data-a="review">Меню ок</button></div></div>`;
+  if(dkey(cs)===dkey(shopCycle())&&[5,6,0].includes(wd(new Date())))h+=rev?`<div class="card ok small">✓ Меню на ${fmtDate(cs)} – ${fmtDate(addDays(cs,6))} проверено. Список покупок собран по нему.</div>`:`<div class="card due"><b>Проверь меню на ${fmtDate(cs)} – ${fmtDate(addDays(cs,6))}</b><div class="small muted">Не нравится блюдо или продукт — нажми на приём. Список покупок пересчитается сам.</div><div class="btns"><button class="btn pri" data-a="review">Меню ок</button></div></div>`;
   h+=`<div class="wkrow"><span class="small muted">${fmtDate(cs)} – ${fmtDate(addDays(cs,6))} · ${menuName(cs)}</span><button class="btn sm ${window._openWk?'on':''}" data-a="wkopen" aria-expanded="${!!window._openWk}">Меню недели</button></div>`;
   if(window._openWk){
     h+=`<section class="card wk"><div class="ph" style="margin-top:0">Блюда недели</div><ul class="wl">${[0,1,2,3,4,5,6].map(i=>{const d=addDays(cs,i),pl=dayPlan(d),k=pl.meals.reduce((a,m)=>a+macros(m.items).k,0),dn=pl.meals.filter(m=>m.slot==='lunch'||m.slot==='dinner').map(m=>{const r=m.rec||m.dish;return r?RECBY[r][1]:m.items.filter(x=>SWAPP.includes(x.p)).map(x=>cap(PR[x.p].s)).join(', ')||SLOTS[m.slot]});
@@ -356,8 +367,10 @@ function vToday(){
   {const e={k:0,p:0,f:0,c:0};meals.forEach(m=>{if(done(m)){const x=macros(m.items);['k','p','f','c'].forEach(k=>e[k]+=x[k])}});extras.forEach(x=>['k','p','f','c'].forEach(k=>e[k]+=x[k]||0));
    const cell=(k,l,cls)=>{const [lo,hi]=NORM[k],v=r0(e[k]),over=v>hi+(k==='k'?50:5);return `<div class="nt"><b class="${over?'over':''}">${v}</b><div class="nl">${l}</div><div class="nn">${lo}–${hi}</div><div class="nb"><i style="width:${Math.min(100,v/hi*100)}%;background:var(--${over?'warn':cls})"></i></div></div>`};
    h+=`<section class="card eatbox" aria-label="Съедено за день"><div class="eh">${isToday?'Съедено сегодня':'Съедено за день'}<span>«Съел» + вне плана</span></div><div class="ng">${cell('k','ккал','accent')}${cell('p','белки, г','p')}${cell('f','жиры, г','f')}${cell('c','углев., г','c')}</div></section>`}
-  const prep=prepFor(date),thaw=hr>=16||!isToday?thawFor(date):[];
-  if(prep.length||thaw.length)h+=`<section class="card prep"><h3>${isToday?'Заготовки сегодня':'Заготовки'}</h3>${prep.map(t=>`<p class="task">${esc(t)}</p>`).join('')}${thaw.length?`<p class="task">Вечером переложи из морозилки в холодильник на завтра:</p><ul class="il">${thaw.map(t=>`<li><span>${esc(cap(t.name))} <i>${esc(t.slot)}</i></span><b>${esc(t.q)}</b></li>`).join('')}</ul>`:''}</section>`;
+  const prep=prepFor(date),thaw=thawFor(date),tmr=tomorrowFor(date);
+  if(prep.length||thaw.length||tmr.eve.length)h+=`<section class="card prep"><h3>${isToday?'Заготовки':'Заготовки на '+fmtDate(date)}</h3>${prep.length?`<div class="ph">Сегодня</div>${prep.map(t=>`<p class="task">${esc(t)}</p>`).join('')}`:''}
+   <div class="ph">Вечером — на завтра, ${DAYS_FULL[wd(addDays(date,1))].toLowerCase()}</div>${thaw.length?`<p class="task">Переложи из морозилки в холодильник:</p><ul class="il">${thaw.map(t=>`<li><span>${esc(cap(t.name))} <i>${esc(t.slot)}</i></span><b>${esc(t.q)}</b></li>`).join('')}</ul>`:'<p class="task muted">Размораживать ничего не нужно.</p>'}${tmr.eve.map(t=>`<p class="task">${esc(t)}</p>`).join('')}
+   ${tmr.dishes.length?`<p class="task muted small">Завтра: ${tmr.dishes.map(esc).join(' · ')}</p>`:''}</section>`;
   let tot={k:0,p:0,f:0,c:0};
   h+=`</div><div class="tc2"><div class="h2c"><h2>План дня</h2>${S.grams?`<button class="ckbtn ${S.cooked?'on':''}" data-a="cooked" aria-pressed="${!!S.cooked}" aria-label="Вес в готовом виде" title="Вес в готовом виде">${ICONS.pot}</button>`:''}</div><ul class="tl">`;
   // еда вне плана, добавленная через «+» у приёма, показывается внутри этого приёма
@@ -407,7 +420,8 @@ function mealPanel(dk,m){
   return h}
 function mealTag(m){const r=m.rec||m.dish;return r?`<div class="rtag">${esc(RECBY[r][1])}</div>`:m.meth&&m.meth!=='pan'?(()=>{const main=m.items.find(i=>METHODS[i.p]);const mt=main&&METHODS[main.p].find(x=>x[0]===m.meth);return mt?`<div class="rtag">${esc(cap(PR[main.p].s))}: ${esc(mt[1].toLowerCase())}</div>`:''})():''}
 function boughtFor(dk){const cs=cycleStart(pkey(dk));if(cs<=cycleStart(appNow()))return true;return Object.keys((S.chk||{})[dkey(cs)]||{}).length>=3}
-function guard(dk){return !boughtFor(dk)||confirm('Продукты на эту неделю уже куплены. Всё равно изменить?')}
+// спрашиваем только про будущую неделю, если в магазине уже отмечено ≥ 3 покупок; текущую неделю меняем без вопросов
+function guard(dk){const cs=cycleStart(pkey(dk));if(cs<=cycleStart(appNow()))return true;return !boughtFor(dk)||confirm('Продукты на эту неделю уже куплены. Всё равно изменить?')}
 function xForm(m){
   return `<section class="xf xfc" aria-label="Съел вне плана: ${SLOTS[m.slot]}">
   <select data-in="xpre" aria-label="Частое"><option value="">Частое ▾</option>${PRESETS.map((p,i)=>`<option value="${i}">${esc(p[0])} — ${p[2]} ккал</option>`).join('')}</select>
@@ -430,7 +444,7 @@ function weekSummary(){
 function dayOk(d){const k=dkey(d),pl=dayPlan(d).meals,ex=(S.extra||{})[k]||[],dn=pl.filter(m=>S.done[dk_(k,m.slot)]),skn=pl.filter(m=>(S.skip||{})[dk_(k,m.slot)]).length;
   let kc=0,p=0;dn.forEach(m=>{const x=macros(m.items);kc+=x.k;p+=x.p});ex.forEach(x=>{kc+=x.k||0;p+=x.p||0});
   const full=dn.length+skn>=pl.length-1||(dn.length>=3&&ex.length>0);return full&&kc>=NORM.k[0]-100&&kc<=NORM.k[1]+100&&p>=NORM.p[0]-10}
-function streak(){let n=0,d=pkey(dkey(appNow()));if(dayOk(d))n++;d=addDays(d,-1);for(let i=0;i<90;i++){if(!dayOk(d))break;n++;d=addDays(d,-1)}return n}
+function streak(){let n=0,d=pkey(dkey(appNow()));if(dayOk(d))n++;d=addDays(d,-1);for(let i=0;i<118;i++){if(!dayOk(d))break;n++;d=addDays(d,-1)}return n}
 function ring(v,max){const r=22,c=2*Math.PI*r,f=Math.min(1,v/max),over=v>max;return `<div class="ring" role="img" aria-label="Съедено ${r0(v)} из ${max} ккал"><svg viewBox="0 0 56 56" width="56" height="56"><circle cx="28" cy="28" r="${r}" class="rb"/><circle cx="28" cy="28" r="${r}" class="rf ${over?'over':''}" stroke-dasharray="${(c*f).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 28 28)"/></svg><span><b>${r0(v)}</b>ккал</span></div>`}
 function summaryCard(){const W=weekSummary();
   return `<section class="card sum"><h3>Итог недели</h3><div class="small muted">${fmtDate(W.from)} – ${fmtDate(W.to)} · считаются дни, где отмечены почти все приёмы</div>
@@ -456,6 +470,51 @@ function parseFree(t){const s=String(t||'').replace(/[`*_]/g,''),num=re=>{const 
 // вставил строку — поля формы заполняются сами, их можно поправить перед «OK»
 function fillFromLine(){const L=parseLines(X.line);if(L.length!==1||L[0].plan)return false;const e=L[0];Object.assign(X,{n:e.n,k:String(e.k),p:String(e.p||''),f:String(e.f||''),c:String(e.c||''),por:'1'});if(e.t)X.t=e.t;X.auto=1;
   [['xn','n'],['xk','k'],['xp','p'],['xf','f'],['xc','c'],['xpor','por']].forEach(([id,f])=>{const el=document.getElementById(id);if(el)el.value=X[f]});return true}
+/* ===== «Что дома» голосом или строкой ДОМА: от Claude ===== */
+// порядок важен: сначала более точные названия
+const HOME_WORDS=[['pbutter',/арахисов\S* паст/],['tunao',/тун(ец|ц)\S*.{0,12}масл/],['tunaw',/тун(ец|ц)/],['sardine',/сардин/],['corncan',/кукуруз\S*.{0,12}(банк|консерв)|(банк|консерв)\S*.{0,12}кукуруз/],['corn',/кукуруз|почат/],
+ ['glassnoodle',/стеклян|миен|фунчоз/],['eggnoodle',/яичн\S* лапш/],['ricenoodle',/лапш|фо\b/],['oats',/овсян|овес|овёс|геркулес/],['rice',/(^|[^а-я])рис(а|у|ом)?([^а-я]|$)/],
+ ['thigh',/бедр|бёдр/],['chicken',/кур(иц|ин|ятин)|грудк|филе/],['mince',/фарш/],['beef',/говя/],['pork',/свин/],['shrimp',/кревет/],['squid',/кальмар/],['fish',/рыб|тилапи|пангасиус|баса|basa/],
+ ['tofu',/тофу/],['egg',/яйц|яиц|яичк/],['yogurt',/йогурт/],['milk',/молок/],['protein',/протеин/],['creatine',/креатин/],['nuts',/орех|кешью|арахис/],
+ ['oil',/оливк\S* масл|масл\S* оливк|оливков/],['oilveg',/масл/],['salt',/(^|[^а-я])сол[ьи]/],['spice',/специ|приправ|куркум|паприк/],['garlic',/чеснок|лайм|лимон/],
+ ['sweet',/батат/],['potato',/картош|картоф/],['pumpkin',/тыкв/],['bread',/багет|хлеб|бань ?ми/],['broccoli',/брок+ол/],['cabbage',/капуст/],['carrot',/морков/],['greens',/шпинат|муонг|зелен/],
+ ['beans',/фасол/],['bokchoy',/бок.?чой|бокчой/],['onion',/(^|[^а-я])лук/],['bellpep',/перец|перц/],['tomato',/помидор|томат/],['cucumber',/огур/],['mushroom',/гриб/],
+ ['banana',/банан/],['apple',/яблок/],['mango',/манго/],['papaya',/папай/],['pineapple',/ананас/],['dragon',/дракон|питахай/],['watermelon',/арбуз/],['orange',/апельсин/],['veg',/овощ/]];
+const NUMW={'один':1,'одна':1,'одно':1,'два':2,'две':2,'три':3,'четыре':4,'пять':5,'шесть':6,'семь':7,'восемь':8,'девять':9,'десять':10,'одиннадцать':11,'двенадцать':12,'пятнадцать':15,'двадцать':20,'тридцать':30,'сто':100,'двести':200,'триста':300,'четыреста':400,'пятьсот':500,'шестьсот':600,'семьсот':700,'восемьсот':800,'девятьсот':900,'тысяча':1000,'тысячу':1000};
+const PIECE={sweet:200,potato:150,tomato:100,carrot:100,onion:100,broccoli:400,cabbage:800,bellpep:150,papaya:800,pineapple:900,dragon:400,watermelon:2000,pumpkin:600,tofu:300};
+function wordsNum(t){let total=0,found=false;t.split(/\s+/).forEach(w=>{if(NUMW[w]!=null){total+=NUMW[w];found=true}});return found?total:null}
+function parseHome(text){const res=[],bad=[];
+  String(text||'').replace(/^\s*ДОМА\s*:\s*/i,'').toLowerCase().replace(/ё/g,'е').replace(/(\d),(\d)/g,'$1.$2').split(/[,;\n]|\s+и\s+|\.\s/).map(x=>x.trim()).filter(Boolean).forEach(ch=>{
+    const hit=HOME_WORDS.find(([,re])=>re.test(ch));if(!hit){bad.push(ch);return}
+    const id=hit[0],p=PR[id];
+    if(p.bulk){const none=/(^|\s)(нет|ноль|0|кончил|закончил|пуст)/.test(ch);res.push({id,bulk:1,have:!none});return}
+    if(/(^|\s)(нет|ноль|кончил|закончил|пуст)/.test(ch)){res.push({id,q:0});return}
+    let n=null;const m=ch.match(/(\d+(?:[.,]\d+)?)/);if(m)n=parseNum(m[1]);else n=wordsNum(ch);
+    if(/литр/.test(ch)&&p.u==='г'){res.push({id,q:Math.round((n||(/пол\s*литр/.test(ch)?0.5:1))*1000)});return}
+    if(/пол\s*кило|полкило|пол\s*килограмм/.test(ch)){res.push({id,q:p.u==='шт'?Math.max(1,Math.round(500/(p.pg||100))):500});return}
+    if(n==null){if(/много|полно|есть/.test(ch)&&p.keep){res.push({id,q:p.u==='шт'?5:500,guess:1});return}bad.push(ch+' — сколько?');return}
+    const kg=/(кг|кило)/.test(ch),gr=/(^|\d|\s)(г|гр|грамм\S*)(\s|$)/.test(ch),pcs=/(шт|штук|бан|пач|упаков|кус)/.test(ch);
+    let q=n;if(kg)q=n*1000;
+    if(p.u==='шт'){if(kg||gr)q=Math.max(1,Math.round(q/(p.pg||100)))}
+    let guess=0;if(p.u!=='шт'&&!kg&&!gr&&(pcs||n<10)){q=n*(PIECE[id]||p.shop||100);guess=1}
+    res.push({id,q:Math.round(q),guess})});
+  const seen={};const out=res.reverse().filter(r=>seen[r.id]?false:(seen[r.id]=1)).reverse(); // один продукт — одна строка, последнее слово главное
+  return {res:out,bad}}
+let HP=null; // разобранная диктовка, ждёт подтверждения
+function homeSummary(L){const have=L.rows.filter(r=>r.q>0).map(r=>esc(r.p.s)+' '+leftText(r.p,r.q)),no=BULK.filter(id=>S.stock[id]).map(id=>esc(nameOf(PR[id]).replace(/:.*$/,'').toLowerCase()));
+  return (have.length?have.join(' · '):'ничего не внесено')+(no.length?` <span class="flag">· нет: ${no.join(', ')}</span>`:'')}
+function homePanel(L){const ck=L.ck;
+  let h=`<section class="card homec" id="homebox"><div class="bh"><h3>Что дома</h3>${S.homeAt?`<span class="small muted">${fmtDate(new Date(S.homeAt))}</span>`:''}</div>`;
+  if(!window._homeOpen){h+=`<div class="small">${homeSummary(L)}</div><div class="btns"><button class="btn sm pri" data-a="homeopen">🎤 Обновить</button></div></section>`;return h}
+  h+=`<p class="small muted" style="margin:2px 0 6px">Нажми 🎤 на клавиатуре и скажи, что есть: «курица 300 грамм, тунец в соку 5 банок, бананы 2, рис много, масла нет». Или вставь строку <b>ДОМА:</b> от Claude.</p>
+  <textarea id="hometext" rows="3" data-in="hometext" placeholder="курица 300 г, яйца 6, тунец в масле 3 банки, рис много">${esc(window._homeText||'')}</textarea>
+  <div class="btns"><button class="btn sm pri" data-a="homeparse">Разобрать</button><button class="btn sm ghost" data-a="homeclose">Отмена</button></div>`;
+  if(HP){h+=`<div class="ph">Понял так — проверь</div><ul class="list hp">${HP.res.map((r,i)=>{const p=PR[r.id],e=homeEntry(r.id,ck),was=p.bulk?(S.stock[r.id]?'нет':'есть'):(e&&e.q?leftText(p,e.q):'0');
+      const now=p.bulk?(r.have?'есть':'нет'):(r.q?leftText(p,r.q):'нет');return `<li><div class="grow"><div class="nm">${esc(cap(nameOf(p).replace(/:.*$/,'')))}${r.guess?' <span class="okc small">примерно</span>':''}</div><div class="sub">было: ${was}</div></div><b>${now}</b><button class="xdel" data-a="homedel" data-i="${i}" aria-label="Убрать">✕</button></li>`}).join('')}</ul>
+    ${HP.bad.length?`<div class="small flag" style="margin-top:6px">Не понял: «${HP.bad.map(esc).join('», «')}» — скажи иначе или поправь текст</div>`:''}
+    <label class="small chkl"><input type="checkbox" id="homeall" ${window._homeAll!==false?'checked':''} data-in="homeall"> Свежего, что не назвал (мясо, рыба, овощи, фрукты), дома нет</label>
+    <div class="btns"><button class="btn pri" data-a="homesave" ${HP.res.length?'':'disabled'}>Сохранить</button></div>`}
+  return h+`</section>`}
 function vShopMode(){
   const L=shopList(),ck=L.ck,C=S.chk[ck]||{};
   const items=L.rows.filter(r=>r.buy>0).map(r=>({id:r.id,n:nameOf(r.p),q:r.p.u==='шт'&&r.p.shop===10?r.buy+' шт':fq(r.buy,r.p.u),vi:r.p.vi,sec:r.p.sec}))
@@ -475,22 +534,24 @@ function vShop(){if(shopMode)return vShopMode();
   const nOn=items.filter(x=>C[x.id]).length;
   const unitLbl=p=>S.grams&&p.u==='г'?'в граммах':p.m&&!S.grams?'в '+{palm:'ладонях',cup:'чашках',ccup:'чашках',handful:'горстях',scoop:'ложках',tsp:'ложках'}[p.m]:'в штуках';
   // остатки
-  const lfn=L.rows.filter(r=>r.q>0).length,openLeft=(wd(new Date())===6||wd(new Date())===0)&&!Object.keys(lf).length;
+  const lfn=L.rows.filter(r=>r.q>0).length,openLeft=false;
   const sug=L.rows.filter(r=>r.extra&&r.home>0&&SWAPP.includes(r.id));
+  h+=homePanel(L);
   sug.forEach(r=>{h+=`<div class="card due small"><b>Дома есть: ${esc(r.p.s)} — ${leftText(r.p,r.home)}</b><div class="muted">В меню на ${fmtDate(cs)} – ${fmtDate(addDays(cs,6))} его нет.</div><div class="btns"><button class="btn sm pri" data-a="useup" data-p="${r.id}">Подставить в обеды и ужины</button></div></div>`});
-  h+=`<details class="card" id="leftbox" ${openLeft||window._openLeft?'open':''}><summary><b>Что осталось дома</b><span class="muted small">${lfn?'внесено: '+lfn:'вс вечером'}</span></summary>
+  let ex=''; // ручная правка и запасы — внизу, под списком
+  ex+=`<details class="card" id="leftbox" ${openLeft||window._openLeft?'open':''}><summary><b>Дома — поправить вручную</b><span class="muted small">${lfn?'внесено: '+lfn:''}</span></summary>
   <p class="small muted" style="margin-top:0">${S.grams?'Взвесь и впиши граммы, штучное — в штуках.':'Посчитай в тех же мерах.'} То, что съешь по плану до вторника, приложение вычтет само. Консервы и сухое помнятся и дальше.</p><ul class="list">`;
   L.rows.forEach(r=>{const p=r.p,q=r.q,g=S.grams&&p.u==='г';
     const val=q?(g?q:(p.m&&!S.grams?niceNum(q/p.mg).s:String(q).replace('.',','))):'0';
-    h+=`<li class="lrow"><div class="grow"><div class="nm">${esc(cap(p.s))}</div><div class="sub">${r.extra?'<span class="okc">в меню нет</span> · ':''}${unitLbl(p)}${q&&r.home<q?' · к вторнику останется '+leftText(p,r.home):''}</div></div>${g?`<div class="qty"><input class="gin" type="number" inputmode="numeric" min="0" step="10" data-in="leftg" data-p="${r.id}" value="${q||''}" placeholder="0" aria-label="${esc(p.s)}, граммов дома"><span class="small muted">г</span></div>`:`<div class="qty"><button data-a="left" data-p="${r.id}" data-v="-1" aria-label="Меньше: ${esc(p.s)}">−</button><b>${val}</b><button data-a="left" data-p="${r.id}" data-v="1" aria-label="Больше: ${esc(p.s)}">+</button></div>`}</li>`});
+    ex+=`<li class="lrow"><div class="grow"><div class="nm">${esc(cap(p.s))}</div><div class="sub">${r.extra?'<span class="okc">в меню нет</span> · ':''}${unitLbl(p)}${q&&r.home<q?' · к вторнику останется '+leftText(p,r.home):''}</div></div>${g?`<div class="qty"><input class="gin" type="number" inputmode="numeric" min="0" step="10" data-in="leftg" data-p="${r.id}" value="${q||''}" placeholder="0" aria-label="${esc(p.s)}, граммов дома"><span class="small muted">г</span></div>`:`<div class="qty"><button data-a="left" data-p="${r.id}" data-v="-1" aria-label="Меньше: ${esc(p.s)}">−</button><b>${val}</b><button data-a="left" data-p="${r.id}" data-v="1" aria-label="Больше: ${esc(p.s)}">+</button></div>`}</li>`});
   const shown=new Set(L.rows.map(r=>r.id)),addable=SECS.map(([sec,t])=>[t,Object.keys(PR).filter(id=>PR[id].sec===sec&&!PR[id].bulk&&!shown.has(id))]).filter(x=>x[1].length);
-  h+=`</ul><div class="field" style="margin-top:6px"><label for="leftadd">+ Добавить продукт</label><select id="leftadd" data-in="leftadd"><option value="">— выбрать —</option>${addable.map(([t,ids])=>`<optgroup label="${esc(t)}">${ids.map(id=>`<option value="${id}">${esc(nameOf(PR[id]))}</option>`).join('')}</optgroup>`).join('')}</select></div>
+  ex+=`</ul><div class="field" style="margin-top:6px"><label for="leftadd">+ Добавить продукт</label><select id="leftadd" data-in="leftadd"><option value="">— выбрать —</option>${addable.map(([t,ids])=>`<optgroup label="${esc(t)}">${ids.map(id=>`<option value="${id}">${esc(nameOf(PR[id]))}</option>`).join('')}</optgroup>`).join('')}</select></div>
   <div class="btns"><a class="btn" href="${gcal('🧺 Рацион: остатки и меню',6,'21:45','1) Покупки → Что осталось дома. 2) Меню → нажми день следующей недели → проверь и нажми «Меню ок».')}" target="_blank" rel="noopener">Напоминание по воскресеньям</a></div></details>`;
   // запасы
-  h+=`<details class="card buy" ${window._openBulk?'open':''} id="bulkbox"><summary><b>Запасы</b><span class="muted small">${(n=>n?'нет дома: '+n:'всё есть')(BULK.filter(id=>S.stock[id]).length)}</span></summary><p class="small muted" style="margin-top:0">Отметки запоминаются. «Нет» — продукт попадёт в список покупок. Отметишь в магазине «Куплено» — сам вернётся на «Есть».</p><ul class="list">`;
+  ex+=`<details class="card buy" ${window._openBulk?'open':''} id="bulkbox"><summary><b>Запасы</b><span class="muted small">${(n=>n?'нет дома: '+n:'всё есть')(BULK.filter(id=>S.stock[id]).length)}</span></summary><p class="small muted" style="margin-top:0">Отметки запоминаются. «Нет» — продукт попадёт в список покупок. Отметишь в магазине «Куплено» — сам вернётся на «Есть».</p><ul class="list">`;
   BULK.forEach(id=>{const p=PR[id],on=!!S.stock[id],wk=L.need[id];
-    h+=`<li class="brow"><div class="bh"><span class="nm">${esc(nameOf(p).replace(/:.*$/,''))}</span><div class="tog"><button data-a="bulk" data-p="${id}" data-v="0" class="${on?'':'on'}">Есть</button><button data-a="bulk" data-p="${id}" data-v="1" class="${on?'on b':''}">Нет</button></div></div><ul class="notes">${wk?`<li>В неделю ≈ ${fq(wk,p.u)}${p.m&&!S.grams?' ('+fmtMeasure(wk/p.mg,p.m)+')':''}</li>`:''}${p.n.includes(':')?`<li>${esc(cap(p.n.split(':')[1].trim()))}</li>`:''}<li>Покупать: ${esc(p.bulk)}</li>${id==='protein'?'<li>В GO! обычно нет</li>':''}</ul></li>`});
-  h+=`</ul></details>`;
+    ex+=`<li class="brow"><div class="bh"><span class="nm">${esc(nameOf(p).replace(/:.*$/,''))}</span><div class="tog"><button data-a="bulk" data-p="${id}" data-v="0" class="${on?'':'on'}">Есть</button><button data-a="bulk" data-p="${id}" data-v="1" class="${on?'on b':''}">Нет</button></div></div><ul class="notes">${wk?`<li>В неделю ≈ ${fq(wk,p.u)}${p.m&&!S.grams?' ('+fmtMeasure(wk/p.mg,p.m)+')':''}</li>`:''}${p.n.includes(':')?`<li>${esc(cap(p.n.split(':')[1].trim()))}</li>`:''}<li>Покупать: ${esc(p.bulk)}</li>${id==='protein'?'<li>В GO! обычно нет</li>':''}</ul></li>`});
+  ex+=`</ul></details>`;
   // список
   const priceLi=(id,c)=>`<li>≈ <button class="link pr" data-a="price" data-p="${id}" aria-label="Цена: ${esc(nameOf(PR[id]))}">${vnd(c)}</button> <span>(${vnd(priceOf(id))} ${priceUnit(id)}${(S.price||{})[id]!=null?', из чека':''})</span></li>`;
   const row=(id,on,name,qty,notes)=>`<li class="srow ${on?'bought':''}"><button class="cb ${on?'on':''} ${popKey==='s_'+id?'pop':''}" data-a="chk" data-p="${id}" aria-pressed="${on}" aria-label="Куплено: ${esc(name)}">${on?'✓':''}</button><div class="grow"><div class="rt"><span class="nm">${esc(name)}</span><b class="q">${qty}</b></div>${notes}</div></li>`;
@@ -509,7 +570,7 @@ function vShop(){if(shopMode)return vShopMode();
   if(L.bulk.length)h+=`<div class="cat">Крупы, орехи, масло, специи</div><ul class="list">${L.bulk.map(id=>{const p=PR[id];return row(id,!!C[id],nameOf(p).replace(/:.*$/,''),esc(p.bulk),`<ul class="notes"><li>На ценнике: <b>${esc(p.vi)}</b></li>${p.pk?`<li>${esc(p.pk)}</li>`:''}${priceLi(id,costOf(id))}</ul>`)}).join('')}</ul>`;
   if(items.length){const T=shopCost(L),over=T.go>1000000;h+=`<div class="tot"><div class="tl1"><span>Примерно в GO!</span><b class="${over?'flag':''}">${vnd(T.go)}</b></div><div class="small muted">Бюджет 600 000–1 000 000 ₫${T.sp?` · спортпит отдельно ≈ ${vnd(T.sp)}`:''}. Цены примерные — нажми на цену у продукта и впиши из чека.</div></div>`}
   if(nOn)h+=`<div class="btns"><button class="btn ghost" data-a="chkreset">Снять все галочки</button></div>`;
-  h+=`</section><section class="card small"><h3>В GO!</h3><ul class="notes"><li>Список идёт примерно по залу: овощи и фрукты, мясо, рыба, яйца и тофу, потом крупы и специи</li><li>Если нужного нет: бёдра ↔ филе, рыба ↔ креветки, свинина ↔ курица</li></ul></section><section class="card small"><h3>После закупки</h3><ul class="notes"><li>Мясо и рыбу на Чт–Пн разложи по пакетам порциями и убери в морозилку</li><li>На Вт и Ср — в холодильник</li><li>Что разморозить на завтра, приложение напомнит вечером</li></ul></section>`;
+  h+=`</section>`+ex+`<section class="card small"><h3>В GO!</h3><ul class="notes"><li>Список идёт примерно по залу: овощи и фрукты, мясо, рыба, яйца и тофу, потом крупы и специи</li><li>Если нужного нет: бёдра ↔ филе, рыба ↔ креветки, свинина ↔ курица</li></ul></section><section class="card small"><h3>После закупки</h3><ul class="notes"><li>Мясо и рыбу на Чт–Пн разложи по пакетам порциями и убери в морозилку</li><li>На Вт и Ср — в холодильник</li><li>Что разморозить на завтра, приложение напомнит вечером</li></ul></section>`;
   return h;
 }
 const kg=v=>String(Math.round(v*10)/10).replace('.',',');
@@ -560,10 +621,18 @@ const A={
   pick:d=>{viewDate=d.v;xOpen=''},
   cyc:d=>{xOpen='';viewDate=dkey(addDays(cycleStart(pkey(viewDate)),Number(d.v)))},
   eat:d=>{const k=dk_(viewDate,d.s);if(S.done[k])delete S.done[k];else{S.done[k]=1;if(S.skip)delete S.skip[k];popKey=k;buzz()}
-    const cut=dkey(addDays(appNow(),-30));Object.keys(S.done).forEach(x=>{if(x<cut)delete S.done[x]});save()},
+    const cut=dkey(addDays(appNow(),-120));Object.keys(S.done).forEach(x=>{if(x<cut)delete S.done[x]});save()},
   goleft:()=>{tab='shop';window._openLeft=true},
   left:d=>{const p=PR[d.p],e=homeEntry(d.p,dkey(shopCycle())),cur=(e&&e.q)||0,q=Math.max(0,Math.round((cur+Number(d.v)*leftStep(p))*10)/10);
     setHome(d.p,q);window._openLeft=true;clean();save()},
+  homeopen:()=>{window._homeOpen=true;HP=null;setTimeout(()=>{const t=document.getElementById('hometext');t&&t.focus()},50)},
+  homeclose:()=>{window._homeOpen=false;HP=null},
+  homeparse:()=>{const t=document.getElementById('hometext');window._homeText=t?t.value:'';HP=parseHome(window._homeText);if(!HP.res.length)toast('Не нашёл продуктов — скажи, например: «курица 300 грамм, бананы 2»')},
+  homedel:d=>{if(HP)HP.res.splice(+d.i,1)},
+  homesave:()=>{if(!HP)return true;const ck=dkey(shopCycle());
+    if(window._homeAll!==false)S.left[ck]={}; // свежее — полный список заново
+    HP.res.forEach(r=>{if(PR[r.id].bulk){if(r.have)delete S.stock[r.id];else S.stock[r.id]=1}else setHome(r.id,r.q)});
+    S.homeAt=Date.now();window._homeOpen=false;window._homeText='';const n=HP.res.length;HP=null;clean();save();toast('Сохранил: '+n+' '+plural(n,['продукт','продукта','продуктов'])+' — список покупок пересчитан')},
   useup:d=>{const id=d.p,cs=shopCycle(),r=shopList().rows.find(x=>x.id===id);let left=r?r.home:0,n=0;S.swaps=S.swaps||{};
     for(let i=0;i<7&&left>0;i++){const day=addDays(cs,i),slot=i%2?'dinner':'lunch',k=dkey(day)+'|'+slot;if(S.swaps[k]||(S.edits||{})[k]||(S.rec||{})[k])continue;
       const m=dayPlan(day).meals.find(x=>x.slot===slot),main=m&&m.items.find(x=>SWAPP.includes(x.p));if(!main||main.p===id)continue;
@@ -638,7 +707,7 @@ const A={
   updcheck:()=>{checkUpdate(true);return true}
 };
 function buzz(){try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}}
-function cleanOld(){const cut=dkey(addDays(appNow(),-60));['skip','edits','rec','meth','dswap'].forEach(n=>Object.keys(S[n]||{}).forEach(k=>{if(k<cut)delete S[n][k]}));Object.keys(S.swaps).forEach(k=>{if(k<cut)delete S.swaps[k]});Object.keys(S.extra).forEach(k=>{if(k<cut)delete S.extra[k]})}
+function cleanOld(){const cut=dkey(addDays(appNow(),-120));['skip','edits','rec','meth','dswap'].forEach(n=>Object.keys(S[n]||{}).forEach(k=>{if(k<cut)delete S[n][k]}));Object.keys(S.swaps).forEach(k=>{if(k<cut)delete S.swaps[k]});Object.keys(S.extra).forEach(k=>{if(k<cut)delete S.extra[k]})}
 function clean(){const keep=dkey(addDays(shopCycle(),-14));['left','bulk','chk'].forEach(n=>Object.keys(S[n]).forEach(k=>{if(k<keep)delete S[n][k]}))}
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-a]');if(!el)return;const fn=A[el.dataset.a];if(!fn)return;
@@ -649,7 +718,7 @@ document.addEventListener('touchstart',e=>{if(tab!=='today'||e.touches.length!==
 document.addEventListener('touchend',e=>{if(!tsok)return;tsok=false;const t=e.changedTouches[0],dx=t.clientX-tsx,dy=t.clientY-tsy;
   if(Math.abs(dx)>70&&Math.abs(dy)<Math.abs(dx)*0.5){viewDate=dkey(addDays(pkey(viewDate),dx<0?1:-1));editOpen='';xOpen='';const app=document.getElementById('app');app.classList.remove('sl','sr');render();void app.offsetWidth;app.classList.add(dx<0?'sl':'sr')}},{passive:true});
 document.addEventListener('toggle',e=>{if(e.target.id&&e.target.id.startsWith('mo-'))moreOpen[e.target.id.slice(3)]=e.target.open;if(e.target.id==='wkbox')window._openWk=e.target.open;if(e.target.id==='xmore')X.more=e.target.open;if(e.target.id==='leftbox')window._openLeft=e.target.open;if(e.target.id==='bulkbox')window._openBulk=e.target.open},true);
-document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset.in;if(k==='xf'){X[el.dataset.k]=el.value;if(el.dataset.k==='line')fillFromLine()}
+document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset.in;if(k==='hometext')window._homeText=el.value;if(k==='homeall')window._homeAll=el.checked;if(k==='xf'){X[el.dataset.k]=el.value;if(el.dataset.k==='line')fillFromLine()}
   if(k==='recsel'){const dk=el.dataset.d,key=dk+'|'+el.dataset.s;if(!guard(dk)){render();return}S.rec=S.rec||{};if(el.value)S.rec[key]=el.value;else delete S.rec[key];delete S.edits[key];delete S.swaps[key];ED=null;save();render();toast(el.value?'Блюдо: '+RECBY[el.value][1]:'По плану')}
   if(k==='edg'&&ED){ED.items[+el.dataset.i][1]=Math.max(0,parseNum(el.value))}
   if(k==='edadd'&&ED&&el.value){const p=PR[el.value];ED.items.push([el.value,p.u==='шт'?1:(el.value==='oil'?5:el.value==='protein'?30:100)]);render()}
