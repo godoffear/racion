@@ -1,4 +1,4 @@
-const APP_VERSION='5.2.1';
+const APP_VERSION='5.3';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -83,7 +83,7 @@ const BULK=['rice','oats','protein','creatine','nuts','oil','oilveg','salt','spi
 const WEEKS=__WEEKS__;
 const OLD_WEEKS=__OLDWEEKS__; // меню до 4.9 — только для недель до EPOCH, где Андрей выбрал «Меню N» вручную
 const TIMES={pre:'09:30',bf_S:'11:30',bf_W:'10:00',bf_R:'10:00',lunch:'16:00',snack:'19:30',dinner:'22:30',late:'00:30'};
-const NORM={k:[1900,2000],p:[160,180],f:[55,65],c:[120,150]};
+const NORM={k:[1900,2000],p:[190,205],f:[55,60],c:[120,145]}; // с 6 окт 2026: больше белка — набор мышц на дефиците
 const LEGACY=[["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["thigh",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["shrimp",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1],["creatine",5]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["squid",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["fish",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["chicken",200],["veg",200],["oil",5]]],["late",[["tofu",150]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1],["creatine",5]]],["lunch",[["shrimp",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["banana",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["R",[["bf",[["egg",4],["oats",60],["banana",1],["creatine",5]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",150]]]]]]; // базовое меню, по которому была закупка до 6 окт
 // разовые замены приёмов по датам: {дата:{приём:[[продукт,кол-во],...]}}
 const OVERRIDES={

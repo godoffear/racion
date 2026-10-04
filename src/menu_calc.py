@@ -50,9 +50,9 @@ def check(menus, quiet=False):
             k, p, f, c = (round(v) for v in t)
             warn = []
             if not 1880 <= k <= 2000: warn.append('ккал')
-            if not 160 <= p <= 190: warn.append('белок')
-            if not 52 <= f <= 67: warn.append('жиры')
-            if not 115 <= c <= 152: warn.append('углеводы')
+            if not 188 <= p <= 208: warn.append('белок')
+            if not 52 <= f <= 62: warn.append('жиры')
+            if not 115 <= c <= 148: warn.append('углеводы')
             bad += bool(warn)
             if not quiet:
                 dishes = ', '.join(m[2] for m in meals if len(m) > 2)
