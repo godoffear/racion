@@ -450,7 +450,7 @@ nav.tabs button{min-width:0;font-size:.7rem}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='5.6.2';
+const APP_VERSION='5.6.3';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -1137,7 +1137,7 @@ function vWeight(){
   <ul class="list rem">${REM.map(([t,time,days,lbl,cook])=>`<li><div class="grow"><div class="nm">${cook?'🍳':'🍽'} ${t} · ${time}</div><div class="sub">${lbl}</div></div><a class="btn sm" href="${gcal((cook?'🍳 ':'🍽 ')+t+' — открой Рацион',days,time,(cook?'Через 30 минут '+t.toLowerCase()+' — начинай готовить. ':'')+'Что есть и сколько — в приложении «Рацион».')}" target="_blank" rel="noopener">Добавить</a></li>`).join('')}</ul>
   <p class="small muted" style="margin-bottom:0">Нет уведомлений? Настройки телефона → Приложения → Календарь → Батарея → «Без ограничений», и проверь, что уведомления Календаря включены.</p>`)}
   ${sec('b','Копия данных',S.lastBackup?(backupAge()>30?'<span class="flag">пора сохранить</span>':'сохранена '+fmtDate(new Date(S.lastBackup))):'ещё не делал',`<div class="small muted">Вес, калипер, отметки и правки меню хранятся только в Chrome на этом телефоне. Раз в месяц сохраняй копию — файл попадёт в «Загрузки». При смене телефона или очистке браузера загрузи её обратно.</div>
-  <div class="btns"><button class="btn pri" data-a="bsave">Сохранить копию</button><label class="btn" for="bload">Загрузить копию</label><input id="bload" type="file" accept=".json,application/json" hidden data-in="bload"></div>`)}
+  <div class="btns"><button class="btn pri" data-a="bsave">Сохранить копию</button><label class="btn" for="bload">Загрузить копию</label><input id="bload" type="file" hidden data-in="bload"></div>`)}
   ${sec('o','Настройки','',`<div class="ph">Порции</div><div class="tog" style="width:max-content"><button data-a="grams" data-v="0" class="${S.grams?'':'on'}">Ладони и чашки</button><button data-a="grams" data-v="1" class="${S.grams?'on':''}">Граммы</button></div>
   <div class="small muted" style="margin-top:14px">Рацион ${APP_VERSION} · работает без интернета.<br>${sa?'':'Установить: Chrome → ⋮ → «Установить приложение». '}<button class="link" data-a="updcheck">Проверить обновление</button></div>`)}`;
 }
@@ -1261,7 +1261,7 @@ document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset
   if(k==='edadd'&&ED&&el.value){const p=PR[el.value];ED.items.push([el.value,p.u==='шт'?1:(el.value==='oil'?5:el.value==='protein'?30:100)]);render()}
   if(k==='xpre'&&el.value!==''){const p=PRESETS[+el.value];Object.assign(X,{n:p[0]+' ('+p[1]+')',k:String(p[2]),p:String(p[3]),f:String(p[4]),c:String(p[5])});render()}});
 document.addEventListener('change',e=>{const el=e.target;
-  if(el.dataset&&el.dataset.in==='bload'){const f=el.files&&el.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x||typeof x!=='object'||!('done' in x))throw 0;if(!confirm('Заменить текущие данные копией?'))return;S=Object.assign(def(),x);migrate();save();render();toast('Копия загружена')}catch(_){toast('Это не копия «Рациона»')}};r.readAsText(f);return}if(el.dataset&&el.dataset.in==='edg'){render();return}if(el.dataset&&el.dataset.in==='leftg'){setHome(el.dataset.p,Math.max(0,Math.round(parseNum(el.value))));window._openLeft=true;clean();save();render()}
+  if(el.dataset&&el.dataset.in==='bload'){filePick=0;const f=el.files&&el.files[0];el.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x||typeof x!=='object'||!('done' in x))throw 0;if(!confirm('Заменить текущие данные копией?'))return;S=Object.assign(def(),x);migrate();save();render();toast('Копия загружена')}catch(_){toast('Это не копия «Рациона»')}};r.readAsText(f);return}if(el.dataset&&el.dataset.in==='edg'){render();return}if(el.dataset&&el.dataset.in==='leftg'){setHome(el.dataset.p,Math.max(0,Math.round(parseNum(el.value))));window._openLeft=true;clean();save();render()}
   if(el.dataset&&el.dataset.in==='leftadd'&&el.value){const p=PR[el.value];setHome(el.value,p.u==='шт'?1:p.shop||100);window._openLeft=true;save();render();toast('Добавлено: '+p.s+' — поправь количество')}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='w-in'){A.wsave();render()}});
 
@@ -1279,7 +1279,8 @@ async function doUpdate(){
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 // 5.6.1: при возврате перечитываем хранилище — Тренер мог записать вес (тот же сайт, тот же localStorage)
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){try{S=Object.assign(def(),JSON.parse(localStorage.getItem(LS)||'null')||{});migrate()}catch(e){}if(shopMode&&navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{});if(tab==='today')viewDate=dkey(appNow());if(!document.activeElement.matches('input,textarea,select'))render()}});
+let filePick=0;document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('label[for=bload],#bload'))filePick=Date.now()},true);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(Date.now()-filePick<600000)return;try{S=Object.assign(def(),JSON.parse(localStorage.getItem(LS)||'null')||{});migrate()}catch(e){}if(shopMode&&navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{});if(tab==='today')viewDate=dkey(appNow());if(!document.activeElement.matches('input,textarea,select'))render()}});
 setInterval(()=>{if(tab==='today'&&!document.activeElement.matches('input,textarea,select'))render()},60000);
 setTimeout(()=>checkUpdate(false),2000);
 seedHome();
