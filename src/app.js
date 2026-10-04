@@ -1,4 +1,4 @@
-const APP_VERSION='5.6';
+const APP_VERSION='5.6.1';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -826,7 +826,8 @@ async function doUpdate(){
 }
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(shopMode&&navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{});if(tab==='today')viewDate=dkey(appNow());if(!document.activeElement.matches('input,textarea,select'))render()}});
+// 5.6.1: при возврате перечитываем хранилище — Тренер мог записать вес (тот же сайт, тот же localStorage)
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){try{S=Object.assign(def(),JSON.parse(localStorage.getItem(LS)||'null')||{});migrate()}catch(e){}if(shopMode&&navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{});if(tab==='today')viewDate=dkey(appNow());if(!document.activeElement.matches('input,textarea,select'))render()}});
 setInterval(()=>{if(tab==='today'&&!document.activeElement.matches('input,textarea,select'))render()},60000);
 setTimeout(()=>checkUpdate(false),2000);
 seedHome();
