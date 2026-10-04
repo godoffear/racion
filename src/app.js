@@ -738,7 +738,7 @@ const A={
   csave:()=>{const b=parseNum(document.getElementById('c-b').value),sd=parseNum(document.getElementById('c-s').value);if(!(b>0&&b<100)){toast('Впиши число с калипера, например 15');return true}
     const k=dkey(new Date());S.cal=(S.cal||[]).filter(x=>x.d!==k);S.cal.push({d:k,b:Math.round(b*10)/10,s:sd>0&&sd<100?Math.round(sd*10)/10:null});moreOpen.c=true;save();toast('Замер записан')},
   cdel:d=>{if(!confirm('Удалить замер?'))return true;S.cal=(S.cal||[]).filter(x=>x.d!==d.v);save()},
-  bsave:()=>{S.lastBackup=Date.now();save();const b=new Blob([JSON.stringify(S)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='racion-kopiya-'+dkey(new Date())+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);moreOpen.b=true;toast('Копия сохранена в «Загрузки»')},
+  bsave:()=>{S.lastBackup=Date.now();save();const b=new Blob([JSON.stringify(S)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='Рацион_'+(d=>dkey(d)+'_'+String(d.getHours()).padStart(2,'0')+'-'+String(d.getMinutes()).padStart(2,'0'))(new Date())+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);moreOpen.b=true;toast('Копия сохранена в «Загрузки»')},
   xpand:d=>{if(openDone.has(d.v))openDone.delete(d.v);else openDone.add(d.v)},
   skip:d=>{const k=dk_(viewDate,d.s);S.skip=S.skip||{};if(S.skip[k])delete S.skip[k];else{S.skip[k]=1;delete S.done[k]}save()},
   editopen:d=>{const k=(d.d||viewDate)+'|'+d.s;editOpen=editOpen===k?'':k;ED=null;swapAll=false},
