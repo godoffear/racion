@@ -1,4 +1,4 @@
-const APP_VERSION='5.5';
+const APP_VERSION='5.5.1';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -648,6 +648,7 @@ function vShop(){if(shopMode)return vShopMode();
   const its=L.rows.filter(r=>r.buy>0).map(r=>({id:r.id,n:nameOf(r.p),q:r.p.u==='шт'&&r.p.shop===10?r.buy+' шт':fq(r.buy,r.p.u),vi:(r.p.vi||'').split(' (')[0],sec:r.p.sec})).concat(L.bulk.map(id=>({id,n:nameOf(PR[id]).replace(/:.*$/,''),q:PR[id].bulk,vi:(PR[id].vi||'').split(' (')[0],sec:'zz'})));
   const T=shopCost(L),nOn2=its.filter(x=>C[x.id]).length;
   let sl=`<section class="card"><div class="bh"><h3>Купить${its.length?` · ${nOn2} из ${its.length}`:''}</h3><span class="small muted">≈ ${vnd(T.go)}</span></div>${its.length?`<div class="prog"><i style="width:${nOn2/its.length*100}%"></i></div>`:'<p class="small muted">Всё есть, покупать нечего.</p>'}`;
+  if(its.length)sl+=`<button class="btn pri wide2" data-a="shopmode" style="margin:10px 0 4px">🛒 В магазине — экран не гаснет</button>`;
   SECS.concat([['zz','Запасы']]).forEach(([sec,t])=>{const g=its.filter(x=>x.sec===sec);if(g.length)sl+=`<div class="cat">${t}</div><ul class="smlist">${g.map(li).join('')}</ul>`});
   sl+=`${T.sp?`<div class="small muted">Спортпит отдельно ≈ ${vnd(T.sp)}</div>`:''}${nOn2?`<div class="btns"><button class="btn ghost sm" data-a="chkreset">Снять галочки</button></div>`:''}</section>`;
   return H0+AD+sl+more;
