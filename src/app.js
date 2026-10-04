@@ -1,4 +1,4 @@
-const APP_VERSION='5.4';
+const APP_VERSION='5.5';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -89,8 +89,17 @@ const LEGACY=[["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["o
 // разовые замены приёмов по датам: {дата:{приём:[[продукт,кол-во],...]}}
 const OVERRIDES={
  '2026-09-30':{dinner:[['squid',200],['veg',200],['oil',5]]},
- '2026-10-01':{dinner:[['fish',200],['veg',200],['oil',5]]}
+ '2026-10-01':{dinner:[['fish',200],['veg',200],['oil',5]]},
+ // неделя 6–12 окт собрана из того, что дома 4 окт: бёдра по одному приёму в день и без масла, кальмар и рыба — к креветкам
+ '2026-10-06':{dinner:[['shrimp',200],['squid',100],['broccoli',200],['oil',5],['kimchi',100]]},
+ '2026-10-07':{lunch:[['thigh',220],['ricenoodle',40],['greens',100],['cucumber',1],['kimchi',150]],dinner:[['chicken',260],['tomato',100],['veg',150]]},
+ '2026-10-08':{dinner:[['thigh',200],['greens',250],['kimchi',100]]},
+ '2026-10-10':{dinner:[['thigh',200],['bellpep',150],['onion',50],['kimchi',100]]},
+ '2026-10-11':{dinner:[['thigh',220],['tomato',200],['onion',50],['kimchi',100]]},
+ '2026-10-12':{lunch:[['chicken',80],['tofu',150],['potato',170],['cabbage',150],['oil',5],['kimchi',150]],dinner:[['fish',133],['shrimp',140],['tomato',200],['veg',100]],late:[['tunao',1],['tomato',100]]}
 };
+// что было дома 4 окт — заносим один раз, чтобы список покупок на 6–12 окт сразу был верным
+const HOME_SEED={ck:'2026-10-06',at:new Date(2026,9,4,21).getTime(),line:'ДОМА: орехи 234 г; протеин много; креатин есть; специи есть; овсянка много; тунец в соку 4 банки; тунец в масле 4 банки; чеснок 427 г; помидоры 520 г; оливковое масло есть; растительное масло есть; соль есть; яблоки 2; огурцы 3; лук 1,2 кг; вареных яиц 13; кимчи 1 кг; тофу 900 г; креветки 520 г; кальмар 100 г; рыба 133 г; куриное филе 1340 г; бедра 1035 г; вареного риса 600 г'};
 const SWAPP=['chicken','thigh','fish','shrimp','squid','pork','beef','mince','tunaw','tunao','sardine','tofu'];
 // Блюда: [id, название, приёмы, продукты, шаги]. В menus.json приём может ссылаться на блюдо третьим элементом
 const RECIPES=[
@@ -148,8 +157,8 @@ const METHODS={
  pork:[['pan','Сковорода',''],['stew','Тушёная','Свинина тушёная с овощами: под крышкой 15 мин']],
  tofu:[['pan','Обжарить',''],['cold','Без жарки','Тофу кубиками, соль, перец, чили — без жарки'],['soup','В суп','Тофу в суп с овощами на 3 мин']]};
 const PRESETS=[['Чипсы, пачка 50 г','Snack khoai tây',270,3,17,26],['Печенье, 3 шт','Bánh quy',160,2,7,24],['Мороженое, рожок','Kem ốc quế',250,4,12,30],['Шоколадный батончик','Thanh socola',230,3,11,30],['Кофе со сгущёнкой и льдом','Cà phê sữa đá',150,2,4,26],['Чёрный кофе','Cà phê đen',5,0,0,1],['Кокосовая вода','Nước dừa',60,1,0,14],['Фруктовый смузи','Sinh tố',220,3,5,40],['Молочный чай с тапиокой','Trà sữa',350,3,8,65],['Сок сахарного тростника','Nước mía',180,0,0,45],['Багет с мясом','Bánh mì thịt',450,18,16,55],['Суп фо с говядиной','Phở bò',450,25,10,60],['Суп фо с курицей','Phở gà',400,24,8,58],['Свинина на гриле с лапшой','Bún chả',550,25,20,65],['Острый суп с говядиной','Bún bò Huế',500,28,14,60],['Рис со свининой на гриле','Cơm tấm',650,28,22,80],['Рис с курицей','Cơm gà',600,30,18,75],['Столовая: рис и 2–3 добавки','Cơm bình dân',650,25,22,85],['Свежие роллы с креветкой, 2 шт','Gỏi cuốn',180,10,3,28],['Жареные спринг-роллы, 3 шт','Chả giò',300,9,18,26],['Клейкий рис с добавками','Xôi',400,8,8,72],['Варёное яйцо, 1 шт','Trứng luộc',78,6,5,0],['Пиво, банка 330 мл','Bia',145,1,0,12],['Кола, банка 330 мл','Coca',140,0,0,35]];
-// замена белка: при разных единицах (граммы ↔ банки) пересчёт по белку, иначе количество то же
-function swapQ(from,q,to){const a=PR[from],b=PR[to];if(!a||!b||a.u===b.u)return q;const pr=a.p*(a.u==='шт'?q*a.pg:q)/100;
+// замена белка — всегда по количеству белка (тофу вместо курицы — больше граммов), граммы ↔ банки тоже
+function swapQ(from,q,to){const a=PR[from],b=PR[to];if(!a||!b||from===to)return q;if(a.u==='г'&&b.u==='г')return Math.min(q*2,Math.max(10,Math.round(q*a.p/b.p/10)*10));if(a.u===b.u)return q;const pr=a.p*(a.u==='шт'?q*a.pg:q)/100;
   return b.u==="шт"?Math.max(1,Math.round(pr/(b.p*b.pg/100)+0.2)):Math.max(10,Math.round(pr/b.p*100/10)*10)}
 // «из дома в меню»: чем можно заменить продукт в приёме, чтобы съесть остатки
 const UVEG=['broccoli','cabbage','carrot','greens','beans','bokchoy','bellpep','mushroom','tomato','pumpkin'],UFRUIT=['apple','banana','orange','mango','papaya','pineapple','dragon','watermelon'],UCARB=['rice','ricenoodle','glassnoodle','eggnoodle','potato','sweet','bread','corn','corncan'];
@@ -548,6 +557,14 @@ function parseHome(text){const res=[],bad=[];
   const seen={},key=r=>r.id+(r.boiled?'b':'')+(r.cooked?'c':'');const out=res.reverse().filter(r=>seen[key(r)]?false:(seen[key(r)]=1)).reverse(); // один продукт — одна строка, последнее слово главное
   return {res:out,bad}}
 let HP=null; // разобранная диктовка, ждёт подтверждения
+function applyHome(res,now,all,ck){if(all)S.left[ck]={}; // свежее — полный список заново
+  const eggs=res.filter(r=>r.id==='egg'),boil=eggs.find(r=>r.boiled),raw=eggs.find(r=>!r.boiled);
+  if(boil||all)S.boiled={q:boil?boil.q:0,at:now}; // вареные яйца — для заготовок (в холодильнике место под 20)
+  if(eggs.length)setHomeAt('egg',(boil?boil.q:0)+(raw?raw.q:0),now,ck);
+  res.forEach(r=>{if(r.id==='egg')return;if(r.cooked){S.riceBank={q:Math.round(r.q/2.8),at:now};return}if(PR[r.id].bulk){if(r.have)delete S.stock[r.id];else S.stock[r.id]=1}else setHomeAt(r.id,r.q,now,ck)});
+  S.homeFor=ck;S.homeAt=now}
+function setHomeAt(id,q,at,ck){const B=PR[id].keep?(S.pantry=S.pantry||{}):(S.left[ck]=S.left[ck]||{});if(q>0)B[id]={q,at};else delete B[id]}
+function seedHome(){try{if(S.seed1||S.homeFor===HOME_SEED.ck||dkey(shopCycle())!==HOME_SEED.ck)return;applyHome(parseHome(HOME_SEED.line).res,HOME_SEED.at,true,HOME_SEED.ck);S.adaptOff=S.adaptOff||{};S.adaptOff[HOME_SEED.ck]=HOME_SEED.at;S.seed1=1;save()}catch(_){}}
 function homeSummary(L){const have=L.rows.filter(r=>r.q>0).map(r=>esc(r.p.s)+' '+leftText(r.p,r.q)),no=BULK.filter(id=>S.stock[id]).map(id=>esc(nameOf(PR[id]).replace(/:.*$/,'').toLowerCase()));
   return (have.length?have.join(' · '):'ничего не внесено')+(no.length?` <span class="flag">· нет: ${no.join(', ')}</span>`:'')}
 function homePanel(L){const ck=L.ck;
@@ -584,10 +601,11 @@ function vShop(){if(shopMode)return vShopMode();
   // остатки
   const lfn=L.rows.filter(r=>r.q>0).length,openLeft=false;
   const ready=S.homeFor===ck;if(!ready&&window._homeOpen==null)window._homeOpen=true;
-  h+=homePanel(L);
+  const H0=h;h=homePanel(L);const HPN=h;h='';
   if(ready){const ch=adaptPlan(L),wk=[0,1,2,3,4,5,6].map(i=>dkey(addDays(cs,i))),had=Object.keys(S.huse||{}).some(k=>wk.includes(k.split('|')[0]));
     if(ch.length&&(S.adaptOff||{})[ck]!==S.homeAt)h+=`<section class="card due"><h3>Подстроить меню под то, что дома</h3><div class="small muted">Сначала съедаем остатки — тогда меньше покупать. Норма дня сохраняется.</div><ul class="notes" style="font-size:.86rem;margin-top:6px">${ch.map(c=>`<li><b>${DAYS[wd(c.d)]} ${c.d.getDate()} · ${SLOTS[c.slot].toLowerCase()}:</b> ${esc(PR[c.from].s)} ${fq(c.fq,PR[c.from].u)} → ${esc(PR[c.to].s)} ${fq(c.q,PR[c.to].u)}</li>`).join('')}</ul><div class="btns"><button class="btn pri sm" data-a="adaptdo">Применить</button><button class="btn ghost sm" data-a="adaptoff">Не надо</button></div></section>`;
     else if(had)h+=`<div class="small muted" style="margin:-4px 0 12px">Меню подстроено под то, что дома. <button class="link" data-a="adaptundo">Вернуть как было</button></div>`}
+  const AD=h;h='';
   let ex=''; // ручная правка и запасы — внизу, под списком
   ex+=`<details class="card" id="leftbox" ${openLeft||window._openLeft?'open':''}><summary><b>Дома — поправить вручную</b><span class="muted small">${lfn?'внесено: '+lfn:''}</span></summary>
   <p class="small muted" style="margin-top:0">${S.grams?'Взвесь и впиши граммы, штучное — в штуках.':'Посчитай в тех же мерах.'} То, что съешь по плану до вторника, приложение вычтет само. Консервы и сухое помнятся и дальше.</p><ul class="list">`;
@@ -623,7 +641,17 @@ function vShop(){if(shopMode)return vShopMode();
   if(nOn)h+=`<div class="btns"><button class="btn ghost" data-a="chkreset">Снять все галочки</button></div>`;
   h+=`</section>`;if(!ready){const lh=h.slice(i0);h=h.slice(0,i0)+`<details class="card draftd"><summary><b>Черновик списка</b><span class="muted small">до «Что дома»</span></summary>`+lh.replace(/<button class="btn pri wide2"[^]*?<\/button>/,'').replace('<section class="card">','<div>').replace(/<\/section>$/,'</div>')+`</details>`}
   h+=ex+`<section class="card small"><h3>В GO!</h3><ul class="notes"><li>Список идёт примерно по залу: овощи и фрукты, мясо, рыба, яйца и тофу, потом крупы и специи</li><li>Если нужного нет: бёдра ↔ филе, рыба ↔ креветки, свинина ↔ курица</li></ul></section><section class="card small"><h3>После закупки</h3><ul class="notes"><li>Мясо и рыбу на Чт–Пн разложи по пакетам порциями и убери в морозилку</li><li>На Вт и Ср — в холодильник</li><li>Что разморозить на завтра, приложение напомнит вечером</li></ul></section>`;
-  return h;
+  // простой вид: сверху — только что купить, по отделам, с галочками; всё остальное — в одной свёрнутой строке
+  const more=`<details class="card" id="shopmore" ${window._openMore?'open':''}><summary><b>Дома, запасы, цены</b><span class="muted small">${ready?'внесено '+fmtDate(new Date(S.homeAt)):''}</span></summary>${ready?HPN:''}${h.replace(/<section class="card/g,'<section class="sub')}</details>`;
+  if(!ready)return H0+HPN+more;
+  const li=x=>`<li class="${C[x.id]?'bought':''}"><button class="sm-row" data-a="chk" data-p="${x.id}" aria-pressed="${!!C[x.id]}"><span class="cb ${C[x.id]?'on':''} ${popKey==='s_'+x.id?'pop':''}">${C[x.id]?'✓':''}</span><span class="grow"><b>${esc(x.n)}</b><span class="vi">${esc(x.vi||'')}</span></span><span class="q">${esc(x.q)}</span></button></li>`;
+  const its=L.rows.filter(r=>r.buy>0).map(r=>({id:r.id,n:nameOf(r.p),q:r.p.u==='шт'&&r.p.shop===10?r.buy+' шт':fq(r.buy,r.p.u),vi:(r.p.vi||'').split(' (')[0],sec:r.p.sec})).concat(L.bulk.map(id=>({id,n:nameOf(PR[id]).replace(/:.*$/,''),q:PR[id].bulk,vi:(PR[id].vi||'').split(' (')[0],sec:'zz'})));
+  const T=shopCost(L),nOn2=its.filter(x=>C[x.id]).length;
+  let sl=`<section class="card"><div class="bh"><h3>Купить${its.length?` · ${nOn2} из ${its.length}`:''}</h3><span class="small muted">≈ ${vnd(T.go)}</span></div>${its.length?`<div class="prog"><i style="width:${nOn2/its.length*100}%"></i></div>`:'<p class="small muted">Всё есть, покупать нечего.</p>'}`;
+  SECS.concat([['zz','Запасы']]).forEach(([sec,t])=>{const g=its.filter(x=>x.sec===sec);if(g.length)sl+=`<div class="cat">${t}</div><ul class="smlist">${g.map(li).join('')}</ul>`});
+  sl+=`${T.sp?`<div class="small muted">Спортпит отдельно ≈ ${vnd(T.sp)}</div>`:''}${nOn2?`<div class="btns"><button class="btn ghost sm" data-a="chkreset">Снять галочки</button></div>`:''}</section>`;
+  return H0+AD+sl+more;
+
 }
 const kg=v=>String(Math.round(v*10)/10).replace('.',',');
 function spark(pts,target){
@@ -681,13 +709,7 @@ const A={
   homeclose:()=>{window._homeOpen=false;HP=null},
   homeparse:()=>{const t=document.getElementById('hometext');window._homeText=t?t.value:'';HP=parseHome(window._homeText);if(!HP.res.length)toast('Не нашёл продуктов — скажи, например: «курица 300 грамм, бананы 2»')},
   homedel:d=>{if(HP)HP.res.splice(+d.i,1)},
-  homesave:()=>{if(!HP)return true;const ck=dkey(shopCycle());
-    if(window._homeAll!==false)S.left[ck]={}; // свежее — полный список заново
-    const now=Date.now(),eggs=HP.res.filter(r=>r.id==='egg'),boil=eggs.find(r=>r.boiled),raw=eggs.find(r=>!r.boiled);
-    if(boil||window._homeAll!==false)S.boiled={q:boil?boil.q:0,at:now}; // вареные яйца — для заготовок (в холодильнике место под 20)
-    if(eggs.length)setHome('egg',(boil?boil.q:0)+(raw?raw.q:0));
-    HP.res.forEach(r=>{if(r.id==='egg')return;if(r.cooked){S.riceBank={q:Math.round(r.q/2.8),at:now};return}if(PR[r.id].bulk){if(r.have)delete S.stock[r.id];else S.stock[r.id]=1}else setHome(r.id,r.q)});
-    S.homeFor=ck;S.homeAt=now;window._homeOpen=false;window._homeText='';const n=HP.res.length;HP=null;clean();save();toast('Сохранил: '+n+' '+plural(n,['продукт','продукта','продуктов'])+' — список покупок пересчитан')},
+  homesave:()=>{if(!HP)return true;const ck=dkey(shopCycle());applyHome(HP.res,Date.now(),window._homeAll!==false,ck);window._homeOpen=false;window._homeText='';const n=HP.res.length;HP=null;clean();save();toast('Сохранил: '+n+' '+plural(n,['продукт','продукта','продуктов'])+' — список покупок пересчитан')},
   ptab:d=>{prepTab=d.v},
   dismiss:d=>{S.dismiss=S.dismiss||{};const cut=dkey(addDays(appNow(),-14));Object.keys(S.dismiss).forEach(k=>{if(k.split('|')[1]<cut)delete S.dismiss[k]});S.dismiss[d.v+'|'+dkey(appNow())]=1;save();toast(d.v==='weigh'?'Хорошо, взвесишься в следующую пятницу':'Скрыл до следующего раза')},
   ptask:d=>{const ck=d.d,D=(S.prepDone=S.prepDone||{})[ck]=(S.prepDone[ck]||{}),on=!D[d.v],M=prepModel(pkey(ck)),now=Date.now();
@@ -784,7 +806,7 @@ let tsx=0,tsy=0,tsok=false;
 document.addEventListener('touchstart',e=>{if(tab!=='today'||e.touches.length!==1){tsok=false;return}const t=e.target;tsok=!t.closest('input,select,textarea,.mpanel,.picks,.strip,.weeknav,details');tsx=e.touches[0].clientX;tsy=e.touches[0].clientY},{passive:true});
 document.addEventListener('touchend',e=>{if(!tsok)return;tsok=false;const t=e.changedTouches[0],dx=t.clientX-tsx,dy=t.clientY-tsy;
   if(Math.abs(dx)>70&&Math.abs(dy)<Math.abs(dx)*0.5){viewDate=dkey(addDays(pkey(viewDate),dx<0?1:-1));editOpen='';xOpen='';const app=document.getElementById('app');app.classList.remove('sl','sr');render();void app.offsetWidth;app.classList.add(dx<0?'sl':'sr')}},{passive:true});
-document.addEventListener('toggle',e=>{if(e.target.id&&e.target.id.startsWith('mo-'))moreOpen[e.target.id.slice(3)]=e.target.open;if(e.target.id==='wkbox')window._openWk=e.target.open;if(e.target.id==='xmore')X.more=e.target.open;if(e.target.id==='leftbox')window._openLeft=e.target.open;if(e.target.id==='bulkbox')window._openBulk=e.target.open},true);
+document.addEventListener('toggle',e=>{if(e.target.id&&e.target.id.startsWith('mo-'))moreOpen[e.target.id.slice(3)]=e.target.open;if(e.target.id==='wkbox')window._openWk=e.target.open;if(e.target.id==='xmore')X.more=e.target.open;if(e.target.id==='shopmore')window._openMore=e.target.open;if(e.target.id==='leftbox')window._openLeft=e.target.open;if(e.target.id==='bulkbox')window._openBulk=e.target.open},true);
 document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset.in;if(k==='hometext')window._homeText=el.value;if(k==='homeall')window._homeAll=el.checked;if(k==='xf'){X[el.dataset.k]=el.value;if(el.dataset.k==='line')fillFromLine()}
   if(k==='recsel'){const dk=el.dataset.d,key=dk+'|'+el.dataset.s;if(!guard(dk)){render();return}S.rec=S.rec||{};if(el.value)S.rec[key]=el.value;else delete S.rec[key];delete S.edits[key];delete S.swaps[key];ED=null;save();render();toast(el.value?'Блюдо: '+RECBY[el.value][1]:'По плану')}
   if(k==='edg'&&ED){ED.items[+el.dataset.i][1]=Math.max(0,parseNum(el.value))}
@@ -811,4 +833,5 @@ if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceW
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(shopMode&&navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{});if(tab==='today')viewDate=dkey(appNow());if(!document.activeElement.matches('input,textarea,select'))render()}});
 setInterval(()=>{if(tab==='today'&&!document.activeElement.matches('input,textarea,select'))render()},60000);
 setTimeout(()=>checkUpdate(false),2000);
+seedHome();
 render();
