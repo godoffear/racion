@@ -1,4 +1,4 @@
-const APP_VERSION='5.6.4';
+const APP_VERSION='5.6.5';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -174,15 +174,15 @@ function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast('�
 
 /* ===== Даты ===== */
 const pad=n=>String(n).padStart(2,'0');
-// до 4:00 ещё идёт вчерашний день (поздний перекус в 00:30), но как только поздний перекус отмечен — уже новый день
-function appNow(){const d=new Date();if(d.getHours()<4){const y=new Date(d);y.setDate(y.getDate()-1);let m=false;try{const k=dkey(y)+'|late';m=!!((S.done||{})[k]||(S.skip||{})[k])}catch(_){}if(!m)return y}return d}
+// до 2:00 ещё идёт вчерашний день (поздний перекус в 00:30), но как только поздний перекус отмечен — уже новый день
+function appNow(){const d=new Date();if(d.getHours()<2){const y=new Date(d);y.setDate(y.getDate()-1);let m=false;try{const k=dkey(y)+'|late';m=!!((S.done||{})[k]||(S.skip||{})[k])}catch(_){}if(!m)return y}return d}
 function dkey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function pkey(k){const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)}
 function wd(d){return (d.getDay()+6)%7}
 function addDays(d,n){return new Date(d.getFullYear(),d.getMonth(),d.getDate()+n)}
 function fmtDate(d){return d.getDate()+' '+MONTHS[d.getMonth()]}
 function tmin(t){const [h,m]=t.split(':').map(Number);return (h<4?h+24:h)*60+m}
-function nowMin(){const d=new Date();return (d.getHours()<4?d.getHours()+24:d.getHours())*60+d.getMinutes()}
+function nowMin(){const d=new Date();return (d.getHours()<2?d.getHours()+24:d.getHours())*60+d.getMinutes()}
 function cycleStart(d){return addDays(d,-((wd(d)-1+7)%7))} // ближайший вторник назад
 function menuName(cs){const i=menuIdxOf(cs);return i<0?'базовое меню':'меню '+(i+1)+' из 4'}
 function cycleIdx(cs){const n=Math.round((cs-EPOCH)/864e5/7);return ((n%4)+4)%4}
