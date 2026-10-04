@@ -3,6 +3,8 @@
 const CACHE = 'racion-v3-2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 const PAGE = new URL('./index.html', self.registration.scope).href;
+// Папка trener/ — отдельное приложение со своим service worker: его страницы и файлы не трогаем.
+const OTHER = new URL('./trener/', self.registration.scope).pathname;
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -14,6 +16,7 @@ self.addEventListener('fetch', e => {
   const r = e.request;
   if (r.method !== 'GET') return;
   const u = new URL(r.url);
+  if (u.origin === location.origin && u.pathname.startsWith(OTHER)) return;
   if (r.cache === 'no-store' || u.hostname === 'calendar.google.com') return;
   if (r.mode === 'navigate') {
     const net = fetch(r).then(res => {
