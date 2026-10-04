@@ -450,7 +450,7 @@ nav.tabs button{min-width:0;font-size:.7rem}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='5.6.3';
+const APP_VERSION='5.6.4';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -626,7 +626,8 @@ function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast('�
 
 /* ===== Даты ===== */
 const pad=n=>String(n).padStart(2,'0');
-function appNow(){const d=new Date();if(d.getHours()<4)d.setDate(d.getDate()-1);return d}
+// до 4:00 ещё идёт вчерашний день (поздний перекус в 00:30), но как только поздний перекус отмечен — уже новый день
+function appNow(){const d=new Date();if(d.getHours()<4){const y=new Date(d);y.setDate(y.getDate()-1);let m=false;try{const k=dkey(y)+'|late';m=!!((S.done||{})[k]||(S.skip||{})[k])}catch(_){}if(!m)return y}return d}
 function dkey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function pkey(k){const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)}
 function wd(d){return (d.getDay()+6)%7}
@@ -798,7 +799,9 @@ const ICONS={
 const TABS=[['today','Сегодня'],['menu','Меню'],['shop','Покупки'],['prep','Заготовки'],['weight','Ещё']];
 function shopLeftCount(){try{if(S.homeFor!==dkey(shopCycle()))return 0;const L=shopList(),C=S.chk[L.ck]||{},ids=L.rows.filter(r=>r.buy>0).map(r=>r.id).concat(L.bulk);return ids.filter(id=>!C[id]).length}catch(_){return 0}}
 function toast(t){const el=document.getElementById('toast');el.textContent=t;el.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>el.hidden=true,2200)}
+let lastTk='';
 function render(){
+  {const tk=dkey(appNow());if(lastTk&&tk!==lastTk&&viewDate===lastTk)viewDate=tk;lastTk=tk} // день сменился — «Сегодня» переходит на новый
   const bd=[6,0].includes(wd(new Date()))?shopLeftCount():0;
   document.getElementById('tabs').innerHTML=TABS.map(([id,l])=>`<button data-a="tab" data-v="${id}" class="${tab===id?'on':''}" aria-current="${tab===id?'page':'false'}"><span class="ic" aria-hidden="true">${ICONS[id]}${id==='shop'&&bd?`<i class="badge">${bd}</i>`:''}</span>${l}${id==='shop'&&bd?`<span class="sr">, осталось купить ${bd}</span>`:''}</button>`).join('');
   document.getElementById('app').innerHTML=(updReady?`<div class="bar-top"><span>Вышла новая версия приложения.</span><button class="btn" data-a="upd">Обновить</button></div>`:'')+({today:vToday,menu:vMenu,shop:vShop,prep:vPrep,weight:vWeight}[tab])();
@@ -1261,7 +1264,7 @@ document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset
   if(k==='edadd'&&ED&&el.value){const p=PR[el.value];ED.items.push([el.value,p.u==='шт'?1:(el.value==='oil'?5:el.value==='protein'?30:100)]);render()}
   if(k==='xpre'&&el.value!==''){const p=PRESETS[+el.value];Object.assign(X,{n:p[0]+' ('+p[1]+')',k:String(p[2]),p:String(p[3]),f:String(p[4]),c:String(p[5])});render()}});
 document.addEventListener('change',e=>{const el=e.target;
-  if(el.dataset&&el.dataset.in==='bload'){filePick=0;const f=el.files&&el.files[0];el.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x||typeof x!=='object'||!('done' in x))throw 0;if(!confirm('Заменить текущие данные копией?'))return;S=Object.assign(def(),x);migrate();save();render();toast('Копия загружена')}catch(_){toast('Это не копия «Рациона»')}};r.readAsText(f);return}if(el.dataset&&el.dataset.in==='edg'){render();return}if(el.dataset&&el.dataset.in==='leftg'){setHome(el.dataset.p,Math.max(0,Math.round(parseNum(el.value))));window._openLeft=true;clean();save();render()}
+  if(el.dataset&&el.dataset.in==='bload'){filePick=0;const f=el.files&&el.files[0];el.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x||typeof x!=='object'||!('done' in x))throw 0;if(!confirm('Заменить текущие данные копией?'))return;S=Object.assign(def(),x);migrate();save();seedHome();render();toast('Копия загружена')}catch(_){toast('Это не копия «Рациона»')}};r.readAsText(f);return}if(el.dataset&&el.dataset.in==='edg'){render();return}if(el.dataset&&el.dataset.in==='leftg'){setHome(el.dataset.p,Math.max(0,Math.round(parseNum(el.value))));window._openLeft=true;clean();save();render()}
   if(el.dataset&&el.dataset.in==='leftadd'&&el.value){const p=PR[el.value];setHome(el.value,p.u==='шт'?1:p.shop||100);window._openLeft=true;save();render();toast('Добавлено: '+p.s+' — поправь количество')}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='w-in'){A.wsave();render()}});
 
