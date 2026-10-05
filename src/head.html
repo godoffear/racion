@@ -443,6 +443,21 @@ nav.tabs button{min-width:0;font-size:.7rem}
 .card .sm-row{padding:11px 12px;gap:12px}
 .card .sm-row b{font-size:1rem}
 .card .sm-row .q{font-size:1rem}
+
+/* 5.8: действия у строки списка, окно, свои продукты */
+.shl{display:flex;align-items:stretch}
+.shl .sm-row{flex:1;width:auto;min-width:0}
+.shm{flex:none;width:52px;border:0;border-left:1px solid var(--line);background:none;font-size:1.5rem;line-height:1;color:var(--muted);border-radius:0 var(--r-sm) var(--r-sm) 0}
+.shl .q small{display:block;font-weight:400;font-size:.72rem;color:var(--muted)}
+.shl.none .q{color:var(--warn);font-size:.9rem;white-space:normal;text-align:right}
+.snote{background:var(--sunk);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:.88rem;line-height:1.4}
+.shbg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40}
+.shp{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:88vh;overflow:auto;background:var(--surface);color:var(--ink);border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px rgba(0,0,0,.25);max-width:640px;margin:0 auto}
+.shp h3{margin:0 0 4px}
+.shopt{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;margin-bottom:6px;font:inherit;text-align:left;min-height:48px}
+.shopt b{white-space:nowrap}
+.shp .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.shp .field input,.shp .field select{font-size:1rem}
 </style>
 </head>
 <body>
