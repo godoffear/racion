@@ -52,7 +52,7 @@ R = [
  ['shrimppump','Креветки с тыквой',['dinner'],[['shrimp',150],['pumpkin',250],['onion',50]],['Тыкву кусками на пару в рисоварке 15 мин','Лук полукольцами 3 мин на сковороде, креветки туда же на 2–3 мин','Тыкву к креветкам, перец, соль']],
  # ---- поздний перекус
  ['eggcuke','Яйца с огурцом и помидором',['late'],[['egg',3],['cucumber',1],['tomato',100]],['Яйца из запаса, овощи нарезать, соль и перец']],
- ['tofuveg','Тофу с овощами',['late'],[['tofu',150],['veg',100]],['Тофу и овощи на сухую сковороду на 5 мин']],
+ ['tofuveg','Тофу с овощами',[],[['tofu',150],['veg',100]],['Тофу и овощи на сухую сковороду на 5 мин']],
  ['tunacuke','Тунец с огурцом',['late'],[['tunaw',1],['cucumber',1]],['Тунец без жидкости, огурец нарезать, перец и лайм']],
  ['sardveg','Сардины с помидором',['late'],[['sardine',1],['tomato',100]],['Сардины из банки, помидор нарезать — готовить не нужно']],
  # ---- неделя 6–12 окт (по чеку): блюда без приёмов не предлагаются в выборе
@@ -68,7 +68,7 @@ R = [
  ['thightom','Бёдра в помидорах с кабачками',[],[['thigh',220],['tomato',200],['zucchini',150],['onion',50]],['С бёдер снять кожу, кусочками 8 мин на сухой сковороде','Лук, помидоры и кабачки туда же','Под крышкой 8 мин, перец, соль']],
  ['fishpump','Рыба на пару с тыквой и брокколи',['lunch'],[['fish',270],['pumpkin',300],['broccoli',200]],['Тыкву кусками на пару в рисоварке 15 мин','Рыбу и брокколи туда же на последние 10 мин','Соль, перец, лайм']],
  ['shrimptofu','Креветки с тофу в помидорах',['dinner'],[['shrimp',140],['tofu',150],['tomato',200]],['Помидоры кубиками 3 мин на сковороде без масла','Тофу кубиками туда же на 4 мин','Креветки на 2–3 мин, перец, зелёный лук']],
- ['tofuzuc','Тофу с кабачками',['late'],[['tofu',150],['zucchini',150]],['Тофу и кабачки кубиками 5 мин на сухой сковороде, соль, перец']],
+ ['tofuzuc','Тофу с кабачками',[],[['tofu',150],['zucchini',150]],['Тофу и кабачки кубиками 5 мин на сухой сковороде, соль, перец']],
  ['tunaveg','Тунец с огурцом и помидором',['late'],[['tunaw',1],['cucumber',1],['tomato',100]],['Тунец без жидкости, огурец и помидор нарезать, перец и лайм']],
  ['oatjack','Овсянка с джекфрутом и варёные яйца',['bf'],[['egg',3],['oats',50],['jackfruit',100]],['Овсянку залить кипятком на 5 мин','Джекфрут кусочками сверху','Яйца из запаса']],
 ]
@@ -76,8 +76,8 @@ RB = {r[0]: r for r in R}
 SNACKF = [['apple',1],['banana',1],['mango',1],['orange',1],['pineapple',200],['dragon',200],['papaya',200]]
 TYPES = ['S','W','S','S','W','R','S']
 W = [
- [('oatban','friedrice','shrimpbroc','eggcuke'),('omtom','beefgreens','fishpan','tunacuke'),('oatban','thighrice','porkgreens','tunacuke'),('sweeteggs','shrimpcab','chickmush','eggcuke'),('tunabm','chickpump','squidpep','tofuveg'),('oatmango','curry','meatballs','tunacuke'),('oatban','porkpot','fishtom','sardveg')],
- [('oatban','beefbroc','gingchick','eggcuke'),('sweeteggs','thighrice','tunasalad','tofuveg'),('omtom','mincebeans','shrimpbroc','eggcuke'),('oatban','fishsweet','omelet','eggcuke'),('oatmango','friedrice','squidsalad','tunacuke'),('tunabm','curry','porkgreens','tofuveg'),('oatban','tunarice','beefpep','eggcuke')],
+ [('oatban','friedrice','shrimpbroc','eggcuke'),('omtom','beefgreens','fishpan','tunacuke'),('oatban','thighrice','porkgreens','tunacuke'),('sweeteggs','shrimpcab','chickmush','eggcuke'),('tunabm','chickpump','squidpep','tunacuke'),('oatmango','curry','meatballs','tunacuke'),('oatban','porkpot','fishtom','sardveg')],
+ [('oatban','beefbroc','gingchick','eggcuke'),('sweeteggs','thighrice','tunasalad','sardveg'),('omtom','mincebeans','shrimpbroc','eggcuke'),('oatban','fishsweet','omelet','eggcuke'),('oatmango','friedrice','squidsalad','tunacuke'),('tunabm','curry','porkgreens','eggcuke'),('oatban','tunarice','beefpep','eggcuke')],
  [('oatban','porkstir','shrimppump','eggcuke'),('oatban','curry','fishtom','eggcuke'),('sweeteggs','shrimprice','tofumince','tunacuke'),('oatban','chickpump','beefpep','tunacuke'),('tunabm','beefgreens','fishpan','eggcuke'),('sweeteggs','banhmichick','shrimpbroc','eggcuke'),('oatban','thighrice','squidpep','tunacuke')],
  [('oatban','tofutom','gingchick','tunacuke'),('sweeteggs','shrimpcab','meatballs','tunacuke'),('oatban','beefbroc','tunasalad','eggcuke'),('oatban','friedrice','porkgreens','eggcuke'),('oatmango','fishsweet','chickmush','eggcuke'),('tunabm','mincebeans','squidsalad','tunacuke'),('oatban','curry','fishtom','eggcuke')],
 ]
