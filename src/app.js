@@ -1,4 +1,4 @@
-const APP_VERSION='5.8.1';
+const APP_VERSION='5.8.2';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -303,7 +303,26 @@ function invFor(cs){const ck=dkey(cs),out=[];if(!(S.left||{})[ck]&&!(S.shx||{})[
     const n=need[id]||0,lack=n-home,buy=lack>0?Math.ceil(Math.round(lack*10)/10/p.shop)*p.shop:0,s=shxOf(ck,id),got=!C[id]||(s&&s.none)?0:s&&s.q!=null?s.q:buy,have=home+got,sp=have-n,sh=p.u==='шт';
     if(have>0||n>0)out.push({id,have,need:n,sur:sp>=(sh?1:60)?(sh?Math.round(sp):Math.round(sp/10)*10):0})});
   return out}
-function surplusFor(cs){const o={};invFor(cs).forEach(x=>{if(x.sur&&(BAGID(x.id)||FRESHG.includes(x.id)))o[x.id]=x.sur});return o}
+const PACKV=['pumpkin','jackfruit','broccoli','dragon','pineapple']; // фрукты и овощи, которые тоже делим на порции и морозим
+function surplusFor(cs){const o={};invFor(cs).forEach(x=>{if(x.sur&&(BAGID(x.id)||FRESHG.includes(x.id)||PACKV.includes(x.id)))o[x.id]=x.sur});return o}
+// пакеты одного размера: не больше 3 размеров; размер пакета = среднее порций в группе (±10%), чтобы мяса хватило на все пакеты
+function clusterBags(qs){const a=qs.map(q=>Math.max(10,Math.round(q/10)*10)).sort((x,y)=>x-y),n=a.length;if(!n)return [];
+  const cost=(i,j)=>{const s=a.slice(i,j),m=s.reduce((x,y)=>x+y,0)/s.length;return s.reduce((x,y)=>x+(y-m)*(y-m),0)};let best=null;
+  const tryCuts=cuts=>{const e=[0].concat(cuts,[n]);let c=400*(e.length-2);for(let k=0;k<e.length-1;k++)c+=cost(e[k],e[k+1]);if(!best||c<best.c)best={c,e}};
+  tryCuts([]);for(let i=1;i<n;i++){tryCuts([i]);for(let j=i+1;j<n;j++)tryCuts([i,j])}
+  const out=[];for(let k=best.e.length-2;k>=0;k--){const s=a.slice(best.e[k],best.e[k+1]),m=s.reduce((x,y)=>x+y,0)/s.length;out.push({size:Math.round(m/10)*10,n:s.length})}
+  return out}
+function chunkRest(rem,tg){const n=Math.max(1,Math.round(rem/tg));return {n,size:Math.round(rem/n/10)*10}}
+// сводка по продуктам: холодильник (ближайшие дни), морозилка (позже и на следующие недели), запас (остаток сверх меню)
+function packModel(days,bags,sur,nx){const P={},get=id=>P[id]=P[id]||{id,fr:[],fz:[],rest:[],tot:0};
+  const lim=id=>BAGID(id)?2:id==='jackfruit'?2:4;
+  days.forEach(x=>x.pl.meals.forEach(m=>{m.items.forEach(it=>{const id=it.p,p=PR[id];if(!p||p.u!=='г'||p.keep||!(BAGID(id)||PACKV.includes(id)))return;
+    const g=get(id);g[x.i<lim(id)?'fr':'fz'].push(it.q);g.tot+=it.q})}));
+  nx.rows.forEach(b=>{const g=get(b.id);g.fz.push(b.q);g.tot+=b.q});
+  Object.keys(sur).filter(id=>BAGID(id)||PACKV.includes(id)).forEach(id=>{const placed=nx.rows.filter(b=>b.id===id).reduce((a,b)=>a+b.q,0),rem=sur[id]-placed;
+    if(rem>=60){const c=chunkRest(rem,id==='tofu'?150:BAGID(id)?230:150);get(id).rest.push({size:c.size,n:c.n});get(id).tot+=c.size*c.n}});
+  const ord=Object.keys(PR);
+  return Object.values(P).filter(g=>g.fr.length||g.fz.length||g.rest.length).sort((a,b)=>(BAGID(b.id)-BAGID(a.id))||ord.indexOf(a.id)-ord.indexOf(b.id)).map(g=>({id:g.id,tot:g.tot,fr:clusterBags(g.fr),fz:clusterBags(g.fz),rest:g.rest}))}
 // лишнее мясо и рыба → пакеты под приёмы следующей недели (по порядку), остаток — отдельно
 function bagsNext(cs,sur){const cs2=addDays(cs,7),meals=[],rows=[],rest=[];
   for(let i=0;i<14;i++){const d=addDays(cs2,i);dayPlan(d).meals.forEach(m=>{if(m.slot==='pre'||m.slot==='snack')return;m.items.forEach(it=>meals.push({i,d,slot:m.slot,id:it.p,q:it.q}))})}
@@ -327,10 +346,9 @@ function prepModel(cs){const D0=prepDone(dkey(cs)),days=[0,1,2,3,4,5,6].map(i=>{
   const cans={};days.forEach(x=>x.pl.meals.forEach(m=>m.items.forEach(it=>{if(PR[it.p].keep)cans[it.p]=(cans[it.p]||0)+it.q})));
   const vegs=days.some(x=>x.pl.meals.some(m=>m.items.some(it=>['veg','broccoli','cabbage','carrot','greens','beans','bokchoy','bellpep','tomato','cucumber','mushroom'].includes(it.p))));
   const big=[];const bt=(id,t,d,extra)=>big.push({id:'big:'+id,t,d,extra});
-  if(bags.length)bt('bags','Мясо и рыба — по пакетам, подписать','Вт и Ср — в холодильник, остальное — в морозилку. На пакете: день · приём · вес.',bags);
   const sur=surplusFor(cs),nx=bagsNext(cs,sur);
   {const inv=invFor(cs).filter(x=>x.have>0&&!x.extra);if(inv.length)big.unshift({id:'big:store',t:'Раскладка покупок — что куда',d:'Разбери пакеты из GO!: морозилка — холодильник — полка. Количество — сколько всего есть к вторнику (дома + купленное).',extra:inv})}
-  if(nx.rows.length||nx.rest.length)bt('bags2','Лишнее мясо и рыба — сразу в пакеты на следующую неделю',`Разложи сейчас, пока всё на столе: под меню ${fmtDate(nx.cs2)} – ${fmtDate(nx.cs3)}. Потом размораживать по одному пакету, а не килограммами. Всё — в морозилку, на пакете: день · приём · вес.`,nx);
+  {const pk=packModel(days,bags,sur,nx);if(pk.length)bt('pack','Фасовка — что на сколько грамм','Раскладывай по продуктам: взвесил, разложил по пакетам одного размера, подписал вес — и в нужное место. Дальше смотреть, какой день — не нужно: вечером приложение скажет, какой пакет достать.',pk)}
   {const FR=[];days.forEach(x=>x.pl.meals.forEach(m=>m.items.forEach(it=>{if(FRESHG.includes(it.p))FR.push({i:x.i,d:x.d,slot:m.slot,id:it.p,q:it.q,fz:x.i>=4})})));
    const rest=Object.keys(sur).filter(id=>FRESHG.includes(id)).map(id=>({id,q:sur[id]}));
    if(FR.length||rest.length)bt('greens','Зелень — вымыть, обсушить и разложить по порциям','Каждую порцию завернуть в бумажное полотенце и в пакет: так лежит 3–4 дня. Что не успеешь съесть к пятнице — бланшировать 1 мин, отжать и в морозилку.',{rows:FR,rest})}
@@ -354,6 +372,8 @@ function prepTask(t,ck){const on=!!prepDone(ck)[t.id];let x='';
   if(t.id==='big:store'){const G=[['freezer','В морозилку'],['fridge','В холодильник'],['shelf','На полку']],w=id=>(STORE[id]||[PR[id].sec==='veg'||PR[id].sec==='fruit'?'fridge':'shelf'])[0];
     x=G.map(([k,tt])=>{const rows=t.extra.filter(i=>w(i.id)===k).sort((a,b)=>PR[a.id].s.localeCompare(PR[b.id].s,'ru'));if(!rows.length)return '';
       return `<div class="ph">${tt}</div><table class="bags">${rows.map(i=>{const s=STORE[i.id]||['','',''];return `<tr><td><b>${esc(PR[i.id].custom?PR[i.id].n:cap(PR[i.id].s))}</b>${s[1]?`<br><small class="muted">${esc(s[1])}</small>`:''}${i.sur&&s[2]?`<br><small>лишнее ≈ ${esc(fq(i.sur,PR[i.id].u))} → в морозилку: ${esc(s[2])}</small>`:i.sur&&k==='fridge'&&!PR[i.id].keep?`<br><small class="muted">сверх меню ≈ ${esc(fq(i.sur,PR[i.id].u))} — пойдёт на следующую неделю</small>`:''}</td><td>${esc(fq(Math.round(i.have*10)/10,PR[i.id].u))}</td></tr>`}).join('')}</table>`}).join('')}
+  if(t.id==='big:pack'){const ln=(lb,tg,cl,u)=>cl.length?`<tr><td><span class="tg ${tg}">${lb}</span></td><td>${cl.map(c=>`<b>${c.n} × ${c.size}</b> ${u}`).join(' · ')}</td></tr>`:'';
+    x=t.extra.map(g=>{const p=PR[g.id];return `<div class="ph">${esc(cap(p.s))}${g.id==='thigh'?' <small class="muted">(снять кожу)</small>':''} <small class="muted">всего ≈ ${esc(fq(g.tot,'г'))}</small></div><table class="bags pk">${ln('холод.','fr',g.fr,'г')}${ln('мороз.','fz',g.fz,'г')}${ln('запас','fz',g.rest,'г')}</table>`}).join('')+`<div class="hint">Вес пакета — средний по порциям в группе: в меню может быть на 10–30 г меньше или больше, это нормально (в плане дня граммы можно поправить кнопками ±). «Холод.» — в ближайшие дни (мясо — Вт–Ср, фрукты и овощи — до пятницы); «мороз.» — дальше и на следующие недели; «запас» — сверх меню, подписать «запас».</div>`}
   if(t.id==='big:bags2'){const n=t.extra,tot=n.rows.reduce((a,b)=>a+b.q,0)+n.rest.reduce((a,b)=>a+b.all,0);x=`<table class="bags">${n.rows.map(b=>`<tr><td><b>${DAYS[wd(b.d)]} ${b.d.getDate()} · ${SLOTS[b.slot].toLowerCase()}</b> ${esc(PR[b.id].s)}${b.id==='thigh'?' <small class="muted">(снять кожу)</small>':''}</td><td>${fq(b.q,PR[b.id].u)} <span class="tg fz">мороз.</span></td></tr>`).join('')}${n.rest.map(b=>`<tr><td><b>Запас · ${esc(PR[b.id].s)}</b>${b.id==='thigh'?' <small class="muted">(снять кожу)</small>':''}<br><small class="muted">${b.n>1?b.n+' пакета':'1 пакет'} по ≈ ${fq(b.q,PR[b.id].u)}, подписать «запас · вес»</small></td><td>${fq(b.all,PR[b.id].u)} <span class="tg fz">мороз.</span></td></tr>`).join('')}</table><div class="hint">Всего в морозилку ≈ ${fq(tot,'г')}. Вечером перед нужным днём — в холодильник один пакет.</div>`}
   if(t.id==='big:greens'){const g=t.extra;x=`<table class="bags">${g.rows.map(b=>`<tr><td><b>${DAYS[wd(b.d)]} · ${SLOTS[b.slot].toLowerCase()}</b> ${esc(PR[b.id].s)}</td><td>${fq(b.q,PR[b.id].u)} <span class="tg ${b.fz?'fz':'fr'}">${b.fz?'бланш. + мороз.':'холод.'}</span></td></tr>`).join('')}${g.rest.map(b=>`<tr><td><b>Лишнее</b> ${esc(PR[b.id].s)}<br><small class="muted">порциями по 150 г</small></td><td>${fq(b.q,PR[b.id].u)} <span class="tg fz">бланш. + мороз.</span></td></tr>`).join('')}</table>`}
   if(t.id==='big:rice'&&t.extra.cook){const r=t.extra,used=r.rice.reduce((a,x)=>a+x.a,0),spare=r.cook+r.bank-used;x=`<table class="bags">${r.rice.map(z=>`<tr><td><b>${DAYS[wd(z.d)]} ${z.d.getDate()}</b> · обед</td><td>${cookedRice(z.a)} г <span class="tg ${z.fz?'fz':'fr'}">${z.fz?'мороз.':'холод.'}</span></td></tr>`).join('')}${spare>20?`<tr><td>Остальное — «запас» на следующие недели</td><td>${cookedRice(spare)} г <span class="tg fz">мороз.</span></td></tr>`:''}</table><div class="hint">В холодильнике до 3 дней, в морозилке до месяца. Разогреть: на сковороду с ложкой воды под крышку 2–3 мин.</div>`}
