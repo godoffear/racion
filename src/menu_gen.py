@@ -24,7 +24,7 @@ R = [
  ['shrimprice','Жареный рис с креветками',['lunch'],[['shrimp',150],['egg',1],['rice',40],['veg',150],['oil',5]],['Креветки 2 мин на сковороде, отложить','Яйцо на сковороду, перемешать','Рис и овощи 3–4 мин, вернуть креветки, лайм']],
  ['curry','Курица с бататом, тушёная с куркумой',['lunch'],[['chicken',150],['sweet',200],['veg',150],['oil',5]],['Курицу кубиками обжарить 3 мин','Батат кубиками, ½ стакана воды, куркума, перец','Под крышкой 15 мин, в конце овощи на 3 мин']],
  ['porkstir','Свинина с овощами и рисом',['lunch'],[['pork',150],['rice',40],['veg',200],['oil',5]],['Свинину тонкими полосками 5 мин на сильном огне','Овощи туда же на 3–4 мин, чеснок, перец','С рисом из рисоварки']],
- ['tofutom','Тофу в помидорах с яйцом и рисом',['lunch'],[['tofu',200],['tomato',150],['egg',2],['rice',30]],['Помидоры кубиками 3 мин на сковороде без масла','Тофу кубиками туда же, 5 мин','Влить взбитые яйца, помешать 1 мин','С рисом']],
+ ['tofutom','Тофу в помидорах с яйцом и рисом',[],[['tofu',200],['tomato',150],['egg',2],['rice',30]],['Помидоры кубиками 3 мин на сковороде без масла','Тофу кубиками туда же, 5 мин','Влить взбитые яйца, помешать 1 мин','С рисом']],
  ['beefbroc','Говядина с брокколи и рисом',['lunch','dinner'],[['beef',150],['broccoli',200],['rice',50],['oil',5]],['Брокколи соцветиями 3 мин в кипятке или на пару','Говядину тонко, 2 мин на сильном огне с чесноком','Брокколи туда же на 1 мин, перец','С рисом из рисоварки']],
  ['tunarice','Рис с тунцом, яйцом и огурцом',['lunch'],[['tunaw',2],['rice',50],['egg',1],['cucumber',1],['veg',100]],['Рис из рисоварки','Тунец без жидкости, яйцо из запаса','Огурец и овощи нарезать, лайм, перец — готовить не нужно']],
  ['porkpot','Свинина с картофелем и капустой',['lunch'],[['pork',150],['potato',250],['cabbage',150],['oil',5]],['Картофель кубиками на пару в рисоварке 15 мин','Свинину полосками 5 мин на сковороде','Капусту туда же на 4 мин, затем картофель, перец, чеснок']],
@@ -46,7 +46,7 @@ R = [
  ['shrimpbroc','Креветки с брокколи и чесноком',['dinner'],[['shrimp',200],['broccoli',200],['oil',5]],['Брокколи 3 мин в кипятке','Креветки 2–3 мин на сильном огне с чесноком','Брокколи туда же на 1 мин, перец, лайм']],
  ['porkgreens','Свинина с водяным шпинатом и чесноком',['dinner'],[['pork',180],['greens',250],['oil',5]],['Свинину тонко 5 мин на сковороде','Водяной шпинат с чесноком туда же на 2–3 мин на сильном огне','Соль, перец']],
  ['meatballs','Тефтели из фарша в томате',['dinner'],[['mince',150],['tomato',200],['onion',50]],['Фарш с солью и перцем скатать в шарики','Помидоры и лук 3 мин на сковороде','Тефтели туда же, под крышку на 10 мин']],
- ['tofumince','Тофу с фаршем в томате',['dinner'],[['tofu',200],['mince',80],['tomato',150]],['Фарш на сухую сковороду 4 мин','Помидоры кубиками туда же на 3 мин','Тофу кубиками, под крышку на 5 мин, перец, зелёный лук']],
+ ['tofumince','Тофу с фаршем в томате',[],[['tofu',200],['mince',80],['tomato',150]],['Фарш на сухую сковороду 4 мин','Помидоры кубиками туда же на 3 мин','Тофу кубиками, под крышку на 5 мин, перец, зелёный лук']],
  ['squidpep','Кальмар с перцем и луком',['dinner'],[['squid',200],['bellpep',150],['onion',50],['oil',5]],['Перец и лук 3 мин на сильном огне','Кальмар кольцами туда же ровно на 2 мин','Чеснок, перец, лайм']],
  ['fishpan','Рыба на сковороде с овощами',['dinner'],[['fish',200],['veg',200],['oil',5]],['Рыбу посолить, поперчить, 3–4 мин с каждой стороны','Овощи туда же или рядом на 3 мин','Лайм, чеснок']],
  ['shrimppump','Креветки с тыквой',['dinner'],[['shrimp',150],['pumpkin',250],['onion',50]],['Тыкву кусками на пару в рисоварке 15 мин','Лук полукольцами 3 мин на сковороде, креветки туда же на 2–3 мин','Тыкву к креветкам, перец, соль']],
@@ -67,9 +67,13 @@ R = [
  ['chickbroc','Курица с брокколи и рисом',['lunch'],[['chicken',200],['broccoli',250],['rice',40],['tomato',100]],['Брокколи соцветиями 3 мин в кипятке или на пару','Курицу полосками 6 мин на сухой сковороде, чеснок','Брокколи туда же на 1 мин, с рисом и помидором']],
  ['thightom','Бёдра в помидорах с кабачками',[],[['thigh',220],['tomato',200],['zucchini',150],['onion',50]],['С бёдер снять кожу, кусочками 8 мин на сухой сковороде','Лук, помидоры и кабачки туда же','Под крышкой 8 мин, перец, соль']],
  ['fishpump','Рыба на пару с тыквой и брокколи',['lunch'],[['fish',270],['pumpkin',300],['broccoli',200]],['Тыкву кусками на пару в рисоварке 15 мин','Рыбу и брокколи туда же на последние 10 мин','Соль, перец, лайм']],
- ['shrimptofu','Креветки с тофу в помидорах',['dinner'],[['shrimp',140],['tofu',150],['tomato',200]],['Помидоры кубиками 3 мин на сковороде без масла','Тофу кубиками туда же на 4 мин','Креветки на 2–3 мин, перец, зелёный лук']],
+ ['shrimptofu','Креветки с тофу в помидорах',[],[['shrimp',140],['tofu',100],['tomato',200]],['Помидоры кубиками 3 мин на сковороде без масла','Тофу кубиками туда же на 4 мин','Креветки на 2–3 мин, перец, зелёный лук']],
  ['tofuzuc','Тофу с кабачками',[],[['tofu',150],['zucchini',150]],['Тофу и кабачки кубиками 5 мин на сухой сковороде, соль, перец']],
  ['tunaveg','Тунец с огурцом и помидором',['late'],[['tunaw',1],['cucumber',1],['tomato',100]],['Тунец без жидкости, огурец и помидор нарезать, перец и лайм']],
+ ['chickmushtofu','Курица с тофу и грибами',[],[['chicken',150],['tofu',150],['mushroom',250],['zucchini',150]],['Тофу кубиками 4–5 мин на сухой антипригарной сковороде до корочки, отложить','Грибы и кабачки 5 мин на сухой сковороде','Курицу полосками туда же 6 мин, затем тофу, чеснок, перец']],
+ ['thighgreenstofu','Бёдра с тофу и водяным шпинатом',[],[['thigh',150],['tofu',150],['greens',300]],['С бёдер снять кожу, полосками 8 мин на сухой сковороде','Тофу кубиками туда же на 4 мин','Водяной шпинат с чесноком на 2–3 мин на сильном огне, перец']],
+ ['chickcabtofu','Курица с тофу, капустой и морковью',[],[['chicken',160],['tofu',150],['cabbage',200],['carrot',100]],['Капусту и морковь соломкой 5 мин на сухой сковороде, 2 ст. л. воды','Курицу полосками туда же 6 мин','Тофу кубиками на 4 мин, соль, перец, чеснок']],
+ ['thightomtofu','Бёдра с тофу в помидорах с кабачками',[],[['thigh',160],['tofu',150],['tomato',200],['zucchini',150],['onion',50]],['С бёдер снять кожу, кусочками 8 мин на сухой сковороде','Лук, помидоры и кабачки туда же','Тофу кубиками, под крышкой 8 мин, перец, соль']],
  ['oatjack','Овсянка с джекфрутом и варёные яйца',['bf'],[['egg',3],['oats',50],['jackfruit',100]],['Овсянку залить кипятком на 5 мин','Джекфрут кусочками сверху','Яйца из запаса']],
 ]
 RB = {r[0]: r for r in R}
@@ -78,8 +82,8 @@ TYPES = ['S','W','S','S','W','R','S']
 W = [
  [('oatban','friedrice','shrimpbroc','eggcuke'),('omtom','beefgreens','fishpan','tunacuke'),('oatban','thighrice','porkgreens','tunacuke'),('sweeteggs','shrimpcab','chickmush','eggcuke'),('tunabm','chickpump','squidpep','tunacuke'),('oatmango','curry','meatballs','tunacuke'),('oatban','porkpot','fishtom','sardveg')],
  [('oatban','beefbroc','gingchick','eggcuke'),('sweeteggs','thighrice','tunasalad','sardveg'),('omtom','mincebeans','shrimpbroc','eggcuke'),('oatban','fishsweet','omelet','eggcuke'),('oatmango','friedrice','squidsalad','tunacuke'),('tunabm','curry','porkgreens','eggcuke'),('oatban','tunarice','beefpep','eggcuke')],
- [('oatban','porkstir','shrimppump','eggcuke'),('oatban','curry','fishtom','eggcuke'),('sweeteggs','shrimprice','tofumince','tunacuke'),('oatban','chickpump','beefpep','tunacuke'),('tunabm','beefgreens','fishpan','eggcuke'),('sweeteggs','banhmichick','shrimpbroc','eggcuke'),('oatban','thighrice','squidpep','tunacuke')],
- [('oatban','tofutom','gingchick','tunacuke'),('sweeteggs','shrimpcab','meatballs','tunacuke'),('oatban','beefbroc','tunasalad','eggcuke'),('oatban','friedrice','porkgreens','eggcuke'),('oatmango','fishsweet','chickmush','eggcuke'),('tunabm','mincebeans','squidsalad','tunacuke'),('oatban','curry','fishtom','eggcuke')],
+ [('oatban','porkstir','shrimppump','eggcuke'),('oatban','curry','fishtom','eggcuke'),('sweeteggs','shrimprice','fishtom','tunacuke'),('oatban','chickpump','beefpep','tunacuke'),('tunabm','beefgreens','fishpan','eggcuke'),('sweeteggs','banhmichick','shrimpbroc','eggcuke'),('oatban','thighrice','squidpep','tunacuke')],
+ [('oatban','porkstir','gingchick','tunacuke'),('sweeteggs','shrimpcab','meatballs','tunacuke'),('oatban','beefbroc','tunasalad','eggcuke'),('oatban','friedrice','porkgreens','eggcuke'),('oatmango','fishsweet','chickmush','eggcuke'),('tunabm','mincebeans','squidsalad','tunacuke'),('oatban','curry','fishtom','eggcuke')],
 ]
 CARB = {'rice','potato','sweet','bread','oats','corn','pumpkin'}
 MEAT = {'chicken','thigh','fish','shrimp','squid','pork','beef','mince','tofu','tunaw','sardine','egg'}
@@ -105,7 +109,7 @@ def pen(t, cpre):
     s += 2000 * max(0, 0.6 - cpre / max(c, 1))   # большая часть углеводов до 16:00
     return s
 
-KIMD={'porkgreens','beefpep','gingchick','chickmush','squidpep','meatballs','tofumince','omelet','shrimpbroc'}
+KIMD={'porkgreens','beefpep','gingchick','chickmush','squidpep','meatballs','chickmush','omelet','shrimpbroc'}
 def build_day(typ, bf, lunch, dinner, late, fruit):
     meals = []
     if typ == 'S': meals.append(['pre', [['protein', 30], ['creatine', 5]], None])
