@@ -450,7 +450,7 @@ nav.tabs button{min-width:0;font-size:.7rem}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='5.6.5';
+const APP_VERSION='5.7';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -505,6 +505,9 @@ const PR={
  pineapple:{vi:'Thơm / dứa (ананас)',sec:'fruit',pk:'Можно уже очищенный в лотке',n:'Ананас',s:'ананас',u:'г',k:50,p:0.5,f:0.1,c:13,cat:'Овощи и фрукты',shop:100},
  dragon:{vi:'Thanh long (драконий фрукт)',sec:'fruit',n:'Драконий фрукт',s:'драконий фрукт',u:'г',k:50,p:1.1,f:0.4,c:11,cat:'Овощи и фрукты',shop:100},
  watermelon:{vi:'Dưa hấu (арбуз)',sec:'fruit',n:'Арбуз',s:'арбуз',u:'г',k:30,p:0.6,f:0.2,c:7.6,cat:'Овощи и фрукты',shop:100},
+ zucchini:{vi:'Bí ngòi (кабачок, цукини)',sec:'veg',n:'Кабачки (цукини)',s:'кабачки',u:'г',k:17,p:1.2,f:0.3,c:3.1,cat:'Овощи и фрукты',shop:100},
+ jackfruit:{vi:'Mít ruột đỏ cắt miếng (джекфрут, нарезанный)',sec:'fruit',pk:'Лоток нарезанного, хранится 3–4 дня — лишнее в морозилку',n:'Джекфрут',s:'джекфрут',u:'г',k:95,p:1.7,f:0.6,c:23,cat:'Овощи и фрукты',shop:100},
+ roseapple:{vi:'Mận An Phước (розовое яблоко)',sec:'fruit',n:'Розовое яблоко (мận)',s:'розовое яблоко',u:'г',k:25,p:0.6,f:0.1,c:5.7,cat:'Овощи и фрукты',shop:100},
  orange:{vi:'Cam (апельсины)',sec:'fruit',n:'Апельсины',s:'апельсин',u:'шт',pg:180,k:47,p:0.9,f:0.1,c:12,cat:'Овощи и фрукты',shop:1},
  kimchi:{vi:'Kim chi cải thảo (кимчи из пекинской капусты)',sec:'egg',pk:'Банка или пакет 300–500 г в холодильнике у тофу. Смотри состав: сахар (đường) не в начале списка',n:'Кимчи',s:'кимчи',u:'г',k:15,p:1.1,f:0.5,c:2.4,cat:'Овощи и фрукты',shop:500,keep:1},
  pbutter:{vi:'Bơ đậu phộng không đường (арахисовая паста без сахара)',sec:'dry',pk:'Банка ≈ 340 г',n:'Арахисовая паста без сахара',s:'арахисовая паста',u:'г',k:590,p:25,f:50,c:20,cat:'Прочее',shop:340,keep:1},
@@ -522,12 +525,13 @@ const PR={
 const SECS=[['veg','Овощи (rau củ)'],['fruit','Фрукты (trái cây)'],['meat','Мясо (thịt)'],['sea','Рыба и морепродукты (hải sản)'],['egg','Яйца, тофу, кимчи'],['milk','Молочное (sữa)'],['can','Консервы (đồ hộp)'],['dry','Лапша и сухое (đồ khô)'],['bak','Хлеб (bánh mì)']];
 // примерные цены GO! Nha Trang, ₫: [цена, за сколько единиц (г или шт)]; для запасов — [цена упаковки]. Андрей правит по чеку → S.price
 // часть цен — с sieuthi-go.vn (курица, яйца, креветки, свинина, говядина, рис ST25, тофу, соевое масло), остальное оценка
-const PRICES={egg:[27000,10],chicken:[87000,1000],thigh:[95000,1000],fish:[90000,1000],shrimp:[170000,1000],squid:[160000,1000],pork:[133000,1000],tofu:[33000,1000],
- sweet:[30000,1000],veg:[35000,1000],banana:[3500,1],apple:[12000,1],cucumber:[4000,1],tomato:[30000,1000],mushroom:[90000,1000],ricenoodle:[60000,1000],
- beef:[330000,1000],mince:[120000,1000],tunaw:[35000,1],tunao:[38000,1],sardine:[25000,1],yogurt:[7000,1],milk:[32000,1000],potato:[30000,1000],pumpkin:[25000,1000],
- corn:[8000,1],corncan:[25000,250],glassnoodle:[80000,1000],eggnoodle:[70000,1000],bread:[5000,1],broccoli:[60000,1000],cabbage:[20000,1000],carrot:[25000,1000],
- greens:[30000,1000],beans:[40000,1000],bokchoy:[35000,1000],onion:[30000,1000],bellpep:[70000,1000],mango:[20000,1],papaya:[25000,1000],pineapple:[25000,1000],
- dragon:[35000,1000],kimchi:[50000,500],watermelon:[18000,1000],orange:[7000,1],pbutter:[90000,340],
+// цены: примерные; по чеку GO! 5 окт 2026 — филе, рыба, овощи, фрукты, кимчи, йогурт
+const PRICES={egg:[27000,10],chicken:[105000,1000],thigh:[95000,1000],fish:[69000,1000],shrimp:[170000,1000],squid:[160000,1000],pork:[133000,1000],tofu:[33000,1000],
+ sweet:[39900,1000],veg:[35000,1000],banana:[5600,1],apple:[12000,1],cucumber:[3300,1],tomato:[39900,1000],mushroom:[127600,1000],ricenoodle:[60000,1000],
+ beef:[330000,1000],mince:[120000,1000],tunaw:[35000,1],tunao:[40900,1],sardine:[25000,1],yogurt:[6400,1],milk:[32000,1000],potato:[40700,1000],pumpkin:[26300,1000],
+ corn:[8000,1],corncan:[25000,250],glassnoodle:[80000,1000],eggnoodle:[70000,1000],bread:[3800,1],broccoli:[59000,1000],cabbage:[16000,1000],carrot:[40000,1000],
+ greens:[39900,1000],beans:[40000,1000],bokchoy:[35000,1000],onion:[30000,1000],bellpep:[70000,1000],mango:[24700,1],papaya:[25000,1000],pineapple:[25000,1000],
+ dragon:[21000,1000],kimchi:[79000,1000],watermelon:[18000,1000],orange:[11100,1],zucchini:[59900,1000],jackfruit:[42000,1000],roseapple:[52900,1000],pbutter:[90000,340],
  rice:[189000],oats:[65000],nuts:[120000],oil:[160000],oilveg:[43000],salt:[6000],spice:[30000],garlic:[25000],protein:[1200000],creatine:[450000]};
 const SPORT=['protein','creatine']; // покупаются не в GO!
 const VEGMIX=[['Rau muống','водяной шпинат'],['Bắp cải','капуста'],['Bông cải xanh','брокколи'],['Đậu que','стручковая фасоль'],['Cà rốt','морковь']];
@@ -538,18 +542,27 @@ const OLD_WEEKS=[[["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4]
 const TIMES={pre:'09:30',bf_S:'11:30',bf_W:'10:00',bf_R:'10:00',lunch:'16:00',snack:'19:30',dinner:'22:30',late:'00:30'};
 const NORM={k:[1900,2000],p:[190,205],f:[55,60],c:[120,145]}; // с 6 окт 2026: больше белка — набор мышц на дефиците
 const LEGACY=[["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["thigh",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["shrimp",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1],["creatine",5]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["squid",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["fish",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["chicken",200],["veg",200],["oil",5]]],["late",[["tofu",150]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1],["creatine",5]]],["lunch",[["shrimp",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["banana",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["R",[["bf",[["egg",4],["oats",60],["banana",1],["creatine",5]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",150]]]]]]; // базовое меню, по которому была закупка до 6 окт
-// разовые замены приёмов по датам: {дата:{приём:[[продукт,кол-во],...]}}
+// разовые замены приёмов по датам: {дата:{приём:[[продукт,кол-во],...,'id блюда'?]}}
 const OVERRIDES={
  '2026-09-30':{dinner:[['squid',200],['veg',200],['oil',5]]},
  '2026-10-01':{dinner:[['fish',200],['veg',200],['oil',5]]},
- // неделя 6–12 окт собрана из того, что дома 4 окт: бёдра по одному приёму в день и без масла, кальмар и рыба — к креветкам
- '2026-10-06':{dinner:[['shrimp',200],['squid',100],['broccoli',200],['oil',5],['kimchi',100]]},
- '2026-10-07':{lunch:[['thigh',220],['rice',40],['greens',100],['cucumber',1],['kimchi',150]],dinner:[['chicken',260],['tomato',100],['veg',150]]},
- '2026-10-08':{dinner:[['thigh',200],['greens',250],['kimchi',100]]},
- '2026-10-10':{dinner:[['thigh',200],['bellpep',150],['onion',50],['kimchi',100]]},
- '2026-10-11':{dinner:[['thigh',220],['tomato',200],['onion',50],['kimchi',100]]},
- '2026-10-12':{lunch:[['chicken',80],['tofu',150],['potato',170],['cabbage',150],['oil',5],['kimchi',150]],dinner:[['fish',133],['shrimp',140],['tomato',200],['veg',100]],late:[['tunao',1],['tomato',100]]}
+ // неделя 6–12 окт пересобрана по чеку GO! 5 окт и тому, что было дома: овощи без масла, лишнее филе — в морозилку. Последний элемент — id блюда
+ '2026-10-06':{pre:[['protein',30],['creatine',5]],bf:[['egg',3],['oats',30],['jackfruit',100],'oatjack'],lunch:[['chicken',170],['zucchini',200],['rice',30],['cucumber',1],['tomato',100],['kimchi',150],'chickzuc'],snack:[['protein',30],['jackfruit',90],['nuts',25]],dinner:[['shrimp',170],['squid',100],['broccoli',200],['kimchi',100]],late:[['egg',3],['cucumber',1],['tomato',100],'eggcuke']},
+ '2026-10-07':{bf:[['oats',30],['mango',1],['yogurt',1],['egg',2],['creatine',5],'oatmango'],lunch:[['thigh',190],['greens',200],['rice',30],['kimchi',150],'thighgreens'],snack:[['protein',35],['jackfruit',100],['nuts',30]],dinner:[['chicken',260],['mushroom',250],['zucchini',150],['kimchi',100],'chickmushz'],late:[['tunaw',1],['cucumber',1],['tomato',100],'tunaveg']},
+ '2026-10-08':{pre:[['protein',30],['creatine',5]],bf:[['egg',3],['oats',30],['banana',1],'oatban'],lunch:[['shrimp',180],['rice',30],['carrot',80],['cabbage',150],['cucumber',1],['kimchi',150],'shrimpcab2'],snack:[['protein',30],['roseapple',290],['nuts',30]],dinner:[['thigh',210],['greens',300],['kimchi',100],'thighgreensd'],late:[['tunaw',1],['cucumber',1],['tomato',100],'tunaveg']},
+ '2026-10-09':{pre:[['protein',30],['creatine',5],['banana',1]],bf:[['sweet',120],['egg',3],['cucumber',1],'sweeteggs'],lunch:[['chicken',190],['pumpkin',150],['onion',50],['rice',30],['oil',5],['kimchi',150],'chickpump'],snack:[['protein',30],['dragon',150],['nuts',10]],dinner:[['fish',280],['tomato',200],['zucchini',150],'fishtomz'],late:[['egg',3],['cucumber',1],['tomato',100],'eggcuke']},
+ '2026-10-10':{bf:[['egg',3],['tomato',100],['bread',1],['creatine',5],'omtom'],lunch:[['thigh',220],['potato',150],['cabbage',150],['tomato',100],['kimchi',150],'thighpot'],snack:[['protein',30],['pineapple',120],['nuts',25]],dinner:[['chicken',260],['cabbage',200],['carrot',100],['kimchi',100],'chickcab'],late:[['tunaw',1],['cucumber',1],['tomato',100],'tunaveg']},
+ '2026-10-11':{bf:[['sweet',170],['egg',3],['cucumber',1],['creatine',5],'sweeteggs'],lunch:[['chicken',240],['broccoli',250],['rice',40],['tomato',100],['kimchi',150],'chickbroc'],snack:[['protein',30],['roseapple',190],['nuts',25]],dinner:[['thigh',240],['tomato',200],['zucchini',150],['onion',50],['kimchi',100],'thightom'],late:[['tunaw',1],['cucumber',1],['tomato',100],'tunaveg']},
+ '2026-10-12':{pre:[['protein',30],['creatine',5]],bf:[['oats',40],['mango',1],['yogurt',1],['egg',2],'oatmango'],lunch:[['fish',270],['pumpkin',200],['broccoli',200],['kimchi',150],'fishpump'],snack:[['protein',30],['orange',1],['nuts',10]],dinner:[['shrimp',140],['tofu',150],['tomato',200],['kimchi',100],'shrimptofu'],late:[['egg',3],['cucumber',1],['tomato',100],'eggcuke']},
 };
+// разовые задачи «Заготовок» по неделям: [id, что, подробно]
+const PREP_EXTRA={'2026-10-06':[
+ ['leftchick','Куриное филе сверх меню (~1,7 кг) — в морозилку','Это запас на следующую неделю. По пакетам 200–250 г, подписать «филе · вес · 5 окт». В морозилке — до 3 месяцев.'],
+ ['leftjack','Джекфрут: ~300 г — в холодильник, остальное (~900 г) — заморозить','В меню он во Вт и Ср. Остальное кусками в пакет, в морозилку — потом в овсянку или в перекус.'],
+ ['lefttofu','Тофу (~600 г) — в морозилку','В меню он только в Пн (150 г): в вс вечером переложить в холодильник. После морозилки тофу пористый — для жарки ещё лучше.'],
+ ['leftthigh','Бёдра сверх меню (~170 г) — в морозилку','Перед готовкой снять кожу.'],
+ ['leftfruit','Бананы сверх меню (~4) — заморозить, когда пожелтеют','Очистить, кусками в пакет, в морозилку — потом в овсянку на следующей неделе.'],
+ ['leftveg','Огурцы и помидоры — ешь без ограничений','Их больше, чем в меню, — к любому приёму. Брокколи ~350 г и капуста ~500 г останутся — назови их в «Что дома» в воскресенье.']]};
 // что было дома 4 окт — заносим один раз, чтобы список покупок на 6–12 окт сразу был верным
 const HOME_SEED={ck:'2026-10-06',at:new Date(2026,9,4,21).getTime(),line:'ДОМА: орехи 234 г; протеин много; креатин есть; специи есть; овсянка много; тунец в соку 4 банки; тунец в масле 4 банки; чеснок 427 г; помидоры 520 г; оливковое масло есть; растительное масло есть; соль есть; яблоки 2; огурцы 3; лук 1,2 кг; вареных яиц 13; кимчи 1 кг; тофу 900 г; креветки 520 г; кальмар 100 г; рыба 133 г; куриное филе 1340 г; бедра 1035 г; вареного риса 600 г'};
 const SWAPP=['chicken','thigh','fish','shrimp','squid','pork','beef','mince','tunaw','tunao','sardine','tofu'];
@@ -592,7 +605,23 @@ const RECIPES=[
  ['eggcuke','Яйца с огурцом и помидором',['late'],[['egg',3],['cucumber',1],['tomato',100]],['Яйца из запаса, овощи нарезать, соль и перец']],
  ['tofuveg','Тофу с овощами',['late'],[['tofu',150],['veg',100]],['Тофу и овощи на сухую сковороду на 5 мин']],
  ['tunacuke','Тунец с огурцом',['late'],[['tunaw',1],['cucumber',1]],['Тунец без жидкости, огурец нарезать, перец и лайм']],
- ['sardveg','Сардины с помидором',['late'],[['sardine',1],['tomato',100]],['Сардины из банки, помидор нарезать — готовить не нужно']]];
+ ['sardveg','Сардины с помидором',['late'],[['sardine',1],['tomato',100]],['Сардины из банки, помидор нарезать — готовить не нужно']],
+ // неделя 6–12 окт (по чеку): блюда без приёмов не предлагаются в выборе
+ ['chickzuc','Курица с кабачками и рисом',['lunch'],[['chicken',180],['zucchini',200],['rice',40],['cucumber',1],['tomato',100]],['Кабачки кружками 4–5 мин на сухой антипригарной сковороде','Курицу полосками туда же 6 мин, чеснок, перец, соль','С рисом; огурец и помидор нарезать']],
+ ['thighgreens','Бёдра с водяным шпинатом и рисом',[],[['thigh',220],['greens',200],['rice',40]],['С бёдер снять кожу, нарезать полосками','8–10 мин на сухой сковороде, чеснок','Водяной шпинат туда же на 2–3 мин на сильном огне','С рисом']],
+ ['thighgreensd','Бёдра с водяным шпинатом',[],[['thigh',220],['greens',300]],['С бёдер снять кожу, нарезать полосками','8–10 мин на сухой сковороде, чеснок','Водяной шпинат туда же на 2–3 мин на сильном огне']],
+ ['chickmushz','Курица с грибами и кабачками',['dinner'],[['chicken',220],['mushroom',250],['zucchini',150]],['Грибы и кабачки 5 мин на сухой сковороде','Курицу полосками туда же 6 мин','Соль, перец, чеснок']],
+ ['shrimpcab2','Креветки с капустой, морковью и рисом',['lunch'],[['shrimp',180],['rice',40],['carrot',80],['cabbage',150],['cucumber',1]],['Капусту и морковь соломкой 4 мин на сухой сковороде, 2 ст. л. воды','Креветки туда же на 2–3 мин, чеснок, перец','С рисом, лайм']],
+ ['fishtomz','Рыба баса в помидорах с кабачками',['dinner'],[['fish',270],['tomato',200],['zucchini',150]],['Помидоры и кабачки 4 мин на сковороде без масла','Рыбу кусками сверху, под крышку на 8 мин','Перец, лайм, зелень']],
+ ['thighpot','Бёдра с картофелем и капустой',[],[['thigh',220],['potato',250],['cabbage',150],['tomato',100]],['Картофель кубиками на пару в рисоварке 15 мин','С бёдер снять кожу, полосками 8–10 мин на сухой сковороде','Капусту туда же на 4 мин, затем картофель, перец, чеснок']],
+ ['chickcab','Курица с капустой и морковью',['dinner'],[['chicken',220],['cabbage',200],['carrot',100]],['Капусту и морковь соломкой 5 мин на сухой сковороде, 2 ст. л. воды','Курицу полосками туда же 6 мин','Соль, перец, чеснок']],
+ ['chickbroc','Курица с брокколи и рисом',['lunch'],[['chicken',200],['broccoli',250],['rice',40],['tomato',100]],['Брокколи соцветиями 3 мин в кипятке или на пару','Курицу полосками 6 мин на сухой сковороде, чеснок','Брокколи туда же на 1 мин, с рисом и помидором']],
+ ['thightom','Бёдра в помидорах с кабачками',[],[['thigh',220],['tomato',200],['zucchini',150],['onion',50]],['С бёдер снять кожу, кусочками 8 мин на сухой сковороде','Лук, помидоры и кабачки туда же','Под крышкой 8 мин, перец, соль']],
+ ['fishpump','Рыба на пару с тыквой и брокколи',['lunch'],[['fish',270],['pumpkin',300],['broccoli',200]],['Тыкву кусками на пару в рисоварке 15 мин','Рыбу и брокколи туда же на последние 10 мин','Соль, перец, лайм']],
+ ['shrimptofu','Креветки с тофу в помидорах',['dinner'],[['shrimp',140],['tofu',150],['tomato',200]],['Помидоры кубиками 3 мин на сковороде без масла','Тофу кубиками туда же на 4 мин','Креветки на 2–3 мин, перец, зелёный лук']],
+ ['tofuzuc','Тофу с кабачками',['late'],[['tofu',150],['zucchini',150]],['Тофу и кабачки кубиками 5 мин на сухой сковороде, соль, перец']],
+ ['tunaveg','Тунец с огурцом и помидором',['late'],[['tunaw',1],['cucumber',1],['tomato',100]],['Тунец без жидкости, огурец и помидор нарезать, перец и лайм']],
+ ['oatjack','Овсянка с джекфрутом и варёные яйца',['bf'],[['egg',3],['oats',50],['jackfruit',100]],['Овсянку залить кипятком на 5 мин','Джекфрут кусочками сверху','Яйца из запаса']]];
 const RECBY=Object.fromEntries(RECIPES.map(r=>[r[0],r]));
 // Способы приготовления основного белка: [id, название, текст]
 const METHODS={
@@ -608,7 +637,7 @@ const PRESETS=[['Чипсы, пачка 50 г','Snack khoai tây',270,3,17,26],[
 function swapQ(from,q,to){const a=PR[from],b=PR[to];if(!a||!b||from===to)return q;if(a.u==='г'&&b.u==='г')return Math.min(q*2,Math.max(10,Math.round(q*a.p/b.p/10)*10));if(a.u===b.u)return q;const pr=a.p*(a.u==='шт'?q*a.pg:q)/100;
   return b.u==="шт"?Math.max(1,Math.round(pr/(b.p*b.pg/100)+0.2)):Math.max(10,Math.round(pr/b.p*100/10)*10)}
 // «из дома в меню»: чем можно заменить продукт в приёме, чтобы съесть остатки
-const UVEG=['broccoli','cabbage','carrot','greens','beans','bokchoy','bellpep','mushroom','tomato','pumpkin'],UFRUIT=['apple','banana','orange','mango','papaya','pineapple','dragon','watermelon'],UCARB=['rice','ricenoodle','glassnoodle','eggnoodle','potato','sweet','bread','corn','corncan'];
+const UVEG=['broccoli','cabbage','carrot','greens','beans','bokchoy','bellpep','mushroom','tomato','pumpkin','zucchini'],UFRUIT=['apple','banana','orange','mango','papaya','pineapple','dragon','watermelon','jackfruit','roseapple'],UCARB=['rice','ricenoodle','glassnoodle','eggnoodle','potato','sweet','bread','corn','corncan'];
 function useClass(id){return SWAPP.includes(id)?'prot':UVEG.includes(id)||id==='veg'?'veg':UFRUIT.includes(id)?'fruit':UCARB.includes(id)?'carb':null}
 // белок — по белку, овощи — те же граммы, фрукты и гарниры — по калориям
 function convQ(from,q,to){const c=useClass(from),a=PR[from],b=PR[to];if(c==='prot')return swapQ(from,q,to);if(c==='veg'&&a.u==='г'&&b.u==='г')return q;
@@ -641,11 +670,12 @@ function cycleIdx(cs){const n=Math.round((cs-EPOCH)/864e5/7);return ((n%4)+4)%4}
 function rawDay(date){const cs=cycleStart(date),ck=dkey(cs),di=Math.round((date-cs)/864e5),wm=(S.wmenu||{})[ck];
   return (wm!=null?(cs<EPOCH?OLD_WEEKS:WEEKS)[wm]:cs<EPOCH?LEGACY:WEEKS[cycleIdx(cs)])[di]}
 function menuIdxOf(cs){const wm=(S.wmenu||{})[dkey(cs)];return wm!=null?wm:cs<EPOCH?-1:cycleIdx(cs)}
+const ovItems=a=>a.filter(Array.isArray),ovDish=a=>typeof a[a.length-1]==='string'?a[a.length-1]:null;
 function dayPlan(date){
   const cs=cycleStart(date),raw=rawDay(date),type=raw[0];
   const ov=OVERRIDES[dkey(date)]||{},dk=dkey(date),ww=(S.wswaps||{})[dkey(cs)]||{};
   return {type,meals:raw[1].map(([slot,items,dsh])=>{const k=dk+'|'+slot,sw=(S.swaps||{})[k],ds=(S.dswap||{})[k];
-    let src=ov[slot]||items,dish=ov[slot]?null:dsh;if(ds){const r2=rawDay(pkey(ds)),m2=r2&&r2[1].find(x=>x[0]===slot);if(m2){src=(OVERRIDES[ds]||{})[slot]||m2[1];dish=(OVERRIDES[ds]||{})[slot]?null:m2[2]}}
+    let src=ov[slot]?ovItems(ov[slot]):items,dish=ov[slot]?ovDish(ov[slot]):dsh;if(ds){const r2=rawDay(pkey(ds)),m2=r2&&r2[1].find(x=>x[0]===slot),o2=(OVERRIDES[ds]||{})[slot];if(m2){src=o2?ovItems(o2):m2[1];dish=o2?ovDish(o2):m2[2]}}
     let its=src.filter(([p,q])=>q>0).map(([p,q])=>({p,q}));
     let wsw=null;
     its=its.map(i=>{const to=ww[i.p];if(to){wsw={from:i.p,to};return {p:to,q:swapQ(i.p,i.q,to)}}return i});
@@ -724,8 +754,9 @@ function prepModel(cs){const D0=prepDone(dkey(cs)),days=[0,1,2,3,4,5,6].map(i=>{
   if(bags.length)bt('bags','Мясо и рыба — по пакетам, подписать','Вт и Ср — в холодильник, остальное — в морозилку. На пакете: день · приём · вес.',bags);
   if(R)bt('rice',cook?`Рис — сварить ${cook} г сухого (≈ ${niceNum(cook/150).s} мерки)`:'Рис — варить не нужно',cook?`Готового ≈ ${cookedRice(cook)} г. Разложить по пакетам, подписать:`:`В морозилке ≈ ${cookedRice(bank)} г готового — хватит на неделю.${rice[0]&&rice[0].i===0?` Порцию на Вт (${cookedRice(rice[0].a)} г) — сейчас в холодильник.`:''}`,{rice,cook,bank,R});
   {const b=boils.find(x=>x.e===-1);if(b)bt('eggs',`Яйца — сварить ${b.k} шт`,`Вареных останется ${b0} — вместе будет ${b0+b.k} из ${EGG_BOX} мест. Вкрутую 9–10 мин, остудить в холодной воде, хранить в скорлупе.`)}
-  if(has('tofu'))bt('tofu','Тофу — в контейнер с водой','Воду менять раз в 2 дня.');
+  if(has('tofu')&&!(PREP_EXTRA[dkey(cs)]||[]).some(x=>x[0]==='lefttofu'))bt('tofu','Тофу — в контейнер с водой','Воду менять раз в 2 дня.');
   if(vegs)bt('veg','Овощи и зелень — помыть, обсушить','Зелень — в бумажное полотенце и в пакет, дольше хранится.');
+  (PREP_EXTRA[dkey(cs)]||[]).forEach(x=>bt(x[0],x[1],x[2]));
   if(Object.keys(cans).length)bt('can','Консервы и сухое — на полку',Object.entries(cans).map(([id,q])=>cap(PR[id].s)+' '+fq(q,PR[id].u)).join(', '));
   // каждый вечер: e = 0 (Вт) … 5 (Вс) — готовим следующий день
   const eve=[0,1,2,3,4,5].map(e=>{const t=days[e+1],T=[];const th=bags.filter(b=>b.i===e+1&&b.fz),rp=rice.find(x=>x.i===e+1&&x.fz);
@@ -982,7 +1013,7 @@ const HOME_WORDS=[['kimchi',/кимч/],['pbutter',/арахисов\S* паст
  ['thigh',/бедр|бёдр/],['chicken',/кур(иц|ин|ятин)|грудк|филе/],['mince',/фарш/],['beef',/говя/],['pork',/свин/],['shrimp',/кревет/],['squid',/кальмар/],['fish',/рыб|тилапи|пангасиус|баса|basa/],
  ['tofu',/тофу/],['egg',/яйц|яиц|яичк/],['yogurt',/йогурт/],['milk',/молок/],['protein',/протеин/],['creatine',/креатин/],['nuts',/орех|кешью|арахис/],
  ['oil',/оливк\S* масл|масл\S* оливк|оливков/],['oilveg',/масл/],['salt',/(^|[^а-я])сол[ьи]/],['spice',/специ|приправ|куркум|паприк/],['garlic',/чеснок|лайм|лимон/],
- ['sweet',/батат/],['potato',/картош|картоф/],['pumpkin',/тыкв/],['bread',/багет|хлеб|бань ?ми/],['broccoli',/брок+ол/],['cabbage',/капуст/],['carrot',/морков/],['greens',/шпинат|муонг|зелен/],
+ ['sweet',/батат/],['potato',/картош|картоф/],['pumpkin',/тыкв/],['bread',/багет|хлеб|бань ?ми/],['broccoli',/брок+ол/],['cabbage',/капуст/],['carrot',/морков/],['zucchini',/кабач|цукин/],['jackfruit',/джекфрут/],['roseapple',/розов\S* яблок/],['greens',/шпинат|муонг|зелен/],
  ['beans',/фасол/],['bokchoy',/бок.?чой|бокчой/],['onion',/(^|[^а-я])лук/],['bellpep',/перец|перц/],['tomato',/помидор|томат/],['cucumber',/огур/],['mushroom',/гриб/],
  ['banana',/банан/],['apple',/яблок/],['mango',/манго/],['papaya',/папай/],['pineapple',/ананас/],['dragon',/дракон|питахай/],['watermelon',/арбуз/],['orange',/апельсин/],['veg',/овощ/]];
 const NUMW={'один':1,'одна':1,'одно':1,'два':2,'две':2,'три':3,'четыре':4,'пять':5,'шесть':6,'семь':7,'восемь':8,'девять':9,'десять':10,'одиннадцать':11,'двенадцать':12,'пятнадцать':15,'двадцать':20,'тридцать':30,'сто':100,'двести':200,'триста':300,'четыреста':400,'пятьсот':500,'шестьсот':600,'семьсот':700,'восемьсот':800,'девятьсот':900,'тысяча':1000,'тысячу':1000};
