@@ -458,6 +458,17 @@ nav.tabs button{min-width:0;font-size:.7rem}
 .shopt b{white-space:nowrap}
 .shp .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .shp .field input,.shp .field select{font-size:1rem}
+
+/* 5.9.1: галочки по пакетам в «Фасовке» */
+.pkl{margin:8px 0 12px}
+.pkh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pkh b{font-size:1.02rem}
+.pkh .small{margin-left:auto}
+.pkc{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.pkb{width:44px;height:44px;border-radius:10px;border:2px solid var(--line);background:var(--surface);color:var(--muted);font:inherit;font-weight:700;font-size:.95rem;display:grid;place-items:center;padding:0}
+.pkb.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pkl.done b{text-decoration:line-through;color:var(--muted)}
+.pksum{font-weight:600;margin:4px 0 2px}
 </style>
 </head>
 <body>
@@ -465,7 +476,7 @@ nav.tabs button{min-width:0;font-size:.7rem}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='5.9';
+const APP_VERSION='5.9.1';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -840,13 +851,16 @@ function prepModel(cs){const D0=prepDone(dkey(cs)),days=[0,1,2,3,4,5,6].map(i=>{
     return {e,d:days[e].d,T}});
   return {cs,big,eve,boils,cook,bank,b0}}
 function prepDone(ck){return (S.prepDone||{})[ck]||{}}
+function packKeys(ex){const o=[];ex.forEach(g=>[['fr',g.fr],['fz',g.fz],['rest',g.rest]].forEach(([kind,cl])=>cl.forEach(c=>o.push([`pk|${g.id}|${kind}|${c.size}`,c.n]))));return o}
 function prepTask(t,ck){const on=!!prepDone(ck)[t.id];let x='';
   if(t.id==='big:bags')x=`<table class="bags">${t.extra.map(b=>`<tr><td><b>${DAYS[wd(b.d)]} · ${SLOTS[b.slot].toLowerCase()}</b> ${esc(PR[b.id].s)}${b.id==='thigh'?' <small class="muted">(снять кожу)</small>':''}</td><td>${fq(b.q,PR[b.id].u)} <span class="tg ${b.fz?'fz':'fr'}">${b.fz?'мороз.':'холод.'}</span></td></tr>`).join('')}</table>`;
   if(t.id==='big:store'){const G=[['freezer','В морозилку'],['fridge','В холодильник'],['shelf','На полку']],w=id=>(STORE[id]||[PR[id].sec==='veg'||PR[id].sec==='fruit'?'fridge':'shelf'])[0];
     x=G.map(([k,tt])=>{const rows=t.extra.filter(i=>w(i.id)===k).sort((a,b)=>PR[a.id].s.localeCompare(PR[b.id].s,'ru'));if(!rows.length)return '';
       return `<div class="ph">${tt}</div><table class="bags">${rows.map(i=>{const s=STORE[i.id]||['','',''];return `<tr><td><b>${esc(PR[i.id].custom?PR[i.id].n:cap(PR[i.id].s))}</b>${s[1]?`<br><small class="muted">${esc(s[1])}</small>`:''}${i.sur&&s[2]?`<br><small>лишнее ${esc(FRPIECE[i.id]?pieceText(i.id,i.sur):'≈ '+fq(i.sur,PR[i.id].u))} → в морозилку: ${esc(s[2])}</small>`:i.sur&&k==='fridge'&&!PR[i.id].keep?`<br><small class="muted">сверх меню ${esc(FRPIECE[i.id]?pieceText(i.id,i.sur):'≈ '+fq(i.sur,PR[i.id].u))} — пойдёт на следующую неделю</small>`:''}</td><td>${esc(FRPIECE[i.id]?pieceText(i.id,i.have):fq(Math.round(i.have*10)/10,PR[i.id].u))}</td></tr>`}).join('')}</table>`}).join('')}
-  if(t.id==='big:pack'){const ln=(lb,tg,cl,u)=>cl.length?`<tr><td><span class="tg ${tg}">${lb}</span></td><td>${cl.map(c=>`<b>${c.n} × ${c.size}</b> ${u}`).join(' · ')}</td></tr>`:'';
-    x=t.extra.map(g=>{const p=PR[g.id];return `<div class="ph">${esc(cap(p.s))}${g.id==='thigh'?' <small class="muted">(снять кожу)</small>':''} <small class="muted">всего ≈ ${esc(fq(g.tot,'г'))}</small></div><table class="bags pk">${ln('холод.','fr',g.fr,'г')}${ln('мороз.','fz',g.fz,'г')}${ln('запас','fz',g.rest,'г')}</table>`}).join('')+`<div class="hint">Вес пакета — средний по порциям в группе: в меню может быть на 10–30 г меньше или больше, это нормально (в плане дня граммы можно поправить кнопками ±). «Холод.» — в ближайшие дни (мясо — Вт–Ср, фрукты и овощи — до пятницы); «мороз.» — дальше и на следующие недели; «запас» — сверх меню, подписать «запас».</div>`}
+  if(t.id==='big:pack'){const D=prepDone(ck),keys=packKeys(t.extra),all=keys.reduce((s,[,n])=>s+n,0),got=keys.reduce((s,[k,n])=>s+Math.min(n,+D[k]||0),0);
+    const ln=(g,kind,lb,tg,cl)=>cl.map(c=>{const key=`pk|${g.id}|${kind}|${c.size}`,dn=Math.min(c.n,+D[key]||0);
+      return `<div class="pkl ${dn>=c.n?'done':''}"><div class="pkh"><span class="tg ${tg}">${lb}</span><b>${c.n} × ${c.size} г</b><span class="small muted">${dn} из ${c.n}</span></div><div class="pkc">${Array.from({length:c.n},(_,i)=>`<button class="pkb ${i<dn?'on':''}" data-a="pkdone" data-d="${ck}" data-k="${key}" data-i="${i}" aria-pressed="${i<dn}" aria-label="${esc(PR[g.id].s)} ${c.size} г: пакет ${i+1} из ${c.n}">${i<dn?'✓':i+1}</button>`).join('')}</div></div>`}).join('');
+    x=`<div class="small pksum">Сделано ${got} из ${all} пакетов</div>`+t.extra.map(g=>{const p=PR[g.id];return `<div class="ph">${esc(cap(p.s))}${g.id==='thigh'?' <small class="muted">(снять кожу)</small>':''} <small class="muted">всего ≈ ${esc(fq(g.tot,'г'))}</small></div>${ln(g,'fr','холод.','fr',g.fr)}${ln(g,'fz','мороз.','fz',g.fz)}${ln(g,'rest','запас','fz',g.rest)}`}).join('')+`<div class="hint">Нажимай номера пакетов по мере готовности. Вес пакета — средний по порциям в группе: в меню может быть на 10–30 г меньше или больше, это нормально (в плане дня граммы можно поправить кнопками ±). «Холод.» — в ближайшие дни (мясо — Вт–Ср, овощи — до пятницы); «мороз.» — дальше и на следующие недели; «запас» — сверх меню, подписать «запас».</div>`}
   if(t.id==='big:bags2'){const n=t.extra,tot=n.rows.reduce((a,b)=>a+b.q,0)+n.rest.reduce((a,b)=>a+b.all,0);x=`<table class="bags">${n.rows.map(b=>`<tr><td><b>${DAYS[wd(b.d)]} ${b.d.getDate()} · ${SLOTS[b.slot].toLowerCase()}</b> ${esc(PR[b.id].s)}${b.id==='thigh'?' <small class="muted">(снять кожу)</small>':''}</td><td>${fq(b.q,PR[b.id].u)} <span class="tg fz">мороз.</span></td></tr>`).join('')}${n.rest.map(b=>`<tr><td><b>Запас · ${esc(PR[b.id].s)}</b>${b.id==='thigh'?' <small class="muted">(снять кожу)</small>':''}<br><small class="muted">${b.n>1?b.n+' пакета':'1 пакет'} по ≈ ${fq(b.q,PR[b.id].u)}, подписать «запас · вес»</small></td><td>${fq(b.all,PR[b.id].u)} <span class="tg fz">мороз.</span></td></tr>`).join('')}</table><div class="hint">Всего в морозилку ≈ ${fq(tot,'г')}. Вечером перед нужным днём — в холодильник один пакет.</div>`}
   if(t.id==='big:greens'){const g=t.extra;x=`<table class="bags">${g.rows.map(b=>`<tr><td><b>${DAYS[wd(b.d)]} · ${SLOTS[b.slot].toLowerCase()}</b> ${esc(PR[b.id].s)}</td><td>${fq(b.q,PR[b.id].u)} <span class="tg ${b.fz?'fz':'fr'}">${b.fz?'бланш. + мороз.':'холод.'}</span></td></tr>`).join('')}${g.rest.map(b=>`<tr><td><b>Лишнее</b> ${esc(PR[b.id].s)}<br><small class="muted">порциями по 150 г</small></td><td>${fq(b.q,PR[b.id].u)} <span class="tg fz">бланш. + мороз.</span></td></tr>`).join('')}</table>`}
   if(t.id==='big:rice'&&t.extra.cook){const r=t.extra,used=r.rice.reduce((a,x)=>a+x.a,0),spare=r.cook+r.bank-used;x=`<table class="bags">${r.rice.map(z=>`<tr><td><b>${DAYS[wd(z.d)]} ${z.d.getDate()}</b> · обед</td><td>${cookedRice(z.a)} г <span class="tg ${z.fz?'fz':'fr'}">${z.fz?'мороз.':'холод.'}</span></td></tr>`).join('')}${spare>20?`<tr><td>Остальное — «запас» на следующие недели</td><td>${cookedRice(spare)} г <span class="tg fz">мороз.</span></td></tr>`:''}</table><div class="hint">В холодильнике до 3 дней, в морозилке до месяца. Разогреть: на сковороду с ложкой воды под крышку 2–3 мин.</div>`}
@@ -1342,6 +1356,8 @@ const A={
   homesave:()=>{if(!HP)return true;const ck=dkey(shopCycle());applyHome(HP.res,Date.now(),window._homeAll!==false,ck);window._homeOpen=false;window._homeText='';const n=HP.res.length;HP=null;clean();save();toast('Сохранил: '+n+' '+plural(n,['продукт','продукта','продуктов'])+' — список покупок пересчитан')},
   ptab:d=>{prepTab=d.v},
   dismiss:d=>{S.dismiss=S.dismiss||{};const cut=dkey(addDays(appNow(),-14));Object.keys(S.dismiss).forEach(k=>{if(k.split('|')[1]<cut)delete S.dismiss[k]});S.dismiss[d.v+'|'+dkey(appNow())]=1;save();toast(d.v==='weigh'?'Хорошо, взвесишься в следующую пятницу':'Скрыл до следующего раза')},
+  pkdone:d=>{const ck=d.d,D=(S.prepDone=S.prepDone||{})[ck]=(S.prepDone[ck]||{}),i=+d.i,cur=+D[d.k]||0;D[d.k]=i<cur?i:i+1;if(!D[d.k])delete D[d.k];
+    const M=prepModel(pkey(ck)),pk=M.big.find(x=>x.id==='big:pack');if(pk){const ks=packKeys(pk.extra);if(ks.length&&ks.every(([k,n])=>(+D[k]||0)>=n))D['big:pack']=1;else delete D['big:pack']}save()},
   ptask:d=>{const ck=d.d,D=(S.prepDone=S.prepDone||{})[ck]=(S.prepDone[ck]||{}),on=!D[d.v],M=prepModel(pkey(ck)),now=Date.now();
     if(on){D[d.v]=1;buzz();
       if(d.v==='big:rice'&&M.cook){if(!D._rice)D._rice=JSON.stringify(S.riceBank||{q:0,at:0});S.riceBank={q:M.bank+M.cook,at:now}}
