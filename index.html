@@ -465,7 +465,7 @@ nav.tabs button{min-width:0;font-size:.7rem}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='5.8';
+const APP_VERSION='5.8.1';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -542,10 +542,10 @@ const SECS=[['veg','Овощи (rau củ)'],['fruit','Фрукты (trái cây)'
 // часть цен — с sieuthi-go.vn (курица, яйца, креветки, свинина, говядина, рис ST25, тофу, соевое масло), остальное оценка
 // цены: примерные; по чеку GO! 5 окт 2026 — филе, рыба, овощи, фрукты, кимчи, йогурт
 const PRICES={egg:[27000,10],chicken:[105000,1000],thigh:[95000,1000],fish:[69000,1000],shrimp:[170000,1000],squid:[160000,1000],pork:[133000,1000],tofu:[33000,1000],
- sweet:[39900,1000],veg:[35000,1000],banana:[5600,1],apple:[12000,1],cucumber:[3300,1],tomato:[39900,1000],mushroom:[127600,1000],ricenoodle:[60000,1000],
+ sweet:[39900,1000],veg:[35000,1000],banana:[4800,1],apple:[12000,1],cucumber:[3300,1],tomato:[39900,1000],mushroom:[127600,1000],ricenoodle:[60000,1000],
  beef:[330000,1000],mince:[120000,1000],tunaw:[35000,1],tunao:[40900,1],sardine:[25000,1],yogurt:[6400,1],milk:[32000,1000],potato:[40700,1000],pumpkin:[26300,1000],
  corn:[8000,1],corncan:[25000,250],glassnoodle:[80000,1000],eggnoodle:[70000,1000],bread:[3800,1],broccoli:[59000,1000],cabbage:[16000,1000],carrot:[40000,1000],
- greens:[39900,1000],beans:[40000,1000],bokchoy:[35000,1000],onion:[30000,1000],bellpep:[70000,1000],mango:[24700,1],papaya:[25000,1000],pineapple:[25000,1000],
+ greens:[39900,1000],beans:[40000,1000],bokchoy:[35000,1000],onion:[30000,1000],bellpep:[70000,1000],mango:[19500,1],papaya:[25000,1000],pineapple:[25000,1000],
  dragon:[21000,1000],kimchi:[79000,1000],watermelon:[18000,1000],orange:[11100,1],zucchini:[59900,1000],jackfruit:[42000,1000],roseapple:[52900,1000],pbutter:[90000,340],
  rice:[189000],oats:[65000],nuts:[120000],oil:[160000],oilveg:[43000],salt:[6000],spice:[30000],garlic:[25000],protein:[1200000],creatine:[450000]};
 const SPORT=['protein','creatine']; // покупаются не в GO!
@@ -571,10 +571,9 @@ const OVERRIDES={
  '2026-10-12':{pre:[['protein',30],['creatine',5]],bf:[['oats',40],['mango',1],['yogurt',1],['egg',2],'oatmango'],lunch:[['fish',270],['pumpkin',200],['broccoli',200],['kimchi',150],'fishpump'],snack:[['protein',30],['orange',1],['nuts',10]],dinner:[['shrimp',140],['tofu',150],['tomato',200],['kimchi',100],'shrimptofu'],late:[['egg',3],['cucumber',1],['tomato',100],'eggcuke']},
 };
 // разовые задачи «Заготовок» по неделям: [id, что, подробно]
-const PREP_EXTRA={'2026-10-06':[
- ['leftjack','Джекфрут: ~300 г — в холодильник, остальное (~900 г) — заморозить','В меню он во Вт и Ср. Остальное кусками в пакет, в морозилку — потом в овсянку или в перекус.'],
- ['leftfruit','Бананы сверх меню (~4) — заморозить, когда пожелтеют','Очистить, кусками в пакет, в морозилку — потом в овсянку на следующей неделе.'],
- ['leftveg','Огурцы и помидоры — ешь без ограничений','Их больше, чем в меню, — к любому приёму. Брокколи ~350 г и капуста ~500 г останутся — назови их в «Что дома» в воскресенье.']]};
+const PREP_EXTRA={}; // разовые задачи «Заготовок» по неделям: {ГГГГ-ММ-ДД: [[id, что, подробно], ...]}
+// чек GO! 5 окт 15:13 (≈ 982 тыс ₫ продукты, ≈ 328 тыс ₫ не продукты): что реально куплено, г или шт. Заносим один раз (S.seed2)
+const RECEIPT={ck:'2026-10-06',at:new Date(2026,9,5,15,13).getTime(),q:{orange:2,bread:1,jackfruit:1270,pumpkin:622,mango:3,chicken:1700,broccoli:1000,dragon:484,kimchi:1000,tomato:1832,cucumber:13,potato:344,mushroom:250,yogurt:4,banana:7,zucchini:908,greens:544,carrot:198,cabbage:1020,tunao:1,sweet:340,roseapple:708,fish:540,rongbien:6}};
 // что было дома 4 окт — заносим один раз, чтобы список покупок на 6–12 окт сразу был верным
 const HOME_SEED={ck:'2026-10-06',at:new Date(2026,9,4,21).getTime(),line:'ДОМА: орехи 234 г; протеин много; креатин есть; специи есть; овсянка много; тунец в соку 4 банки; тунец в масле 4 банки; чеснок 427 г; помидоры 520 г; оливковое масло есть; растительное масло есть; соль есть; яблоки 2; огурцы 3; лук 1,2 кг; вареных яиц 13; кимчи 1 кг; тофу 900 г; креветки 520 г; кальмар 100 г; рыба 133 г; куриное филе 1340 г; бедра 1035 г; вареного риса 600 г'};
 const SWAPP=['chicken','thigh','fish','shrimp','squid','pork','beef','mince','tunaw','tunao','sardine','tofu'];
@@ -755,12 +754,23 @@ function prepCycle(){const t=appNow();return wd(t)===0?addDays(cycleStart(t),7):
 // 5.8: что останется сверх меню недели cs = дома к вторнику + куплено (фактически) − нужно. Считаем по мясу, рыбе, тофу и зелени
 const FRESHG=['greens','bokchoy','beans'];
 const BAGID=id=>{const p=PR[id];return !!(p&&p.how&&!p.keep&&id!=='egg')};
-function surplusFor(cs){const ck=dkey(cs),out={};if(!(S.left||{})[ck])return out;const need=needFor(cs),ua={};
-  Object.keys(PR).forEach(id=>{const p=PR[id];if(p.bulk||!(BAGID(id)||FRESHG.includes(id)))return;
+// где лежит и что делать с лишним: [место, совет, чем заморозить лишнее ('' — не морозить)]
+const STORE={potato:['shelf','на полке, сухо и темно, не мыть',''],sweet:['shelf','на полке, не в холодильнике',''],onion:['shelf','на полке, сухо',''],bread:['freezer','багет: завтра — на воздухе, остальное в морозилку, потом 1 мин на сухой сковороде','целиком'],
+ banana:['shelf','на воздухе; что пожелтеет сверх меню — очистить и заморозить','кусками, очищенные'],mango:['shelf','дозревает на полке, спелый — в холодильник','кубиками'],
+ pumpkin:['fridge','нарезанная — в холодильник','кубиками'],jackfruit:['fridge','в холодильнике до 3–4 дней','кусками в пакете'],roseapple:['fridge','в холодильнике, 5–7 дней',''],dragon:['fridge','в холодильнике, целым 5–7 дней','кубиками'],orange:['fridge','в холодильнике',''],pineapple:['fridge','в холодильнике','кубиками'],
+ cucumber:['fridge','в овощном ящике',''],tomato:['fridge','в холодильнике, 5–7 дней',''],cabbage:['fridge','в плёнке, держится 2 недели',''],carrot:['fridge','в овощном ящике, 2 недели',''],broccoli:['fridge','в бумажном полотенце, 4–5 дней','бланшировать 2 мин, порциями'],zucchini:['fridge','в овощном ящике, неделя',''],
+ greens:['fridge','в бумажном полотенце и пакете, 3–4 дня','бланшировать 1 мин, порциями по 150 г'],bokchoy:['fridge','в бумажном полотенце, 3–4 дня','бланшировать 1 мин'],beans:['fridge','в пакете, 4–5 дней','бланшировать 2 мин'],mushroom:['fridge','в бумажном пакете, не в плёнке, 3–4 дня',''],bellpep:['fridge','в овощном ящике',''],
+ kimchi:['fridge','в банке, плотно закрыть',''],yogurt:['fridge','в холодильнике',''],egg:['fridge','в холодильнике',''],tofu:['fridge','в воде, воду менять раз в 2 дня','брусками'],
+ chicken:['freezer','порции в морозилку, Вт–Ср — в холодильник',''],thigh:['freezer','снять кожу, порции в морозилку',''],fish:['freezer','порции в морозилку, Вт–Ср — в холодильник',''],shrimp:['freezer','порции в морозилку',''],squid:['freezer','порции в морозилку',''],pork:['freezer','порции в морозилку',''],beef:['freezer','порции в морозилку',''],mince:['freezer','порции в морозилку',''],
+ tunao:['shelf','на полку',''],tunaw:['shelf','на полку',''],sardine:['shelf','на полку','']};
+// что есть к началу недели cs: дома к вторнику + куплено (фактически), сколько нужно по меню и что лишнее
+function invFor(cs){const ck=dkey(cs),out=[];if(!(S.left||{})[ck]&&!(S.shx||{})[ck])return out;const need=needFor(cs),ua={},C=(S.chk||{})[ck]||{};
+  Object.keys(PR).forEach(id=>{const p=PR[id];if(p.bulk)return;
     const l=homeEntry(id,ck);let home=0;if(l&&l.q>0){const u=(ua[l.at]=ua[l.at]||useAfter(l.at,cs))[id]||0;home=Math.max(0,l.q-u)}
-    const n=need[id]||0,lack=n-home,buy=lack>0?Math.ceil(Math.round(lack*10)/10/p.shop)*p.shop:0,s=shxOf(ck,id),got=s&&s.none?0:s&&s.q!=null?s.q:buy,sp=home+got-n;
-    if(sp>=60)out[id]=Math.round(sp/10)*10});
+    const n=need[id]||0,lack=n-home,buy=lack>0?Math.ceil(Math.round(lack*10)/10/p.shop)*p.shop:0,s=shxOf(ck,id),got=!C[id]||(s&&s.none)?0:s&&s.q!=null?s.q:buy,have=home+got,sp=have-n,sh=p.u==='шт';
+    if(have>0||n>0)out.push({id,have,need:n,sur:sp>=(sh?1:60)?(sh?Math.round(sp):Math.round(sp/10)*10):0})});
   return out}
+function surplusFor(cs){const o={};invFor(cs).forEach(x=>{if(x.sur&&(BAGID(x.id)||FRESHG.includes(x.id)))o[x.id]=x.sur});return o}
 // лишнее мясо и рыба → пакеты под приёмы следующей недели (по порядку), остаток — отдельно
 function bagsNext(cs,sur){const cs2=addDays(cs,7),meals=[],rows=[],rest=[];
   for(let i=0;i<14;i++){const d=addDays(cs2,i);dayPlan(d).meals.forEach(m=>{if(m.slot==='pre'||m.slot==='snack')return;m.items.forEach(it=>meals.push({i,d,slot:m.slot,id:it.p,q:it.q}))})}
@@ -786,6 +796,7 @@ function prepModel(cs){const D0=prepDone(dkey(cs)),days=[0,1,2,3,4,5,6].map(i=>{
   const big=[];const bt=(id,t,d,extra)=>big.push({id:'big:'+id,t,d,extra});
   if(bags.length)bt('bags','Мясо и рыба — по пакетам, подписать','Вт и Ср — в холодильник, остальное — в морозилку. На пакете: день · приём · вес.',bags);
   const sur=surplusFor(cs),nx=bagsNext(cs,sur);
+  {const inv=invFor(cs).filter(x=>x.have>0&&!x.extra);if(inv.length)big.unshift({id:'big:store',t:'Раскладка покупок — что куда',d:'Разбери пакеты из GO!: морозилка — холодильник — полка. Количество — сколько всего есть к вторнику (дома + купленное).',extra:inv})}
   if(nx.rows.length||nx.rest.length)bt('bags2','Лишнее мясо и рыба — сразу в пакеты на следующую неделю',`Разложи сейчас, пока всё на столе: под меню ${fmtDate(nx.cs2)} – ${fmtDate(nx.cs3)}. Потом размораживать по одному пакету, а не килограммами. Всё — в морозилку, на пакете: день · приём · вес.`,nx);
   {const FR=[];days.forEach(x=>x.pl.meals.forEach(m=>m.items.forEach(it=>{if(FRESHG.includes(it.p))FR.push({i:x.i,d:x.d,slot:m.slot,id:it.p,q:it.q,fz:x.i>=4})})));
    const rest=Object.keys(sur).filter(id=>FRESHG.includes(id)).map(id=>({id,q:sur[id]}));
@@ -807,6 +818,9 @@ function prepModel(cs){const D0=prepDone(dkey(cs)),days=[0,1,2,3,4,5,6].map(i=>{
 function prepDone(ck){return (S.prepDone||{})[ck]||{}}
 function prepTask(t,ck){const on=!!prepDone(ck)[t.id];let x='';
   if(t.id==='big:bags')x=`<table class="bags">${t.extra.map(b=>`<tr><td><b>${DAYS[wd(b.d)]} · ${SLOTS[b.slot].toLowerCase()}</b> ${esc(PR[b.id].s)}${b.id==='thigh'?' <small class="muted">(снять кожу)</small>':''}</td><td>${fq(b.q,PR[b.id].u)} <span class="tg ${b.fz?'fz':'fr'}">${b.fz?'мороз.':'холод.'}</span></td></tr>`).join('')}</table>`;
+  if(t.id==='big:store'){const G=[['freezer','В морозилку'],['fridge','В холодильник'],['shelf','На полку']],w=id=>(STORE[id]||[PR[id].sec==='veg'||PR[id].sec==='fruit'?'fridge':'shelf'])[0];
+    x=G.map(([k,tt])=>{const rows=t.extra.filter(i=>w(i.id)===k).sort((a,b)=>PR[a.id].s.localeCompare(PR[b.id].s,'ru'));if(!rows.length)return '';
+      return `<div class="ph">${tt}</div><table class="bags">${rows.map(i=>{const s=STORE[i.id]||['','',''];return `<tr><td><b>${esc(PR[i.id].custom?PR[i.id].n:cap(PR[i.id].s))}</b>${s[1]?`<br><small class="muted">${esc(s[1])}</small>`:''}${i.sur&&s[2]?`<br><small>лишнее ≈ ${esc(fq(i.sur,PR[i.id].u))} → в морозилку: ${esc(s[2])}</small>`:i.sur&&k==='fridge'&&!PR[i.id].keep?`<br><small class="muted">сверх меню ≈ ${esc(fq(i.sur,PR[i.id].u))} — пойдёт на следующую неделю</small>`:''}</td><td>${esc(fq(Math.round(i.have*10)/10,PR[i.id].u))}</td></tr>`}).join('')}</table>`}).join('')}
   if(t.id==='big:bags2'){const n=t.extra,tot=n.rows.reduce((a,b)=>a+b.q,0)+n.rest.reduce((a,b)=>a+b.all,0);x=`<table class="bags">${n.rows.map(b=>`<tr><td><b>${DAYS[wd(b.d)]} ${b.d.getDate()} · ${SLOTS[b.slot].toLowerCase()}</b> ${esc(PR[b.id].s)}${b.id==='thigh'?' <small class="muted">(снять кожу)</small>':''}</td><td>${fq(b.q,PR[b.id].u)} <span class="tg fz">мороз.</span></td></tr>`).join('')}${n.rest.map(b=>`<tr><td><b>Запас · ${esc(PR[b.id].s)}</b>${b.id==='thigh'?' <small class="muted">(снять кожу)</small>':''}<br><small class="muted">${b.n>1?b.n+' пакета':'1 пакет'} по ≈ ${fq(b.q,PR[b.id].u)}, подписать «запас · вес»</small></td><td>${fq(b.all,PR[b.id].u)} <span class="tg fz">мороз.</span></td></tr>`).join('')}</table><div class="hint">Всего в морозилку ≈ ${fq(tot,'г')}. Вечером перед нужным днём — в холодильник один пакет.</div>`}
   if(t.id==='big:greens'){const g=t.extra;x=`<table class="bags">${g.rows.map(b=>`<tr><td><b>${DAYS[wd(b.d)]} · ${SLOTS[b.slot].toLowerCase()}</b> ${esc(PR[b.id].s)}</td><td>${fq(b.q,PR[b.id].u)} <span class="tg ${b.fz?'fz':'fr'}">${b.fz?'бланш. + мороз.':'холод.'}</span></td></tr>`).join('')}${g.rest.map(b=>`<tr><td><b>Лишнее</b> ${esc(PR[b.id].s)}<br><small class="muted">порциями по 150 г</small></td><td>${fq(b.q,PR[b.id].u)} <span class="tg fz">бланш. + мороз.</span></td></tr>`).join('')}</table>`}
   if(t.id==='big:rice'&&t.extra.cook){const r=t.extra,used=r.rice.reduce((a,x)=>a+x.a,0),spare=r.cook+r.bank-used;x=`<table class="bags">${r.rice.map(z=>`<tr><td><b>${DAYS[wd(z.d)]} ${z.d.getDate()}</b> · обед</td><td>${cookedRice(z.a)} г <span class="tg ${z.fz?'fz':'fr'}">${z.fz?'мороз.':'холод.'}</span></td></tr>`).join('')}${spare>20?`<tr><td>Остальное — «запас» на следующие недели</td><td>${cookedRice(spare)} г <span class="tg fz">мороз.</span></td></tr>`:''}</table><div class="hint">В холодильнике до 3 дней, в морозилке до месяца. Разогреть: на сковороду с ложкой воды под крышку 2–3 мин.</div>`}
@@ -821,8 +835,8 @@ function useAfter(ts,until){ // сколько уйдёт по плану с м�
 // что лежит дома: консервы и сухое (keep) помнятся между неделями в S.pantry, свежее — в S.left на неделю закупки
 function homeEntry(id,ck){return PR[id].keep?(S.pantry||{})[id]:(S.left[ck]||{})[id]}
 function setHome(id,q){const ck=dkey(shopCycle()),B=PR[id].keep?(S.pantry=S.pantry||{}):(S.left[ck]=S.left[ck]||{});if(q>0)B[id]={q,at:Date.now()};else delete B[id]}
-function shopList(){
-  const cs=shopCycle(),ck=dkey(cs),need=needFor(cs),rows=[],ua={};
+function shopList(cs0){
+  const cs=cs0||shopCycle(),ck=dkey(cs),need=needFor(cs),rows=[],ua={};
   Object.keys(PR).forEach(id=>{const p=PR[id],l=!p.bulk&&homeEntry(id,ck);if(p.bulk||(!need[id]&&!l))return;
     let home=0;if(l&&l.q>0){const u=(ua[l.at]=ua[l.at]||useAfter(l.at,cs))[id]||0;home=Math.max(0,l.q-u)}
     const lack=(need[id]||0)-home,buy=lack>0?Math.ceil(Math.round(lack*10)/10/p.shop)*p.shop:0;
@@ -1132,6 +1146,14 @@ function applyHome(res,now,all,ck){if(all)S.left[ck]={}; // свежее — п�
   S.homeFor=ck;S.homeAt=now}
 function setHomeAt(id,q,at,ck){const B=PR[id].keep?(S.pantry=S.pantry||{}):(S.left[ck]=S.left[ck]||{});if(q>0)B[id]={q,at};else delete B[id]}
 function seedHome(){try{if(S.seed1||S.homeFor===HOME_SEED.ck||dkey(shopCycle())!==HOME_SEED.ck)return;applyHome(parseHome(HOME_SEED.line).res,HOME_SEED.at,true,HOME_SEED.ck);S.adaptOff=S.adaptOff||{};S.adaptOff[HOME_SEED.ck]=HOME_SEED.at;S.seed1=1;save()}catch(_){}}
+function addHomeQ(id,v,cs,at){const ck=dkey(cs),e=homeEntry(id,ck);let cur=0;if(e&&e.q>0){const lost=(useAfter(e.at,cs)[id]||0)-(useAfter(at,cs)[id]||0);cur=Math.max(0,e.q-Math.max(0,lost))}setHomeAt(id,Math.round((cur+v)*10)/10,at,ck)}
+function seedReceipt(){try{if(S.seed2||!S.seed1)return;const ck=RECEIPT.ck,cs=pkey(ck);
+  S.custom=S.custom||{};if(!S.custom.rongbien){S.custom.rongbien={n:'Водоросли-снек Otoki острые (пачка 4,8 г)',u:'шт',pg:4.8,k:500,p:25,f:33,c:22,sec:'dry',price:9833,keep:1};applyCustom()}
+  const L=shopList(cs),C=S.chk[ck]=S.chk[ck]||{},X=(S.shx=S.shx||{})[ck]=S.shx[ck]||{},homeNew=!(S.homeAt>RECEIPT.at);
+  Object.entries(RECEIPT.q).forEach(([id,q])=>{if(!PR[id])return;const r=L.rows.find(x=>x.id===id);
+    if(r&&r.buy>0){if(C[id]||X[id])return;C[id]=1;if(q!==r.buy)X[id]={q};return}
+    if(!homeNew)return;const e=homeEntry(id,ck);if(e&&e.at>=RECEIPT.at)return;addHomeQ(id,q,cs,RECEIPT.at)});
+  S.seed2=1;save()}catch(_){}}
 function homeSummary(L){const have=L.rows.filter(r=>r.q>0).map(r=>esc(r.p.s)+' '+leftText(r.p,r.q)),no=BULK.filter(id=>S.stock[id]).map(id=>esc(nameOf(PR[id]).replace(/:.*$/,'').toLowerCase()));
   return (have.length?have.join(' · '):'ничего не внесено')+(no.length?` <span class="flag">· нет: ${no.join(', ')}</span>`:'')}
 function homePanel(L){const ck=L.ck;
@@ -1414,7 +1436,7 @@ document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset
   if(k==='edadd'&&ED&&el.value){const p=PR[el.value];ED.items.push([el.value,p.u==='шт'?1:(el.value==='oil'?5:el.value==='protein'?30:100)]);render()}
   if(k==='xpre'&&el.value!==''){const p=PRESETS[+el.value];Object.assign(X,{n:p[0]+' ('+p[1]+')',k:String(p[2]),p:String(p[3]),f:String(p[4]),c:String(p[5])});render()}});
 document.addEventListener('change',e=>{const el=e.target;
-  if(el.dataset&&el.dataset.in==='bload'){filePick=0;const f=el.files&&el.files[0];el.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x||typeof x!=='object'||!('done' in x))throw 0;if(!confirm('Заменить текущие данные копией?'))return;S=Object.assign(def(),x);migrate();save();seedHome();render();toast('Копия загружена')}catch(_){toast('Это не копия «Рациона»')}};r.readAsText(f);return}if(el.dataset&&el.dataset.in==='edg'){render();return}if(el.dataset&&el.dataset.in==='leftg'){setHome(el.dataset.p,Math.max(0,Math.round(parseNum(el.value))));window._openLeft=true;clean();save();render()}
+  if(el.dataset&&el.dataset.in==='bload'){filePick=0;const f=el.files&&el.files[0];el.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x||typeof x!=='object'||!('done' in x))throw 0;if(!confirm('Заменить текущие данные копией?'))return;S=Object.assign(def(),x);migrate();save();seedHome();seedReceipt();render();toast('Копия загружена')}catch(_){toast('Это не копия «Рациона»')}};r.readAsText(f);return}if(el.dataset&&el.dataset.in==='edg'){render();return}if(el.dataset&&el.dataset.in==='leftg'){setHome(el.dataset.p,Math.max(0,Math.round(parseNum(el.value))));window._openLeft=true;clean();save();render()}
   if(el.dataset&&el.dataset.in==='leftadd'&&el.value){const p=PR[el.value];setHome(el.value,p.u==='шт'?1:p.shop||100);window._openLeft=true;save();render();toast('Добавлено: '+p.s+' — поправь количество')}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='w-in'){A.wsave();render()}});
 
@@ -1437,6 +1459,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 setInterval(()=>{if(tab==='today'&&!document.activeElement.matches('input,textarea,select'))render()},60000);
 setTimeout(()=>checkUpdate(false),2000);
 seedHome();
+seedReceipt();
 render();
 
 </script>
