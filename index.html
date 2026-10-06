@@ -480,7 +480,7 @@ nav.tabs button{min-width:0;font-size:.7rem}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='5.10';
+const APP_VERSION='5.10.1';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -1334,14 +1334,20 @@ function ghReq(c,method,path,body){return fetch('https://api.github.com/repos/'+
 const ghWhy=s=>s===401||s===403?'нет доступа: проверь токен и право «Contents: Read and write»':s===404?'репозиторий не найден (проверь имя и доступ токена)':s===409||s===422?'конфликт записи, нажми ещё раз':'GitHub ответил '+s;
 async function ghPut(c,path,content,msg){let sha;const g=await ghReq(c,'GET','/contents/'+path);if(g.ok)sha=(await g.json()).sha;else if(g.status!==404)throw new Error(ghWhy(g.status));
   const p=await ghReq(c,'PUT','/contents/'+path,{message:msg,content,sha});if(!p.ok)throw new Error(ghWhy(p.status))}
-async function ghPush(){const c=ghCfg();if(!c.token||!c.repo)return false;
+let ghBusy=false;
+async function ghPush(){const c=ghCfg();if(!c.token||!c.repo||ghBusy)return false;ghBusy=true;
   try{if(!navigator.onLine)throw new Error('нет сети');const now=new Date(),day=dkey(now),stamp=day+' '+pad(now.getHours())+':'+pad(now.getMinutes()),body=b64(JSON.stringify(Object.assign({},S,{_meta:{app:APP_VERSION,at:now.toISOString()}})));
     await ghPut(c,'latest.json',body,'Рацион: копия '+stamp);await ghPut(c,'history/racion_'+day+'.json',body,'Рацион: копия за '+day);
-    const c2=ghCfg();c2.last=Date.now();c2.err='';c2.pending=0;ghSave(c2);return true}
-  catch(e){const c2=ghCfg();c2.err=String(e&&e.message||e);c2.pending=1;ghSave(c2);return false}}
+    const c2=ghCfg();c2.last=Date.now();c2.err='';c2.pending=0;ghSave(c2);S.lastBackup=Date.now();save();return true}
+  catch(e){const c2=ghCfg();c2.err=String(e&&e.message||e);c2.pending=1;ghSave(c2);return false}
+  finally{ghBusy=false}}
+// 5.10.1: само, без нажатий — при первом открытии нового дня (день меняется в 2:00) и если приложение открыто в этот момент
+function ghAuto(){const c=ghCfg();if(!c.token||!c.repo||ghBusy||!navigator.onLine)return;const dk=dkey(appNow());
+  if(c.autoDay===dk||(c.tryAt&&Date.now()-c.tryAt<10*60000))return;c.tryAt=Date.now();ghSave(c);
+  ghPush().then(ok=>{if(ok){const c2=ghCfg();c2.autoDay=dk;ghSave(c2)}if(tab==='weight'&&!document.activeElement.matches('input,textarea,select'))render()})}
 async function ghCheck(c){const r=await ghReq(c,'GET','');if(!r.ok)throw new Error(ghWhy(r.status));const j=await r.json();if(!(j.permissions&&j.permissions.push))throw new Error('токен без права записи (нужно «Contents: Read and write»)');if(!j.private)throw new Error('репозиторий публичный — копию с твоими данными туда нельзя, сделай его приватным');return true}
 function ghBody(){const c=ghCfg();
-  if(c.token&&c.repo)return `<div class="small">Подключено: <b>${esc(c.repo)}</b> · токен сохранён на этом телефоне.</div><div class="small ${c.err?'flag':'muted'}" style="margin-top:4px">${c.err?'Не отправилось: '+esc(c.err)+(c.pending?' — повторю при следующем входе':''):c.last?'Последняя отправка: '+fmtDate(new Date(c.last))+' '+pad(new Date(c.last).getHours())+':'+pad(new Date(c.last).getMinutes()):'Ещё не отправлял'}</div><div class="small muted" style="margin-top:6px">Кнопка «Сохранить копию» выше теперь ещё и отправляет данные в приватный репозиторий: Claude читает их оттуда.</div>
+  if(c.token&&c.repo)return `<div class="small">Подключено: <b>${esc(c.repo)}</b> · токен сохранён на этом телефоне.</div><div class="small ${c.err?'flag':'muted'}" style="margin-top:4px">${c.err?'Не отправилось: '+esc(c.err)+(c.pending?' — повторю при следующем входе':''):c.last?'Последняя отправка: '+fmtDate(new Date(c.last))+' '+pad(new Date(c.last).getHours())+':'+pad(new Date(c.last).getMinutes()):'Ещё не отправлял'}</div><div class="small muted" style="margin-top:6px">Копия уходит в приватный репозиторий <b>сама</b>: раз в сутки при первом открытии приложения в новый день (день меняется в 2:00), а ещё по кнопке «Сохранить копию» выше. Claude читает её оттуда.${c.autoDay?`<br>Автоотправка: за ${esc(fmtDate(pkey(c.autoDay)))}`:''}</div>
   <div class="btns"><button class="btn pri sm" data-a="ghnow">Отправить сейчас</button><button class="btn sm" data-a="ghtest">Проверить доступ</button><button class="btn ghost sm" data-a="ghoff">Отключить</button></div>`;
   return `<div class="small muted">Один раз подключи: 1) на GitHub создай <b>приватный</b> репозиторий <b>racion-data</b>; 2) Settings → Developer settings → Fine-grained tokens → Generate: доступ только к racion-data, право <b>Contents: Read and write</b>; 3) вставь токен ниже.</div>
   <div class="field" style="margin-top:8px"><label for="ghrepo">Репозиторий</label><input id="ghrepo" value="${esc(c.repo||'godoffear/racion-data')}" autocapitalize="off" autocomplete="off"></div>
@@ -1552,12 +1558,13 @@ if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catc
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 // 5.6.1: при возврате перечитываем хранилище — Тренер мог записать вес (тот же сайт, тот же localStorage)
 let filePick=0;document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('label[for=bload],#bload'))filePick=Date.now()},true);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){{const c=ghCfg();if(c.token&&c.pending&&navigator.onLine)ghPush()}if(Date.now()-filePick<600000)return;try{S=Object.assign(def(),JSON.parse(localStorage.getItem(LS)||'null')||{});migrate()}catch(e){}if(shopMode&&navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{});if(tab==='today')viewDate=dkey(appNow());if(!document.activeElement.matches('input,textarea,select'))render()}});
-setInterval(()=>{if(tab==='today'&&!document.activeElement.matches('input,textarea,select'))render()},60000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){setTimeout(ghAuto,1500);{const c=ghCfg();if(c.token&&c.pending&&navigator.onLine)ghPush()}if(Date.now()-filePick<600000)return;try{S=Object.assign(def(),JSON.parse(localStorage.getItem(LS)||'null')||{});migrate()}catch(e){}if(shopMode&&navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{});if(tab==='today')viewDate=dkey(appNow());if(!document.activeElement.matches('input,textarea,select'))render()}});
+setInterval(()=>{if(tab==='today'&&!document.activeElement.matches('input,textarea,select'))render();ghAuto()},60000);window.addEventListener('online',()=>ghAuto());
 setTimeout(()=>checkUpdate(false),2000);
 seedHome();
 seedReceipt();
 render();
+setTimeout(ghAuto,2500);
 
 </script>
 </body>
