@@ -480,7 +480,7 @@ nav.tabs button{min-width:0;font-size:.7rem}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='5.10.1';
+const APP_VERSION='5.10.2';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -506,6 +506,7 @@ const PR={
  cucumber:{vi:'Dưa leo (огурцы)',sec:'veg',n:'Огурцы',s:'огурец',u:'шт',pg:150,k:15,p:0.7,f:0.1,c:3.6,cat:'Овощи и фрукты',shop:1},
  tomato:{vi:'Cà chua (помидоры)',sec:'veg',pk:'На развес',n:'Помидоры',s:'помидоры',u:'г',k:18,p:0.9,f:0.2,c:3.9,cat:'Овощи и фрукты',shop:100},
  mushroom:{vi:'Nấm rơm / nấm bào ngư (грибы)',sec:'veg',pk:'Лоток 200–300 г',n:'Грибы',s:'грибы',u:'г',k:25,p:3,f:0.3,c:3.5,cat:'Овощи и фрукты',shop:100},
+ burger:{vi:'Бургер (готовый): говяжья котлета, сыр, яйцо',sec:'dry',n:'Бургер (котлета, сыр, яйцо)',s:'бургер',u:'шт',pg:300,k:283,p:16.7,f:17.3,c:15,cat:'Готовое',shop:1,nobuy:1},
  ricenoodle:{vi:'Bánh phở khô (сухая рисовая лапша)',sec:'dry',pk:'Пачка 200–400 г',n:'Рисовая лапша сухая',s:'рисовая лапша',u:'г',k:360,p:6,f:0.6,c:80,cat:'Крупы',shop:100},
  // ---- 4.8.1: расширенный справочник; keep — долго хранится (консервы, сухое), остаток помнится между неделями
  beef:{vi:'Thịt bò nạc vai / đùi bò (говядина: лопатка или бедро)',sec:'meat',pk:'Лоток 300–500 г',n:'Говядина',s:'говядина',u:'г',m:'palm',mg:100,k:150,p:21,f:7,c:0,cat:'Белок',shop:100,how:'Говядина: тонкими ломтиками 2–3 мин на сильном огне, перец и чеснок.'},
@@ -578,7 +579,7 @@ const OVERRIDES={
  '2026-10-01':{dinner:[['fish',200],['veg',200],['oil',5]]},
  // неделя 6–12 окт пересобрана по чеку GO! 5 окт и тому, что было дома: овощи без масла, лишнее филе — в морозилку. Последний элемент — id блюда
  '2026-10-06':{pre:[['protein',30],['creatine',5]],bf:[['egg',3],['oats',30],['jackfruit',100],'oatjack'],lunch:[['chicken',170],['zucchini',200],['rice',30],['cucumber',1],['tomato',100],['kimchi',150],'chickzuc'],snack:[['protein',30],['jackfruit',90],['nuts',25]],dinner:[['shrimp',170],['squid',100],['broccoli',200],['kimchi',100]],late:[['egg',3],['cucumber',1],['tomato',100],'eggcuke']},
- '2026-10-07':{bf:[['oats',30],['mango',1],['yogurt',1],['egg',2],['creatine',5],'oatmango'],lunch:[['thigh',220],['greens',200],['rice',30],['kimchi',150],'thighgreens'],snack:[['protein',40],['jackfruit',100],['nuts',10]],dinner:[['chicken',170],['tofu',150],['mushroom',250],['zucchini',150],['kimchi',100],'chickmushtofu'],late:[['tunaw',1],['cucumber',1],['tomato',100],'tunaveg']},
+ '2026-10-07':{bf:[['oats',30],['mango',1],['yogurt',1],['egg',2],['creatine',5],'oatmango'],lunch:[['chicken',220],['cucumber',1],['tomato',150],['cabbage',100],['kimchi',150],'leanlunch'],snack:[['burger',1]],dinner:[['chicken',120],['tofu',150],['mushroom',250],['zucchini',150],['kimchi',100],'chickmushtofu'],late:[['tunaw',1],['cucumber',1],['tomato',100],'tunaveg']},
  '2026-10-08':{pre:[['protein',30],['creatine',5]],bf:[['egg',3],['oats',30],['banana',1],'oatban'],lunch:[['shrimp',170],['rice',30],['carrot',80],['cabbage',150],['cucumber',1],['kimchi',150],'shrimpcab2'],snack:[['protein',35],['roseapple',240],['nuts',25]],dinner:[['thigh',130],['tofu',150],['greens',300],['kimchi',100],'thighgreenstofu'],late:[['tunaw',1],['cucumber',1],['tomato',100],'tunaveg']},
  '2026-10-09':{pre:[['protein',30],['creatine',5],['banana',1]],bf:[['sweet',120],['egg',3],['cucumber',1],'sweeteggs'],lunch:[['chicken',190],['pumpkin',150],['onion',50],['rice',30],['oil',5],['kimchi',150],'chickpump'],snack:[['protein',30],['dragon',150],['nuts',10]],dinner:[['fish',280],['tomato',200],['zucchini',150],'fishtomz'],late:[['egg',3],['cucumber',1],['tomato',100],'eggcuke']},
  '2026-10-10':{bf:[['egg',3],['tomato',100],['bread',1],['creatine',5],'omtom'],lunch:[['thigh',220],['potato',150],['cabbage',150],['tomato',100],['kimchi',150],'thighpot'],snack:[['protein',30],['pineapple',120],['nuts',10]],dinner:[['chicken',210],['tofu',150],['cabbage',200],['carrot',100],['kimchi',100],'chickcabtofu'],late:[['tunaw',1],['cucumber',1],['tomato',100],'tunaveg']},
@@ -651,6 +652,7 @@ const RECIPES=[
  ['thighgreenstofu','Бёдра с тофу и водяным шпинатом',[],[['thigh',150],['tofu',150],['greens',300]],['С бёдер снять кожу, полосками 8 мин на сухой сковороде','Тофу кубиками туда же на 4 мин','Водяной шпинат с чесноком на 2–3 мин на сильном огне, перец']],
  ['chickcabtofu','Курица с тофу, капустой и морковью',[],[['chicken',160],['tofu',150],['cabbage',200],['carrot',100]],['Капусту и морковь соломкой 5 мин на сухой сковороде, 2 ст. л. воды','Курицу полосками туда же 6 мин','Тофу кубиками на 4 мин, соль, перец, чеснок']],
  ['thightomtofu','Бёдра с тофу в помидорах с кабачками',[],[['thigh',160],['tofu',150],['tomato',200],['zucchini',150],['onion',50]],['С бёдер снять кожу, кусочками 8 мин на сухой сковороде','Лук, помидоры и кабачки туда же','Тофу кубиками, под крышкой 8 мин, перец, соль']],
+ ['leanlunch','Куриное филе с большим овощным салатом',[],[['chicken',220],['cucumber',1],['tomato',150],['cabbage',100],['kimchi',150]],['Филе полосками 6–8 мин на сухой антипригарной сковороде, соль, перец, чеснок','Огурцы, помидоры, капусту нарезать, лайм, немного горчицы и яблочного уксуса','С кимчи. Без риса и масла: углеводы сегодня уйдут на бургер']],
  ['oatjack','Овсянка с джекфрутом и варёные яйца',['bf'],[['egg',3],['oats',50],['jackfruit',100]],['Овсянку залить кипятком на 5 мин','Джекфрут кусочками сверху','Яйца из запаса']]];
 const RECBY=Object.fromEntries(RECIPES.map(r=>[r[0],r]));
 // Способы приготовления основного белка: [id, название, текст]
@@ -787,7 +789,7 @@ const STORE={potato:['shelf','на полке, сухо и темно, не мы
  tunao:['shelf','на полку',''],tunaw:['shelf','на полку',''],sardine:['shelf','на полку','']};
 // что есть к началу недели cs: дома к вторнику + куплено (фактически), сколько нужно по меню и что лишнее
 function invFor(cs){const ck=dkey(cs),out=[];if(!(S.left||{})[ck]&&!(S.shx||{})[ck])return out;const need=needFor(cs),ua={},C=(S.chk||{})[ck]||{};
-  Object.keys(PR).forEach(id=>{const p=PR[id];if(p.bulk)return;
+  Object.keys(PR).forEach(id=>{const p=PR[id];if(p.bulk||p.nobuy)return;
     const l=homeEntry(id,ck);let home=0;if(l&&l.q>0){const u=(ua[l.at]=ua[l.at]||useAfter(l.at,cs))[id]||0;home=Math.max(0,l.q-u)}
     const n=need[id]||0,lack=n-home,buy=lack>0?Math.ceil(Math.round(lack*10)/10/p.shop)*p.shop:0,s=shxOf(ck,id),got=!C[id]||(s&&s.none)?0:s&&s.q!=null?s.q:buy;
     // съеденное сверх плана из продуктов (S.eaten): из «дома» оно уже вычтено в useAfter, остальное — из купленного
@@ -889,7 +891,7 @@ function homeEntry(id,ck){return PR[id].keep?(S.pantry||{})[id]:(S.left[ck]||{})
 function setHome(id,q){const ck=dkey(shopCycle()),B=PR[id].keep?(S.pantry=S.pantry||{}):(S.left[ck]=S.left[ck]||{});if(q>0)B[id]={q,at:Date.now()};else delete B[id]}
 function shopList(cs0){
   const cs=cs0||shopCycle(),ck=dkey(cs),need=needFor(cs),rows=[],ua={};
-  Object.keys(PR).forEach(id=>{const p=PR[id],l=!p.bulk&&homeEntry(id,ck);if(p.bulk||(!need[id]&&!l))return;
+  Object.keys(PR).forEach(id=>{const p=PR[id],l=!p.bulk&&homeEntry(id,ck);if(p.bulk||p.nobuy||(!need[id]&&!l))return;
     let home=0;if(l&&l.q>0){const u=(ua[l.at]=ua[l.at]||useAfter(l.at,cs))[id]||0;home=Math.max(0,l.q-u)}
     const lack=(need[id]||0)-home,buy=lack>0?Math.ceil(Math.round(lack*10)/10/p.shop)*p.shop:0;
     rows.push({id,p,need:need[id]||0,home,buy,q:l?l.q:0,extra:!need[id]})});
@@ -1209,6 +1211,17 @@ function applyHome(res,now,all,ck){if(all)S.left[ck]={}; // свежее — п�
 function setHomeAt(id,q,at,ck){const B=PR[id].keep?(S.pantry=S.pantry||{}):(S.left[ck]=S.left[ck]||{});if(q>0)B[id]={q,at};else delete B[id]}
 function seedHome(){try{if(S.seed1||S.homeFor===HOME_SEED.ck||dkey(shopCycle())!==HOME_SEED.ck)return;applyHome(parseHome(HOME_SEED.line).res,HOME_SEED.at,true,HOME_SEED.ck);S.adaptOff=S.adaptOff||{};S.adaptOff[HOME_SEED.ck]=HOME_SEED.at;S.seed1=1;save()}catch(_){}}
 function addHomeQ(id,v,cs,at){const ck=dkey(cs),e=homeEntry(id,ck);let cur=0;if(e&&e.q>0){const lost=(useAfter(e.at,cs)[id]||0)-(useAfter(at,cs)[id]||0);cur=Math.max(0,e.q-Math.max(0,lost))}setHomeAt(id,Math.round((cur+v)*10)/10,at,ck)}
+// 7 окт: Андрей купил 30 яиц; старые ручные блюда не должны перекрывать план недели; джекфрут 444 г списывается с «Дома»
+const EGGS_AT=new Date(2026,9,7,11,40).getTime();
+function seedFix7(){try{if(S.seed3||!S.seed1)return;
+  const R={'2026-10-07|lunch':'tofutom','2026-10-08|dinner':'chickmush','2026-10-09|lunch':'pho','2026-10-10|dinner':'fishtom'};
+  Object.keys(R).forEach(k=>{if(S.rec&&S.rec[k]===R[k])delete S.rec[k]});
+  const jf=((S.extra||{})['2026-10-05']||[]).find(x=>x.id==='muv23hjb'&&/Джекфрут/.test(x.n));
+  if(jf&&!jf.pid){jf.pid='jackfruit';S.eaten=S.eaten||[];if(!S.eaten.some(e=>e.id===jf.id))S.eaten.push({id:jf.id,t:new Date(2026,9,5,16,0).getTime(),p:'jackfruit',q:444})}
+  {const ck=RECEIPT.ck,cs=pkey(ck),L=shopList(cs),C=(S.chk||{})[ck]||{},X=(S.shx=S.shx||{})[ck]=S.shx[ck]||{};
+   Object.entries(RECEIPT.q).forEach(([id,q])=>{const r=L.rows.find(x=>x.id===id);if(r&&r.buy>0&&C[id]&&!X[id]&&q!==r.buy)X[id]={q}})}
+  addHomeQ('egg',30,pkey('2026-10-06'),EGGS_AT);
+  S.seed3=1;save()}catch(_){}}
 function seedReceipt(){try{if(S.seed2||!S.seed1)return;const ck=RECEIPT.ck,cs=pkey(ck);
   S.custom=S.custom||{};if(!S.custom.rongbien){S.custom.rongbien={n:'Водоросли-снек Otoki острые (пачка 4,8 г)',u:'шт',pg:4.8,k:500,p:25,f:33,c:22,sec:'dry',price:9833,keep:1};applyCustom()}
   const L=shopList(cs),C=S.chk[ck]=S.chk[ck]||{},X=(S.shx=S.shx||{})[ck]=S.shx[ck]||{},homeNew=!(S.homeAt>RECEIPT.at);
@@ -1539,7 +1552,7 @@ document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset
   if(k==='xpq'){X.pq=el.value;fillFromProduct()}
   if(k==='xpre'&&el.value!==''){const p=PRESETS[+el.value];Object.assign(X,{n:p[0]+' ('+p[1]+')',k:String(p[2]),p:String(p[3]),f:String(p[4]),c:String(p[5])});render()}});
 document.addEventListener('change',e=>{const el=e.target;
-  if(el.dataset&&el.dataset.in==='bload'){filePick=0;const f=el.files&&el.files[0];el.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x||typeof x!=='object'||!('done' in x))throw 0;if(!confirm('Заменить текущие данные копией?'))return;S=Object.assign(def(),x);migrate();save();seedHome();seedReceipt();render();toast('Копия загружена')}catch(_){toast('Это не копия «Рациона»')}};r.readAsText(f);return}if(el.dataset&&el.dataset.in==='edg'){render();return}if(el.dataset&&el.dataset.in==='leftg'){setHome(el.dataset.p,Math.max(0,Math.round(parseNum(el.value))));window._openLeft=true;clean();save();render()}
+  if(el.dataset&&el.dataset.in==='bload'){filePick=0;const f=el.files&&el.files[0];el.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x||typeof x!=='object'||!('done' in x))throw 0;if(!confirm('Заменить текущие данные копией?'))return;S=Object.assign(def(),x);migrate();save();seedHome();seedReceipt();seedFix7();render();toast('Копия загружена')}catch(_){toast('Это не копия «Рациона»')}};r.readAsText(f);return}if(el.dataset&&el.dataset.in==='edg'){render();return}if(el.dataset&&el.dataset.in==='leftg'){setHome(el.dataset.p,Math.max(0,Math.round(parseNum(el.value))));window._openLeft=true;clean();save();render()}
   if(el.dataset&&el.dataset.in==='leftadd'&&el.value){const p=PR[el.value];setHome(el.value,p.u==='шт'?1:p.shop||100);window._openLeft=true;save();render();toast('Добавлено: '+p.s+' — поправь количество')}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='w-in'){A.wsave();render()}});
 
@@ -1563,6 +1576,7 @@ setInterval(()=>{if(tab==='today'&&!document.activeElement.matches('input,textar
 setTimeout(()=>checkUpdate(false),2000);
 seedHome();
 seedReceipt();
+seedFix7();
 render();
 setTimeout(ghAuto,2500);
 
