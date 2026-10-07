@@ -1,4 +1,4 @@
-const APP_VERSION='5.10.2';
+const APP_VERSION='5.10.3';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -728,9 +728,12 @@ function applyHome(res,now,all,ck){if(all)S.left[ck]={}; // свежее — п�
   S.homeFor=ck;S.homeAt=now}
 function setHomeAt(id,q,at,ck){const B=PR[id].keep?(S.pantry=S.pantry||{}):(S.left[ck]=S.left[ck]||{});if(q>0)B[id]={q,at};else delete B[id]}
 function seedHome(){try{if(S.seed1||S.homeFor===HOME_SEED.ck||dkey(shopCycle())!==HOME_SEED.ck)return;applyHome(parseHome(HOME_SEED.line).res,HOME_SEED.at,true,HOME_SEED.ck);S.adaptOff=S.adaptOff||{};S.adaptOff[HOME_SEED.ck]=HOME_SEED.at;S.seed1=1;save()}catch(_){}}
-function addHomeQ(id,v,cs,at){const ck=dkey(cs),e=homeEntry(id,ck);let cur=0;if(e&&e.q>0){const lost=(useAfter(e.at,cs)[id]||0)-(useAfter(at,cs)[id]||0);cur=Math.max(0,e.q-Math.max(0,lost))}setHomeAt(id,Math.round((cur+v)*10)/10,at,ck)}
+function addHomeQ(id,v,cs,at){const ck=dkey(cs),e=homeEntry(id,ck),un=new Date(Math.max(+cs,at));let cur=0;if(e&&e.q>0){const lost=(useAfter(e.at,un)[id]||0)-(useAfter(at,un)[id]||0);cur=Math.max(0,e.q-Math.max(0,lost))}setHomeAt(id,Math.round((cur+v)*10)/10,at,ck)}
 // 7 окт: Андрей купил 30 яиц; старые ручные блюда не должны перекрывать план недели; джекфрут 444 г списывается с «Дома»
 const EGGS_AT=new Date(2026,9,7,11,40).getTime();
+// 7 окт: у Андрея осталось 1 варёное яйцо + купил 30 → всего 31 (считать расход «по плану» для яиц здесь не нужно)
+function eggsFix(){const ck='2026-10-06';S.left[ck]=S.left[ck]||{};const e=S.left[ck].egg;if(!e||e.at<=EGGS_AT)S.left[ck].egg={q:31,at:EGGS_AT};if(!(S.boiled&&S.boiled.at>EGGS_AT))S.boiled={q:1,at:EGGS_AT};S.seed4=1}
+function seedFix7b(){try{if(S.seed4||!S.seed3)return;eggsFix();save()}catch(_){}}
 function seedFix7(){try{if(S.seed3||!S.seed1)return;
   const R={'2026-10-07|lunch':'tofutom','2026-10-08|dinner':'chickmush','2026-10-09|lunch':'pho','2026-10-10|dinner':'fishtom'};
   Object.keys(R).forEach(k=>{if(S.rec&&S.rec[k]===R[k])delete S.rec[k]});
@@ -738,7 +741,7 @@ function seedFix7(){try{if(S.seed3||!S.seed1)return;
   if(jf&&!jf.pid){jf.pid='jackfruit';S.eaten=S.eaten||[];if(!S.eaten.some(e=>e.id===jf.id))S.eaten.push({id:jf.id,t:new Date(2026,9,5,16,0).getTime(),p:'jackfruit',q:444})}
   {const ck=RECEIPT.ck,cs=pkey(ck),L=shopList(cs),C=(S.chk||{})[ck]||{},X=(S.shx=S.shx||{})[ck]=S.shx[ck]||{};
    Object.entries(RECEIPT.q).forEach(([id,q])=>{const r=L.rows.find(x=>x.id===id);if(r&&r.buy>0&&C[id]&&!X[id]&&q!==r.buy)X[id]={q}})}
-  addHomeQ('egg',30,pkey('2026-10-06'),EGGS_AT);
+  eggsFix();
   S.seed3=1;save()}catch(_){}}
 function seedReceipt(){try{if(S.seed2||!S.seed1)return;const ck=RECEIPT.ck,cs=pkey(ck);
   S.custom=S.custom||{};if(!S.custom.rongbien){S.custom.rongbien={n:'Водоросли-снек Otoki острые (пачка 4,8 г)',u:'шт',pg:4.8,k:500,p:25,f:33,c:22,sec:'dry',price:9833,keep:1};applyCustom()}
@@ -1070,7 +1073,7 @@ document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset
   if(k==='xpq'){X.pq=el.value;fillFromProduct()}
   if(k==='xpre'&&el.value!==''){const p=PRESETS[+el.value];Object.assign(X,{n:p[0]+' ('+p[1]+')',k:String(p[2]),p:String(p[3]),f:String(p[4]),c:String(p[5])});render()}});
 document.addEventListener('change',e=>{const el=e.target;
-  if(el.dataset&&el.dataset.in==='bload'){filePick=0;const f=el.files&&el.files[0];el.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x||typeof x!=='object'||!('done' in x))throw 0;if(!confirm('Заменить текущие данные копией?'))return;S=Object.assign(def(),x);migrate();save();seedHome();seedReceipt();seedFix7();render();toast('Копия загружена')}catch(_){toast('Это не копия «Рациона»')}};r.readAsText(f);return}if(el.dataset&&el.dataset.in==='edg'){render();return}if(el.dataset&&el.dataset.in==='leftg'){setHome(el.dataset.p,Math.max(0,Math.round(parseNum(el.value))));window._openLeft=true;clean();save();render()}
+  if(el.dataset&&el.dataset.in==='bload'){filePick=0;const f=el.files&&el.files[0];el.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x||typeof x!=='object'||!('done' in x))throw 0;if(!confirm('Заменить текущие данные копией?'))return;S=Object.assign(def(),x);migrate();save();seedHome();seedReceipt();seedFix7();seedFix7b();render();toast('Копия загружена')}catch(_){toast('Это не копия «Рациона»')}};r.readAsText(f);return}if(el.dataset&&el.dataset.in==='edg'){render();return}if(el.dataset&&el.dataset.in==='leftg'){setHome(el.dataset.p,Math.max(0,Math.round(parseNum(el.value))));window._openLeft=true;clean();save();render()}
   if(el.dataset&&el.dataset.in==='leftadd'&&el.value){const p=PR[el.value];setHome(el.value,p.u==='шт'?1:p.shop||100);window._openLeft=true;save();render();toast('Добавлено: '+p.s+' — поправь количество')}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='w-in'){A.wsave();render()}});
 
@@ -1095,5 +1098,6 @@ setTimeout(()=>checkUpdate(false),2000);
 seedHome();
 seedReceipt();
 seedFix7();
+seedFix7b();
 render();
 setTimeout(ghAuto,2500);
