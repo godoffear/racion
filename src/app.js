@@ -1,4 +1,4 @@
-const APP_VERSION='5.10.3';
+const APP_VERSION='5.11';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -118,13 +118,13 @@ const RECIPES=[
  ['sweeteggs','Батат с яйцами и огурцом',['bf'],[['sweet',200],['egg',3],['cucumber',1]],['Батат на пару в рисоварке 20–25 мин — удобно сварить с вечера','Яйца из запаса, огурец нарезать']],
  ['tunabm','Бань ми с тунцом и яйцом',['bf','lunch'],[['bread',1],['tunaw',1],['egg',1],['cucumber',1]],['Багет 1 мин на сухой сковороде','Тунец без жидкости размять с перцем и лаймом','В багет — тунец, яйцо кружками, огурец']],
  ['oatmango','Овсянка с манго, йогурт и яйца',['bf'],[['oats',50],['mango',1],['yogurt',1],['egg',2]],['Овсянку залить кипятком на 5 мин','Манго кубиками, йогурт сверху','Яйца из запаса']],
- ['friedrice','Жареный рис с курицей и яйцом',['lunch'],[['chicken',120],['egg',1],['rice',40],['veg',150],['oil',5]],['Рис лучше вчерашний, из холодильника','Курицу кубиками 5 мин на сковороде','Сдвинуть, вбить яйцо, перемешать','Добавить рис и овощи, 3–4 мин на сильном огне, соль, перец']],
- ['shrimprice','Жареный рис с креветками',['lunch'],[['shrimp',150],['egg',1],['rice',40],['veg',150],['oil',5]],['Креветки 2 мин на сковороде, отложить','Яйцо на сковороду, перемешать','Рис и овощи 3–4 мин, вернуть креветки, лайм']],
- ['curry','Курица с бататом, тушёная с куркумой',['lunch'],[['chicken',150],['sweet',200],['veg',150],['oil',5]],['Курицу кубиками обжарить 3 мин','Батат кубиками, ½ стакана воды, куркума, перец','Под крышкой 15 мин, в конце овощи на 3 мин']],
- ['porkstir','Свинина с овощами и рисом',['lunch'],[['pork',150],['rice',40],['veg',200],['oil',5]],['Свинину тонкими полосками 5 мин на сильном огне','Овощи туда же на 3–4 мин, чеснок, перец','С рисом из рисоварки']],
+ ['friedrice','Жареный рис с курицей и яйцом',['lunch'],[['chicken',120],['egg',1],['rice',40],['zucchini',150],['oil',5]],['Рис лучше вчерашний, из холодильника','Курицу кубиками 5 мин на сковороде','Сдвинуть, вбить яйцо, перемешать','Кабачки кубиком жарить на сухой сковороде 3 мин, без масла; добавить рис, 3–4 мин на сильном огне, соль, перец']],
+ ['shrimprice','Жареный рис с креветками',['lunch'],[['shrimp',150],['egg',1],['rice',40],['bellpep',150],['oil',5]],['Креветки 2 мин на сковороде, отложить','Яйцо на сковороду, перемешать','Перец соломкой и рис 3–4 мин (перец на сухой сковороде, без масла), вернуть креветки, лайм']],
+ ['curry','Курица с бататом, тушёная с куркумой',['lunch'],[['chicken',150],['sweet',200],['zucchini',150],['oil',5]],['Курицу кубиками обжарить 3 мин','Батат кубиками, ½ стакана воды, куркума, перец','Под крышкой 15 мин, в конце кабачки на 3 мин']],
+ ['porkstir','Свинина с овощами и рисом',['lunch'],[['pork',150],['rice',40],['cabbage',200],['oil',5]],['Свинину тонкими полосками 5 мин на сильном огне','Капусту туда же на 3–4 мин, без масла, чеснок, перец','С рисом из рисоварки']],
  ['tofutom','Тофу в помидорах с яйцом и рисом',[],[['tofu',200],['tomato',150],['egg',2],['rice',30]],['Помидоры кубиками 3 мин на сковороде без масла','Тофу кубиками туда же, 5 мин','Влить взбитые яйца, помешать 1 мин','С рисом']],
  ['beefbroc','Говядина с брокколи и рисом',['lunch','dinner'],[['beef',150],['broccoli',200],['rice',50],['oil',5]],['Брокколи соцветиями 3 мин в кипятке или на пару','Говядину тонко, 2 мин на сильном огне с чесноком','Брокколи туда же на 1 мин, перец','С рисом из рисоварки']],
- ['tunarice','Рис с тунцом, яйцом и огурцом',['lunch'],[['tunaw',2],['rice',50],['egg',1],['cucumber',1],['veg',100]],['Рис из рисоварки','Тунец без жидкости, яйцо из запаса','Огурец и овощи нарезать, лайм, перец — готовить не нужно']],
+ ['tunarice','Рис с тунцом, яйцом и огурцом',['lunch'],[['tunaw',2],['rice',50],['egg',1],['cucumber',1],['tomato',100]],['Рис из рисоварки','Тунец без жидкости, яйцо из запаса','Огурец и помидоры нарезать, сырыми, лайм, перец — готовить не нужно']],
  ['porkpot','Свинина с картофелем и капустой',['lunch'],[['pork',150],['potato',250],['cabbage',150],['oil',5]],['Картофель кубиками на пару в рисоварке 15 мин','Свинину полосками 5 мин на сковороде','Капусту туда же на 4 мин, затем картофель, перец, чеснок']],
  ['mincebeans','Фарш со стручковой фасолью и рисом',['lunch'],[['mince',120],['beans',200],['rice',50]],['Фарш на сухую сковороду 5 мин, разбивая лопаткой','Фасоль кусочками туда же, ¼ стакана воды, под крышкой 5 мин','Чеснок, перец, с рисом']],
  ['chickpump','Курица, тушённая с тыквой, и рис',['lunch'],[['chicken',180],['pumpkin',250],['onion',50],['rice',30],['oil',5]],['Лук и курицу кубиками обжарить 3 мин','Тыкву кубиками, ½ стакана воды, куркума','Под крышкой 12 мин, с рисом']],
@@ -133,10 +133,10 @@ const RECIPES=[
  ['banhmichick','Бань ми с курицей и овощами',['lunch'],[['bread',2],['chicken',150],['cucumber',1],['carrot',50]],['Курицу полосками 6 мин на сковороде, перец, чеснок','Морковь соломкой, огурец полосками','Багеты подогреть 1 мин, начинить курицей и овощами']],
  ['beefgreens','Говядина с водяным шпинатом и рисом',['lunch'],[['beef',150],['rice',50],['greens',150],['cucumber',1]],['Рис из рисоварки','Говядину тонко, 2 мин на сильном огне с чесноком','Водяной шпинат кусками туда же на 2 мин, перец, лайм','С рисом и огурцом']],
  ['shrimpcab','Креветки с капустой, морковью и рисом',['lunch'],[['shrimp',180],['rice',40],['carrot',80],['cabbage',100],['oil',5]],['Морковь и капусту соломкой 3 мин на сковороде','Креветки туда же на 2 мин, чеснок, перец','С рисом из рисоварки, лайм']],
- ['omelet','Омлет с курицей и овощами',['dinner'],[['egg',2],['chicken',100],['veg',200]],['Курицу мелко и обжарить 5 мин без масла','Овощи на 3 мин','Залить взбитыми яйцами, под крышкой 4 мин']],
+ ['omelet','Омлет с курицей и овощами',['dinner'],[['egg',2],['chicken',100],['bellpep',200]],['Курицу мелко и обжарить 5 мин без масла','Перец кубиками на 3 мин, без масла','Залить взбитыми яйцами, под крышкой 4 мин']],
  ['squidsalad','Тёплый салат с кальмаром',['dinner'],[['squid',200],['cucumber',1],['tomato',100],['oil',5]],['Кальмар кольцами в кипяток на 1 мин','Огурец и помидоры нарезать','Смешать, масло, лайм, соль, чили']],
- ['chickmush','Курица с грибами',['dinner'],[['chicken',200],['mushroom',150],['veg',100],['oil',5]],['Курицу полосками 6 мин на сковороде','Грибы и овощи туда же на 5 мин','Соль, перец, чеснок']],
- ['fishtom','Рыба в помидорах',['dinner'],[['fish',200],['tomato',200],['veg',100],['oil',5]],['Помидоры кубиками 3 мин на сковороде','Рыбу сверху, под крышку на 8 мин','Овощи сбоку на пару минут, перец, лайм']],
+ ['chickmush','Курица с грибами',['dinner'],[['chicken',200],['mushroom',150],['zucchini',100],['oil',5]],['Курицу полосками 6 мин на сковороде','Грибы и кабачки туда же на 5 мин','Соль, перец, чеснок']],
+ ['fishtom','Рыба в помидорах',['dinner'],[['fish',200],['tomato',200],['beans',100],['oil',5]],['Помидоры кубиками 3 мин на сковороде','Рыбу сверху, под крышку на 8 мин','Фасоль сбоку на пару минут, перец, лайм']],
  ['beefpep','Говядина с болгарским перцем и луком',['dinner'],[['beef',150],['bellpep',150],['onion',50],['oil',5]],['Перец и лук полосками 3 мин на сильном огне','Говядину тонко туда же на 2 мин','Чеснок, чёрный перец, соль']],
  ['gingchick','Курица с имбирём и бок-чоем',['dinner'],[['chicken',200],['bokchoy',200],['oil',5]],['Курицу полосками 6 мин с тёртым имбирём и чесноком','Бок-чой разрезать вдоль, туда же на 2–3 мин','Соль, перец']],
  ['tunasalad','Салат с тунцом, яйцом и овощами',['dinner','late'],[['tunaw',2],['egg',1],['cucumber',1],['tomato',150],['oil',5]],['Тунец без жидкости, яйцо из запаса','Огурец и помидоры нарезать','Смешать, масло, лайм, перец — готовить не нужно']],
@@ -145,10 +145,10 @@ const RECIPES=[
  ['meatballs','Тефтели из фарша в томате',['dinner'],[['mince',150],['tomato',200],['onion',50]],['Фарш с солью и перцем скатать в шарики','Помидоры и лук 3 мин на сковороде','Тефтели туда же, под крышку на 10 мин']],
  ['tofumince','Тофу с фаршем в томате',[],[['tofu',200],['mince',80],['tomato',150]],['Фарш на сухую сковороду 4 мин','Помидоры кубиками туда же на 3 мин','Тофу кубиками, под крышку на 5 мин, перец, зелёный лук']],
  ['squidpep','Кальмар с перцем и луком',['dinner'],[['squid',200],['bellpep',150],['onion',50],['oil',5]],['Перец и лук 3 мин на сильном огне','Кальмар кольцами туда же ровно на 2 мин','Чеснок, перец, лайм']],
- ['fishpan','Рыба на сковороде с овощами',['dinner'],[['fish',200],['veg',200],['oil',5]],['Рыбу посолить, поперчить, 3–4 мин с каждой стороны','Овощи туда же или рядом на 3 мин','Лайм, чеснок']],
+ ['fishpan','Рыба на сковороде с овощами',['dinner'],[['fish',200],['broccoli',200],['oil',5]],['Рыбу посолить, поперчить, 3–4 мин с каждой стороны','Брокколи туда же или рядом на 4 мин, без масла','Лайм, чеснок']],
  ['shrimppump','Креветки с тыквой',['dinner'],[['shrimp',150],['pumpkin',250],['onion',50]],['Тыкву кусками на пару в рисоварке 15 мин','Лук полукольцами 3 мин на сковороде, креветки туда же на 2–3 мин','Тыкву к креветкам, перец, соль']],
  ['eggcuke','Яйца с огурцом и помидором',['late'],[['egg',3],['cucumber',1],['tomato',100]],['Яйца из запаса, овощи нарезать, соль и перец']],
- ['tofuveg','Тофу с овощами',[],[['tofu',150],['veg',100]],['Тофу и овощи на сухую сковороду на 5 мин']],
+ ['tofuveg','Тофу с овощами',[],[['tofu',150],['zucchini',100]],['Тофу и кабачки на сухую сковороду на 5 мин']],
  ['tunacuke','Тунец с огурцом',['late'],[['tunaw',1],['cucumber',1]],['Тунец без жидкости, огурец нарезать, перец и лайм']],
  ['sardveg','Сардины с помидором',['late'],[['sardine',1],['tomato',100]],['Сардины из банки, помидор нарезать — готовить не нужно']],
  // неделя 6–12 окт (по чеку): блюда без приёмов не предлагаются в выборе
@@ -491,7 +491,7 @@ function gcal(title,days,time,details){
 let openDone=new Set(),popKey='',shopMode=false,wakeLock=null;
 const moreOpen={w:true};
 let menuSel=dkey([6,0].includes(wd(new Date()))?addDays(cycleStart(appNow()),7):appNow()),menuOff=0; // выбранный день в календаре меню, сдвиг календаря на 4 недели
-let tab='today',viewDate=dkey(appNow()),updReady=false,swapAll=false,editOpen='',ED=null,xOpen='',X={n:'',k:'',p:'',f:'',c:'',por:'1',line:''};
+let tab='today',viewDate=dkey(appNow()),updReady=false,swapAll=false,editOpen='',ED=null,xOpen='',X={n:'',k:'',p:'',f:'',c:'',por:'1',line:'',items:[],where:'home'};
 const ICONS={
  today:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.9"/><circle cx="12" cy="12" r="2.1"/><path d="M2.6 3v4.2a1.4 1.4 0 0 0 2.8 0V3M4 8.6V21M21.4 3v18M21.4 3c-1.6.9-2.6 3-2.6 6.2v2.6h2.6"/></svg>',
  pot:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 11h15v4.5a4.5 4.5 0 0 1-4.5 4.5H9a4.5 4.5 0 0 1-4.5-4.5z"/><path d="M2.5 11h2M19.5 11h2M9 3.5c-.9 1 .9 2 0 3.5M12 3c-.9 1 .9 2 0 3.5M15 3.5c-.9 1 .9 2 0 3.5"/></svg>',
@@ -635,14 +635,23 @@ function prodPick(){const ck=dkey(shopCycle()),ck0=dkey(cycleStart(appNow())),ha
   add(S.left[ck]);add(S.left[ck0]);add(S.pantry);add(S.chk[ck]);
   const sec=Object.fromEntries(SECS.map(([k,t],i)=>[k,i])),nm=id=>PR[id].custom?PR[id].n:cap(PR[id].s),opt=id=>`<option value="${id}" ${X.pid===id?'selected':''}>${esc(nm(id))} · ${PR[id].u}</option>`,
     ids=Object.keys(PR).filter(id=>!PR[id].bulk&&id!=='veg').sort((a,b)=>(sec[PR[a].sec]||0)-(sec[PR[b].sec]||0)||nm(a).localeCompare(nm(b),'ru'));
-  return `<div class="xrow"><select data-in="xprod" aria-label="Из продуктов дома"><option value="">Из продуктов дома ▾</option><optgroup label="Есть дома">${ids.filter(id=>have.has(id)).map(opt).join('')}</optgroup><optgroup label="Остальные">${ids.filter(id=>!have.has(id)).map(opt).join('')}</optgroup></select><input id="xpq" class="xkc" inputmode="decimal" data-in="xpq" value="${esc(X.pq||'')}" placeholder="${X.pid&&PR[X.pid]?PR[X.pid].u:'г / шт'}" aria-label="Сколько съел"></div>`}
-function fillFromProduct(){const id=X.pid,q=parseNum(X.pq);if(!id||!PR[id]||!(q>0))return;const m=macros([{p:id,q}]);
-  Object.assign(X,{n:(PR[id].custom?PR[id].n:cap(PR[id].s))+' '+String(q).replace('.',',')+' '+PR[id].u,k:String(r0(m.k)),p:String(Math.round(m.p*10)/10),f:String(Math.round(m.f*10)/10),c:String(Math.round(m.c*10)/10),por:'1'});X.auto=1;X.line='';
+  const nmq=(id,q)=>nm(id)+' '+String(q).replace('.',',')+' '+PR[id].u;
+  const rows=(X.items||[]).map((it,i)=>{const hv=homeNow(it.id),over=hv!=null&&it.q>hv+0.01,u=PR[it.id].u;
+    const st=hv==null?'<span class="muted">дома не записано</span>':over?`<span class="xwarn">дома только ${r0(hv)} ${u}</span>`:`<span class="muted">дома ${r0(hv)} → останется ${r0(hv-it.q)} ${u}</span>`;
+    return `<div class="xit"><span class="grow">${esc(nmq(it.id,it.q))}<br><small>${st}</small></span><button class="link" data-a="xitdel" data-i="${i}" aria-label="Убрать">✕</button></div>`}).join('');
+  return `${rows}<div class="xrow"><select data-in="xprod" aria-label="Продукт из дома"><option value="">Продукт из дома ▾</option><optgroup label="Есть дома">${ids.filter(id=>have.has(id)).map(opt).join('')}</optgroup><optgroup label="Остальные">${ids.filter(id=>!have.has(id)).map(opt).join('')}</optgroup></select><input id="xpq" class="xkc" inputmode="decimal" data-in="xpq" value="${esc(X.pq||'')}" placeholder="${X.pid&&PR[X.pid]?PR[X.pid].u:'г / шт'}" aria-label="Сколько съел"></div><div id="xhint">${xHint()}</div><button class="btn sm" data-a="xadd">+ ещё продукт</button>`}
+function xHint(){const hv=X.pid?homeNow(X.pid):null,q=parseNum(X.pq),cur=X.pid&&PR[X.pid]&&q>0,over=cur&&hv!=null&&q>hv+0.01;
+  return X.pid&&PR[X.pid]?(hv==null?'<div class="small muted">Этого продукта нет в «Что дома» — спишется из купленного.</div>':`<div class="small ${over?'xwarn':'muted'}">${over?'Дома только':'Дома'} ${r0(hv)} ${PR[X.pid].u}${cur&&!over?' → останется '+r0(hv-q)+' '+PR[X.pid].u:''}</div>`):''}
+function xHintUpd(){const el=document.getElementById('xhint');if(el)el.innerHTML=xHint()}
+function homeNow(id){const c=[homeEntry(id,dkey(shopCycle())),homeEntry(id,dkey(cycleStart(appNow())))].filter(Boolean).sort((a,b)=>b.at-a.at)[0];if(!c)return null;return Math.max(0,c.q-(useAfter(c.at,new Date())[id]||0))}
+function xList(){const L=(X.items||[]).slice(),q=parseNum(X.pq);if(X.pid&&PR[X.pid]&&q>0)L.push({id:X.pid,q});return L}
+function fillFromProduct(){const L=xList();if(!L.length)return;const m=macros(L.map(i=>({p:i.id,q:i.q}))),nm=id=>PR[id].custom?PR[id].n:cap(PR[id].s);
+  Object.assign(X,{n:L.map(i=>nm(i.id)+' '+String(i.q).replace('.',',')+' '+PR[i.id].u).join(' + '),k:String(r0(m.k)),p:String(Math.round(m.p*10)/10),f:String(Math.round(m.f*10)/10),c:String(Math.round(m.c*10)/10),por:'1'});X.auto=1;X.line='';
   [['xn','n'],['xk','k'],['xp','p'],['xf','f'],['xc','c'],['xpor','por']].forEach(([i,k])=>{const el=document.getElementById(i);if(el)el.value=X[k]})}
 function xForm(m){
   return `<section class="xf xfc" aria-label="Съел вне плана: ${SLOTS[m.slot]}">
-  <select data-in="xpre" aria-label="Частое"><option value="">Частое ▾</option>${PRESETS.map((p,i)=>`<option value="${i}">${esc(p[0])} — ${p[2]} ккал</option>`).join('')}</select>
-  ${prodPick()}
+  <div class="picks xwhere"><button class="pick ${X.where!=='out'?'on':''}" data-a="xwhere" data-v="home">Дома</button><button class="pick ${X.where==='out'?'on':''}" data-a="xwhere" data-v="out">Вне дома</button></div>
+  ${X.where==='out'?`<select data-in="xpre" aria-label="Частое"><option value="">Частое ▾</option>${PRESETS.map((p,i)=>`<option value="${i}">${esc(p[0])} — ${p[2]} ккал</option>`).join('')}</select>`:prodPick()}
   <div class="xrow"><input id="xn" data-in="xf" data-k="n" value="${esc(X.n)}" placeholder="Что съел" aria-label="Что съел"><input id="xk" class="xkc" inputmode="decimal" data-in="xf" data-k="k" value="${esc(X.k)}" placeholder="ккал" aria-label="Ккал"><button class="btn pri sm" data-a="xsave">OK</button></div>
   <details id="xmore" ${X.more?'open':''}><summary class="small muted">подробнее</summary>
   <div class="g4">${[['p','Белки'],['f','Жиры'],['c','Углев.'],['por','Порций']].map(([k,l])=>`<div class="field"><label for="x${k}">${l}</label><input id="x${k}" inputmode="decimal" data-in="xf" data-k="${k}" value="${esc(X[k])}"></div>`).join('')}</div>
@@ -1033,8 +1042,11 @@ const A={
   wreset:()=>{const cs=menuCs();if(!confirm('Сбросить все правки этой недели?'))return true;const ds=[0,1,2,3,4,5,6].map(i=>dkey(addDays(cs,i)));
     ['edits','swaps','rec','meth','dswap','huse'].forEach(n=>Object.keys(S[n]||{}).forEach(k=>{if(ds.includes(k.split('|')[0]))delete S[n][k]}));delete S.wswaps[dkey(cs)];if(S.wmenu)delete S.wmenu[dkey(cs)];save();toast('Неделя как по плану')},
   review:()=>{S.reviewed=S.reviewed||{};S.reviewed[dkey(menuCs())]=1;save();toast('Меню на неделю проверено')},
-  xopen:d=>{if(xOpen===d.s){xOpen='';return}const m=dayPlan(pkey(viewDate)).meals.find(x=>x.slot===d.s);xOpen=d.s;X={n:'',k:'',p:'',f:'',c:'',por:'1',line:'',s:d.s,t:m?m.time:''}},
+  xopen:d=>{if(xOpen===d.s){xOpen='';return}const m=dayPlan(pkey(viewDate)).meals.find(x=>x.slot===d.s);xOpen=d.s;X={n:'',k:'',p:'',f:'',c:'',por:'1',line:'',items:[],where:'home',s:d.s,t:m?m.time:''}},
   xclose:()=>{xOpen=''},
+  xwhere:d=>{X.where=d.v==='out'?'out':'home'},
+  xadd:()=>{const q=parseNum(X.pq);if(!(X.pid&&PR[X.pid]&&q>0)){toast('Выбери продукт и вес');return true}{X.items=X.items||[];X.items.push({id:X.pid,q});X.pid='';X.pq='';fillFromProduct()}},
+  xitdel:d=>{X.items.splice(+d.i,1);if(xList().length)fillFromProduct();else Object.assign(X,{n:'',k:'',p:'',f:'',c:'',por:'1',auto:0})},
   qadj:d=>{const dk=d.d||viewDate,m=dayPlan(pkey(dk)).meals.find(x=>x.slot===d.s);if(!m)return true;
     const its=m.items.map(i=>[i.p,i.q]),it=its[+d.i];if(!it)return true;const st=stepOf(PR[it[0]]);
     it[1]=Math.max(st,Math.round((it[1]+Number(d.v)*st)*10)/10);S.edits=S.edits||{};S.edits[dk+'|'+d.s]=its;ED=null;cleanOld();save()},
@@ -1044,9 +1056,9 @@ const A={
     let lines=parseLines(X.line);if(lines.length===1&&!lines[0].plan&&X.auto)lines=[]; // поля уже заполнены из строки (и, может, поправлены) — берём их
     lines.forEach(x=>{if(x.plan){S.done[dk_(viewDate,x.plan)]=1;n++;return}L.push({id:Date.now().toString(36)+n,n:x.n,k:x.k,p:x.p,f:x.f,c:x.c,t:x.t||X.t||now,s:X.s});n++});
     if(!lines.length){const por=parseNum(X.por)||1,k=parseNum(X.k);if(!X.n.trim()||!k){toast('Нужны название и калории');return true}
-      const eid=Date.now().toString(36),pq=parseNum(X.pq);
-      L.push({id:eid,n:X.n.trim()+(por!==1?' ×'+String(por).replace('.',','):''),k:r0(k*por),p:r0(parseNum(X.p)*por),f:r0(parseNum(X.f)*por),c:r0(parseNum(X.c)*por),t:X.t||now,s:X.s,pid:X.pid&&PR[X.pid]&&pq>0?X.pid:undefined});n=1;
-      if(X.pid&&PR[X.pid]&&pq>0){const tt=X.t||now,[hh,mm]=tt.split(':').map(Number);S.eaten=S.eaten||[];S.eaten.push({id:eid,t:pkey(viewDate).getTime()+((hh||0)*60+(mm||0))*60000,p:X.pid,q:pq*por})}}
+      const eid=Date.now().toString(36),XL=X.where==='out'?[]:xList();
+      L.push({id:eid,n:X.n.trim()+(por!==1?' ×'+String(por).replace('.',','):''),k:r0(k*por),p:r0(parseNum(X.p)*por),f:r0(parseNum(X.f)*por),c:r0(parseNum(X.c)*por),t:X.t||now,s:X.s,pid:XL.length?XL[0].id:undefined});n=1;
+      if(XL.length){const tt=X.t||now,[hh,mm]=tt.split(':').map(Number);S.eaten=S.eaten||[];XL.forEach(it=>S.eaten.push({id:eid,t:pkey(viewDate).getTime()+((hh||0)*60+(mm||0))*60000,p:it.id,q:it.q*por}))}}
     if(!L.length)delete S.extra[viewDate];xOpen='';cleanOld();save();toast('Добавлено: '+n)},
   xdel:d=>{S.eaten=(S.eaten||[]).filter(e=>e.id!==d.id);const L=(S.extra[viewDate]||[]).filter(x=>x.id!==d.id);if(L.length)S.extra[viewDate]=L;else delete S.extra[viewDate];save()},
   upd:()=>{doUpdate();return true},
@@ -1069,8 +1081,8 @@ document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset
   if(k==='recsel'){const dk=el.dataset.d,key=dk+'|'+el.dataset.s;if(!guard(dk)){render();return}S.rec=S.rec||{};if(el.value)S.rec[key]=el.value;else delete S.rec[key];delete S.edits[key];delete S.swaps[key];ED=null;save();render();toast(el.value?'Блюдо: '+RECBY[el.value][1]:'По плану')}
   if(k==='edg'&&ED){ED.items[+el.dataset.i][1]=Math.max(0,parseNum(el.value))}
   if(k==='edadd'&&ED&&el.value){const p=PR[el.value];ED.items.push([el.value,p.u==='шт'?1:(el.value==='oil'?5:el.value==='protein'?30:100)]);render()}
-  if(k==='xprod'){X.pid=el.value;if(el.value){const pq=document.getElementById('xpq');if(pq){pq.placeholder=PR[el.value].u;if(!X.pq)pq.focus()}}fillFromProduct()}
-  if(k==='xpq'){X.pq=el.value;fillFromProduct()}
+  if(k==='xprod'){X.pid=el.value;if(el.value){const pq=document.getElementById('xpq');if(pq){pq.placeholder=PR[el.value].u;if(!X.pq)pq.focus()}}fillFromProduct();xHintUpd()}
+  if(k==='xpq'){X.pq=el.value;fillFromProduct();xHintUpd()}
   if(k==='xpre'&&el.value!==''){const p=PRESETS[+el.value];Object.assign(X,{n:p[0]+' ('+p[1]+')',k:String(p[2]),p:String(p[3]),f:String(p[4]),c:String(p[5])});render()}});
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset&&el.dataset.in==='bload'){filePick=0;const f=el.files&&el.files[0];el.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x||typeof x!=='object'||!('done' in x))throw 0;if(!confirm('Заменить текущие данные копией?'))return;S=Object.assign(def(),x);migrate();save();seedHome();seedReceipt();seedFix7();seedFix7b();render();toast('Копия загружена')}catch(_){toast('Это не копия «Рациона»')}};r.readAsText(f);return}if(el.dataset&&el.dataset.in==='edg'){render();return}if(el.dataset&&el.dataset.in==='leftg'){setHome(el.dataset.p,Math.max(0,Math.round(parseNum(el.value))));window._openLeft=true;clean();save();render()}
