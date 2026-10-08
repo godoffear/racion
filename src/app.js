@@ -1,4 +1,4 @@
-const APP_VERSION='5.11.1';
+const APP_VERSION='5.12';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -40,7 +40,7 @@ const PR={
  corncan:{vi:'Bắp hạt đóng hộp (кукуруза консервированная)',sec:'can',pk:'Банка ≈ 400 г, без жидкости ≈ 250 г',n:'Кукуруза консервированная',s:'кукуруза из банки',u:'г',k:80,p:2.5,f:1,c:16,cat:'Крупы',shop:250,keep:1},
  glassnoodle:{vi:'Miến dong (стеклянная лапша, сухая)',sec:'dry',pk:'Пачка 200–500 г',n:'Стеклянная лапша сухая',s:'стеклянная лапша',u:'г',k:350,p:0.2,f:0,c:86,cat:'Крупы',shop:100,keep:1},
  eggnoodle:{vi:'Mì trứng khô (яичная лапша, сухая)',sec:'dry',pk:'Пачка 400–500 г',n:'Яичная лапша сухая',s:'яичная лапша',u:'г',k:380,p:13,f:3,c:75,cat:'Крупы',shop:100,keep:1},
- bread:{vi:'Bánh mì (вьетнамский багет)',sec:'bak',pk:'Поштучно в пекарне GO!',n:'Багет',s:'багет',u:'шт',pg:80,k:270,p:9,f:3,c:52,cat:'Крупы',shop:1},
+ bread:{daily:1,vi:'Bánh mì (вьетнамский багет)',sec:'bak',pk:'Поштучно в пекарне GO!',n:'Багет',s:'багет',u:'шт',pg:80,k:270,p:9,f:3,c:52,cat:'Крупы',shop:1},
  broccoli:{vi:'Bông cải xanh (брокколи)',sec:'veg',n:'Брокколи',s:'брокколи',u:'г',k:34,p:2.8,f:0.4,c:7,cat:'Овощи и фрукты',shop:100},
  cabbage:{vi:'Bắp cải (капуста)',sec:'veg',n:'Капуста',s:'капуста',u:'г',k:25,p:1.3,f:0.1,c:6,cat:'Овощи и фрукты',shop:100},
  carrot:{vi:'Cà rốt (морковь)',sec:'veg',n:'Морковь',s:'морковь',u:'г',k:41,p:0.9,f:0.2,c:10,cat:'Овощи и фрукты',shop:100},
@@ -307,7 +307,7 @@ const STORE={potato:['shelf','на полке, сухо и темно, не мы
  tunao:['shelf','на полку',''],tunaw:['shelf','на полку',''],sardine:['shelf','на полку','']};
 // что есть к началу недели cs: дома к вторнику + куплено (фактически), сколько нужно по меню и что лишнее
 function invFor(cs){const ck=dkey(cs),out=[];if(!(S.left||{})[ck]&&!(S.shx||{})[ck])return out;const need=needFor(cs),ua={},C=(S.chk||{})[ck]||{};
-  Object.keys(PR).forEach(id=>{const p=PR[id];if(p.bulk||p.nobuy)return;
+  Object.keys(PR).forEach(id=>{const p=PR[id];if(p.bulk||p.nobuy||p.daily)return;
     const l=homeEntry(id,ck);let home=0;if(l&&l.q>0){const u=(ua[l.at]=ua[l.at]||useAfter(l.at,cs))[id]||0;home=Math.max(0,l.q-u)}
     const n=need[id]||0,lack=n-home,buy=lack>0?Math.ceil(Math.round(lack*10)/10/p.shop)*p.shop:0,s=shxOf(ck,id),got=!C[id]||(s&&s.none)?0:s&&s.q!=null?s.q:buy;
     // съеденное сверх плана из продуктов (S.eaten): из «дома» оно уже вычтено в useAfter, остальное — из купленного
@@ -409,7 +409,7 @@ function homeEntry(id,ck){return PR[id].keep?(S.pantry||{})[id]:(S.left[ck]||{})
 function setHome(id,q){const ck=dkey(shopCycle()),B=PR[id].keep?(S.pantry=S.pantry||{}):(S.left[ck]=S.left[ck]||{});if(q>0)B[id]={q,at:Date.now()};else delete B[id]}
 function shopList(cs0){
   const cs=cs0||shopCycle(),ck=dkey(cs),need=needFor(cs),rows=[],ua={};
-  Object.keys(PR).forEach(id=>{const p=PR[id],l=!p.bulk&&homeEntry(id,ck);if(p.bulk||p.nobuy||(!need[id]&&!l))return;
+  Object.keys(PR).forEach(id=>{const p=PR[id],l=!p.bulk&&homeEntry(id,ck);if(p.bulk||p.nobuy||p.daily||(!need[id]&&!l))return;
     let home=0;if(l&&l.q>0){const u=(ua[l.at]=ua[l.at]||useAfter(l.at,cs))[id]||0;home=Math.max(0,l.q-u)}
     const lack=(need[id]||0)-home,buy=lack>0?Math.ceil(Math.round(lack*10)/10/p.shop)*p.shop:0;
     rows.push({id,p,need:need[id]||0,home,buy,q:l?l.q:0,extra:!need[id]})});
@@ -562,6 +562,9 @@ function vToday(){
   const dis=k=>!!(S.dismiss||{})[k+'|'+tk],skipB=k=>`<button class="btn sm ghost" data-a="dismiss" data-v="${k}">Пропустить</button>`; // «Пропустить» скрывает карточку на сегодня
   if(isToday&&twd===6&&backupAge()>30&&!dis('backup'))h+=`<div class="card due small"><b>Раз в месяц: сохрани копию данных</b><div class="btns"><button class="btn sm" data-a="bsave">Сохранить копию</button>${skipB('backup')}</div></div>`;
   if(isToday&&twd===4&&(S.cal||[]).length&&Math.round((appNow()-pkey(S.cal.slice().sort((a,b)=>a.d<b.d?-1:1).pop().d))/864e5)>=13&&!dis('cal'))h+=`<div class="card due small"><b>Сегодня замер калипером</b> — живот и бок.<div class="btns"><button class="btn sm" data-a="tab" data-v="weight">Записать</button>${skipB('cal')}</div></div>`;
+  if(isToday&&!dis('fresh')){const fr={};meals.forEach(m=>{if(done(m)||(S.skip||{})[dk_(viewDate,m.slot)])return;m.items.forEach(it=>{if(PR[it.p]&&PR[it.p].daily)fr[it.p]=(fr[it.p]||0)+it.q})});
+    const fl=Object.keys(fr).map(id=>cap(PR[id].s)+' '+r0(fr[id])+' '+PR[id].u);
+    if(fl.length)h+=`<div class="card due xcard"><button class="xcl" data-a="dismiss" data-v="fresh" aria-label="Скрыть: купить свежее">✕</button><b>Купить свежее сегодня</b><div class="small muted">${esc(fl.join(', '))} — в закупку на неделю не входит, берёшь в день приготовления.</div><div class="btns"><button class="btn ghost" data-a="dismiss" data-v="fresh">Купил</button></div></div>`}
   if(isToday&&twd===0&&!dis('shopday')&&!boughtFor(dkey(shopCycle())))h+=`<div class="card due xcard"><button class="xcl" data-a="dismiss" data-v="shopday" aria-label="Скрыть: сегодня закупка">✕</button><b>Сегодня закупка</b><div class="small muted">На ${fmtDate(shopCycle())} – ${fmtDate(addDays(shopCycle(),6))}.</div><div class="btns"><button class="btn" data-a="tab" data-v="shop">Открыть список</button><button class="btn ghost" data-a="dismiss" data-v="shopday">Уже купил</button></div></div>`;
   if(isToday&&twd===4&&!S.w.some(x=>x.d===dkey(new Date()))&&!dis('weigh'))h+=`<div class="card due"><b>Пятница — взвешивание</b><div class="small muted">Утром натощак, до еды и воды.</div><div class="addrow" style="margin-top:8px"><input id="w-in" inputmode="decimal" placeholder="Вес, кг" aria-label="Вес, кг"><button class="btn pri" data-a="wsave">Записать</button></div><div class="btns">${skipB('weigh')}</div></div>`;
   if(isToday&&(twd===4||twd===5)&&S.w.some(x=>x.d>=dkey(addDays(new Date(),-(twd-4)))))h+=summaryCard();
