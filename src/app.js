@@ -1,4 +1,4 @@
-const APP_VERSION='5.12';
+const APP_VERSION='5.13';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -196,7 +196,7 @@ const EPOCH=new Date(2026,9,6); // вторник, 6 окт 2026 — меню 1
 
 /* ===== Состояние ===== */
 const LS='racion-v3';
-function def(){return {rec:{},meth:{},dswap:{},wmenu:{},reviewed:{},v:3,done:{},skip:{},edits:{},w:[],left:{},bulk:{},chk:{},swaps:{},extra:{},excl:{},wswaps:{},treatBuy:{},grams:true,gv:2,cooked:false,stock:{},sv:0,pantry:{},price:{},homeAt:0,homeFor:'',huse:{},adaptOff:{},boiled:{q:0,at:0},riceBank:{q:0,at:0},prepDone:{},dismiss:{},shx:{},custom:{},eaten:[]}}
+function def(){return {rec:{},meth:{},dswap:{},wmenu:{},reviewed:{},v:3,done:{},skip:{},edits:{},w:[],left:{},bulk:{},chk:{},swaps:{},extra:{},excl:{},wswaps:{},treatBuy:{},grams:true,gv:2,cooked:false,stock:{},sv:0,pantry:{},price:{},homeAt:0,homeFor:'',huse:{},adaptOff:{},boiled:{q:0,at:0},riceBank:{q:0,at:0},prepDone:{},dismiss:{},shx:{},custom:{},eaten:[],place:{}}}
 let S;try{S=Object.assign(def(),JSON.parse(localStorage.getItem(LS)||'null')||{})}catch(e){S=def()}
 // 4.8: отметки запасов больше не сбрасываются каждую неделю — переносим «Купить» из S.bulk
 function migrate(){if(S.gv!==2){S.grams=true;S.gv=2}if(S.sv!==1){S.stock=S.stock||{};Object.values(S.bulk||{}).forEach(B=>Object.keys(B||{}).forEach(id=>{S.stock[id]=1}));S.sv=1}applyCustom()}
@@ -407,6 +407,8 @@ function useAfter(ts,until){ // сколько уйдёт по плану с м�
 // что лежит дома: консервы и сухое (keep) помнятся между неделями в S.pantry, свежее — в S.left на неделю закупки
 function homeEntry(id,ck){return PR[id].keep?(S.pantry||{})[id]:(S.left[ck]||{})[id]}
 function setHome(id,q){const ck=dkey(shopCycle()),B=PR[id].keep?(S.pantry=S.pantry||{}):(S.left[ck]=S.left[ck]||{});if(q>0)B[id]={q,at:Date.now()};else delete B[id]}
+// 5.13: где покупать — в GO! (мясо, рыба, яйца, консервы, сухое) или рядом с домом по факту (овощи и фрукты); можно переключить у каждой строки
+function placeOf(id){const o=(S.place||{})[id];if(o)return o;const p=PR[id];return p&&!p.bulk&&(p.sec==='veg'||p.sec==='fruit')?'near':'go'}
 function shopList(cs0){
   const cs=cs0||shopCycle(),ck=dkey(cs),need=needFor(cs),rows=[],ua={};
   Object.keys(PR).forEach(id=>{const p=PR[id],l=!p.bulk&&homeEntry(id,ck);if(p.bulk||p.nobuy||p.daily||(!need[id]&&!l))return;
@@ -458,6 +460,7 @@ function sheetHtml(){if(!SH||tab!=='shop')return '';
       <div class="field" style="margin-top:12px"><label for="shq">Сколько купил на самом деле (${p.u})</label><input id="shq" type="text" inputmode="decimal" data-in="shf" data-k="q" value="${esc(val)}"></div>
       <div class="btns"><button class="btn pri" data-a="shbuy">Куплено столько</button></div>
       <div class="btns"><button class="btn" data-a="shnone">Нет в наличии</button><button class="btn" data-a="shsubopen">Заменить на другое</button></div>
+      <div class="btns"><button class="btn" data-a="shplace">${placeOf(id)==='near'?'Купить в GO!':'Купить у дома'}</button></div>
       <div class="btns">${s||C[id]?'<button class="link" data-a="shundo">Вернуть как в списке</button>':''}<button class="btn ghost" data-a="shclose">Закрыть</button></div>`}
     else b=`<h3>${nm}</h3><div class="small muted">${esc(p.bulk||'')}</div><div class="btns"><button class="btn pri" data-a="shbuy">Куплено</button><button class="btn" data-a="shnone">Нет в наличии</button><button class="btn ghost" data-a="shclose">Закрыть</button></div>`}
   else if(SH.t==='extra'){const have=new Set(L.rows.filter(x=>x.buy>0).map(x=>x.id)),
@@ -475,7 +478,7 @@ function sheetHtml(){if(!SH||tab!=='shop')return '';
       <div class="two"><div class="field"><label for="cs">Отдел в магазине</label><select id="cs" data-in="shf" data-k="c_sec">${SECS.map(([sec,tt])=>`<option value="${sec}" ${(SH.c_sec||'veg')===sec?'selected':''}>${esc(tt.replace(/ \(.*$/,''))}</option>`).join('')}</select></div><div class="field"><label for="cpr">Цена, ₫ за кг (или за шт)</label><input id="cpr" type="text" inputmode="numeric" data-in="shf" data-k="c_pr" value="${v('c_pr')}"></div></div>
       <div class="btns"><button class="btn pri" data-a="custdo">Сохранить продукт</button><button class="btn ghost" data-a="${SH.from==='extra'?'shextra':'shclose'}">Назад</button></div>`}
   return `<div class="shbg" data-a="shclose"></div><div class="shp" role="dialog" aria-modal="true">${b}</div>`}
-function shopCost(L){let go=0,sp=0;L.rows.forEach(r=>{if(r.buy>0){const q=boughtQ(L.ck,r);if(q>0)go+=costOf(r.id,q)}});L.bulk.forEach(id=>{if(SPORT.includes(id))sp+=costOf(id);else go+=costOf(id)});return {go,sp}}
+function shopCost(L){let go=0,sp=0;L.rows.forEach(r=>{if(r.buy>0&&placeOf(r.id)==='go'){const q=boughtQ(L.ck,r);if(q>0)go+=costOf(r.id,q)}});L.bulk.forEach(id=>{if(SPORT.includes(id))sp+=costOf(id);else go+=costOf(id)});return {go,sp}}
 function buyText(r){const p=r.p;if(p.m==='palm'&&!S.grams)return fq(r.buy,'г')+' ≈ '+fmtMeasure(r.buy/p.mg,'palm');if(p.u==='шт'&&r.p.shop===10)return r.buy+' шт ('+r.buy/10+' '+plural(r.buy/10,['десяток','десятка','десятков'])+')';return fq(r.buy,p.u)}
 function leftStep(p){return p.m?p.mg*(p.m==='palm'?0.5:1):1}
 function leftText(p,q){return p.m&&!S.grams?fmtMeasure(q/p.mg,p.m):fq(q,p.u)}
@@ -779,7 +782,7 @@ function homePanel(L){const ck=L.ck;
   return h+`</section>`}
 function vShopMode(){
   const L=shopList(),ck=L.ck,C=S.chk[ck]||{};
-  const items=L.rows.filter(r=>r.buy>0).map(r=>({id:r.id,n:nameOf(r.p),q:r.p.u==='шт'&&r.p.shop===10?r.buy+' шт':fq(r.buy,r.p.u),vi:r.p.vi,sec:r.p.sec,u:r.p.u}))
+  const nearN=L.rows.filter(r=>r.buy>0&&placeOf(r.id)==='near').length,items=L.rows.filter(r=>r.buy>0&&placeOf(r.id)==='go').map(r=>({id:r.id,n:nameOf(r.p),q:r.p.u==='шт'&&r.p.shop===10?r.buy+' шт':fq(r.buy,r.p.u),vi:r.p.vi,sec:r.p.sec,u:r.p.u}))
     .concat(L.bulk.map(id=>({id,n:nameOf(PR[id]).replace(/:.*$/,''),q:PR[id].bulk,vi:PR[id].vi,sec:'zz',bulk:1})));
   const ord=SECS.map(x=>x[0]).concat(['zz']),by=(a,b)=>ord.indexOf(a.sec)-ord.indexOf(b.sec);
   const todo=items.filter(x=>!C[x.id]).sort(by),done=items.filter(x=>C[x.id]),n=done.length;
@@ -787,6 +790,7 @@ function vShopMode(){
   return `<header class="top thead"><div><h1>В магазине</h1><div class="date">куплено ${n} из ${items.length} · ≈ ${vnd(shopCost(L).go)}</div></div><button class="btn" data-a="shopmode">Готово</button></header>
   <div class="prog big"><i style="width:${items.length?n/items.length*100:0}%"></i></div>
   ${shopNotes(L)}
+  ${nearN?`<div class="small muted" style="margin-bottom:8px">Ещё ${nearN} ${plural(nearN,['продукт','продукта','продуктов'])} — у дома, по факту (в списке «Покупки»).</div>`:''}
   ${todo.length?`<ul class="smlist">${todo.map(li).join('')}</ul>`:'<div class="card ok"><b>Всё куплено 🎉</b><div class="small muted">Дома разложи мясо и рыбу на Чт–Пн порциями в морозилку.</div></div>'}
   ${done.length?`<h2>Уже в корзине</h2><ul class="smlist done">${done.map(li).join('')}</ul>`:''}`}
 function vShop(){if(shopMode)return vShopMode();
@@ -844,13 +848,15 @@ function vShop(){if(shopMode)return vShopMode();
   const more=`<details class="card" id="shopmore" ${window._openMore?'open':''}><summary><b>Дома, запасы, цены</b><span class="muted small">${ready?'внесено '+fmtDate(new Date(S.homeAt)):''}</span></summary>${ready?HPN:''}${h.replace(/<section class="card/g,'<section class="sub')}</details>`;
   if(!ready)return H0+HPN+more;
   const li=x=>shopLi(x,C,ck);
-  const its=L.rows.filter(r=>r.buy>0).map(r=>({id:r.id,n:nameOf(r.p),q:r.p.u==='шт'&&r.p.shop===10?r.buy+' шт':fq(r.buy,r.p.u),vi:(r.p.vi||'').split(' (')[0],sec:r.p.sec,u:r.p.u})).concat(L.bulk.map(id=>({id,n:nameOf(PR[id]).replace(/:.*$/,''),q:PR[id].bulk,vi:(PR[id].vi||'').split(' (')[0],sec:'zz',bulk:1})));
+  const its0=L.rows.filter(r=>r.buy>0).map(r=>({id:r.id,n:nameOf(r.p),q:r.p.u==='шт'&&r.p.shop===10?r.buy+' шт':fq(r.buy,r.p.u),vi:(r.p.vi||'').split(' (')[0],sec:r.p.sec,u:r.p.u})).concat(L.bulk.map(id=>({id,n:nameOf(PR[id]).replace(/:.*$/,''),q:PR[id].bulk,vi:(PR[id].vi||'').split(' (')[0],sec:'zz',bulk:1})));
+  const its=its0.filter(x=>x.bulk||placeOf(x.id)==='go'),nearIts=its0.filter(x=>!x.bulk&&placeOf(x.id)==='near');
   const T=shopCost(L),nOn2=its.filter(x=>C[x.id]).length;
   let sl=`<section class="card"><div class="bh"><h3>Купить${its.length?` · ${nOn2} из ${its.length}`:''}</h3><span class="small muted">≈ ${vnd(T.go)}</span></div>${its.length?`<div class="prog"><i style="width:${nOn2/its.length*100}%"></i></div>`:'<p class="small muted">Всё есть, покупать нечего.</p>'}`;
   sl+=shopNotes(L);
   if(its.length)sl+=`<button class="btn pri wide2" data-a="shopmode" style="margin:10px 0 4px">🛒 В магазине — экран не гаснет</button>`;
   SECS.concat([['zz','Запасы']]).forEach(([sec,t])=>{const g=its.filter(x=>x.sec===sec);if(g.length)sl+=`<div class="cat">${t}</div><ul class="smlist">${g.map(li).join('')}</ul>`});
   sl+=`${T.sp?`<div class="small muted">Спортпит отдельно ≈ ${vnd(T.sp)}</div>`:''}${nOn2?`<div class="btns"><button class="btn ghost sm" data-a="chkreset">Снять галочки</button></div>`:''}</section>`;
+  if(nearIts.length){const nN=nearIts.filter(x=>C[x.id]).length;sl+=`<section class="card"><div class="bh"><h3>У дома, по факту · ${nN} из ${nearIts.length}</h3></div><div class="small muted" style="margin-bottom:6px">Свежее берёшь рядом с домом в нужный день. В закупку GO! и в сумму не входит. Нажми «⋯», чтобы перенести продукт в GO!.</div><ul class="smlist">${nearIts.sort((a,b)=>SECS.findIndex(x=>x[0]===a.sec)-SECS.findIndex(x=>x[0]===b.sec)).map(li).join('')}</ul></section>`}
   return H0+AD+sl+more;
 
 }
@@ -975,6 +981,7 @@ const A={
   shnone:()=>{const id=SH&&SH.id;if(!id)return true;const ck=dkey(shopCycle()),C=S.chk[ck]=S.chk[ck]||{};
     S.shx=S.shx||{};(S.shx[ck]=S.shx[ck]||{})[id]={none:1};C[id]=1;clean();save();
     if(PR[id].bulk)SH=null;else SH.m='sub'},
+  shplace:()=>{const id=SH&&SH.id;if(!id)return true;S.place=S.place||{};const to=placeOf(id)==='near'?'go':'near';S.place[id]=to;SH=null;save();toast(to==='near'?'Теперь покупаю у дома':'Теперь покупаю в GO!')},
   shundo:()=>{const id=SH&&SH.id;if(!id)return true;const ck=dkey(shopCycle());if(S.shx&&S.shx[ck])delete S.shx[ck][id];if(S.chk[ck])delete S.chk[ck][id];SH=null;save();toast('Вернул как в списке')},
   shsubdo:d=>{const id=SH&&SH.id,to=d.to;if(!id||!PR[to])return true;const ck=dkey(shopCycle());
     S.wswaps=S.wswaps||{};const W=S.wswaps[ck]=S.wswaps[ck]||{};W[id]=to;Object.keys(W).forEach(k=>{if(W[k]===k)delete W[k]});
