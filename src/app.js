@@ -1,4 +1,4 @@
-const APP_VERSION='5.14';
+const APP_VERSION='5.15';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -206,7 +206,7 @@ function xSugHtml(){if(X.fromList||String(X.n||'').trim().length<3)return '';con
   return ids.length?`<div class="picks">${ids.map(i=>`<button class="pick" data-a="xsug" data-i="${i}">${esc(all[i][0])} <small>${all[i][2]} ккал</small></button>`).join('')}</div>`:''}
 function xSugUpd(){const el=document.getElementById('xsug');if(el)el.innerHTML=xSugHtml()}
 function xRemember(n,k,p,f,c){n=String(n||'').trim();if(!n||!(k>0))return;S.myfoods=S.myfoods||[];const key=xnorm(n);if(xAll().some(x=>xnorm(x[0])===key))return;S.myfoods.unshift([n.slice(0,80),'',k,p,f,c]);if(S.myfoods.length>200)S.myfoods.length=200}
-function def(){return {rec:{},meth:{},dswap:{},wmenu:{},reviewed:{},v:3,done:{},skip:{},edits:{},w:[],left:{},bulk:{},chk:{},swaps:{},extra:{},excl:{},wswaps:{},treatBuy:{},grams:true,gv:2,cooked:false,stock:{},sv:0,pantry:{},price:{},homeAt:0,homeFor:'',huse:{},adaptOff:{},boiled:{q:0,at:0},riceBank:{q:0,at:0},prepDone:{},dismiss:{},shx:{},custom:{},eaten:[],place:{},myfoods:[]}}
+function def(){return {rec:{},meth:{},dswap:{},wmenu:{},reviewed:{},v:3,done:{},skip:{},edits:{},w:[],left:{},bulk:{},chk:{},swaps:{},extra:{},excl:{},wswaps:{},treatBuy:{},grams:true,gv:2,cooked:false,stock:{},sv:0,pantry:{},price:{},homeAt:0,homeFor:'',huse:{},adaptOff:{},boiled:{q:0,at:0},riceBank:{q:0,at:0},prepDone:{},dismiss:{},shx:{},custom:{},eaten:[],place:{},myfoods:[],showMac:true}}
 let S;try{S=Object.assign(def(),JSON.parse(localStorage.getItem(LS)||'null')||{})}catch(e){S=def()}
 // 4.8: отметки запасов больше не сбрасываются каждую неделю — переносим «Купить» из S.bulk
 function migrate(){if(S.gv!==2){S.grams=true;S.gv=2}if(S.sv!==1){S.stock=S.stock||{};Object.values(S.bulk||{}).forEach(B=>Object.keys(B||{}).forEach(id=>{S.stock[id]=1}));S.sv=1}applyCustom()}
@@ -271,7 +271,8 @@ function cap(t){return t.charAt(0).toUpperCase()+t.slice(1)}
 // примерный вес в готовом виде: рис, лапша и овсянка набирают воду, мясо и рыба при жарке теряют
 const COOKED={rice:2.8,ricenoodle:2.5,oats:2.5,chicken:.75,thigh:.7,pork:.75,fish:.8,shrimp:.8,squid:.7,tofu:.9};
 function cookedTxt(i){const f=S.cooked&&S.grams&&COOKED[i.p];return f?` <small class="ckd">(≈ ${Math.round(i.q*f/5)*5} г)</small>`:''}
-function itemsList(items){return `<ul class="il">${items.map(i=>`<li><span>${esc(cap(PR[i.p].s))}</span><b>${esc(qtyText(i))}${cookedTxt(i)}</b></li>`).join('')}</ul>`}
+function itemMac(i){if(S.showMac===false)return '';const m=macros([i]);if(m.k<15)return '';return `<small class="im">${r0(m.k)} ккал · Б ${r0(m.p)} · Ж ${r0(m.f)} · У ${r0(m.c)}</small>`}
+function itemsList(items){return `<ul class="il">${items.map(i=>`<li><span class="grow">${esc(cap(PR[i.p].s))}${itemMac(i)}</span><b>${esc(qtyText(i))}${cookedTxt(i)}</b></li>`).join('')}</ul>`}
 function itemsText(items){return items.map(i=>PR[i.p].s+' '+qtyText(i)).join(', ')}
 function chips(m){return `<div class="chips"><span>${r0(m.k)} ккал</span><span class="p">Б ${r0(m.p)}</span><span class="f">Ж ${r0(m.f)}</span><span class="c">У ${r0(m.c)}</span></div>`}
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -621,7 +622,7 @@ function vToday(){
 function stepOf(p){return p.u==='шт'||p===PR.creatine?1:[PR.oil,PR.nuts,PR.protein].includes(p)?5:10}
 // продукты приёма с кнопками − и + : граммы меняются сразу, без «Сохранить»
 function qtyList(m,dk){const D=`data-d="${dk}" data-s="${m.slot}"`;
-  return `<ul class="il ql">${m.items.map((i,n)=>{const p=PR[i.p];return `<li><span>${esc(cap(p.s))}</span><span class="qv"><button class="qb" data-a="qadj" ${D} data-i="${n}" data-v="-1" aria-label="Меньше: ${esc(p.s)}">−</button><b>${esc(qtyText(i))}${cookedTxt(i)}</b><button class="qb" data-a="qadj" ${D} data-i="${n}" data-v="1" aria-label="Больше: ${esc(p.s)}">+</button></span></li>`}).join('')}</ul>`}
+  return `<ul class="il ql">${m.items.map((i,n)=>{const p=PR[i.p];return `<li><span class="grow">${esc(cap(p.s))}${itemMac(i)}</span><span class="qv"><button class="qb" data-a="qadj" ${D} data-i="${n}" data-v="-1" aria-label="Меньше: ${esc(p.s)}">−</button><b>${esc(qtyText(i))}${cookedTxt(i)}</b><button class="qb" data-a="qadj" ${D} data-i="${n}" data-v="1" aria-label="Больше: ${esc(p.s)}">+</button></span></li>`}).join('')}</ul>`}
 function editBox(m,dk){dk=dk||viewDate;
   if(!ED||ED.key!==dk+'|'+m.slot)ED={key:dk+'|'+m.slot,items:m.items.map(i=>[i.p,i.q])};
   const opts=Object.keys(PR).filter(id=>PR[id].k&&!ED.items.some(x=>x[0]===id));
@@ -937,7 +938,7 @@ function vWeight(){
   ${sec('b','Копия данных',S.lastBackup?(backupAge()>30?'<span class="flag">пора сохранить</span>':'сохранена '+fmtDate(new Date(S.lastBackup))):'ещё не делал',`<div class="small muted">Вес, калипер, отметки и правки меню хранятся только в Chrome на этом телефоне. Раз в месяц сохраняй копию — файл попадёт в «Загрузки». При смене телефона или очистке браузера загрузи её обратно.</div>
   <div class="btns"><button class="btn pri" data-a="bsave">Сохранить копию</button><label class="btn" for="bload">Загрузить копию</label><input id="bload" type="file" hidden data-in="bload"></div>`)}
   ${sec('g','Копия в GitHub',ghCfg().token?(ghCfg().err?'<span class="flag">ошибка</span>':ghCfg().last?'отправлена '+fmtDate(new Date(ghCfg().last)):'подключено'):'не подключено',ghBody())}
-  ${sec('o','Настройки','',`<div class="ph">Порции</div><div class="tog" style="width:max-content"><button data-a="grams" data-v="0" class="${S.grams?'':'on'}">Ладони и чашки</button><button data-a="grams" data-v="1" class="${S.grams?'on':''}">Граммы</button></div>
+  ${sec('o','Настройки','',`<div class="ph">Порции</div><div class="tog" style="width:max-content"><button data-a="grams" data-v="0" class="${S.grams?'':'on'}">Ладони и чашки</button><button data-a="grams" data-v="1" class="${S.grams?'on':''}">Граммы</button></div><div class="ph">КБЖУ у продуктов</div><div class="tog" style="width:max-content"><button data-a="showmac" data-v="0" class="${S.showMac===false?'on':''}">Скрыть</button><button data-a="showmac" data-v="1" class="${S.showMac===false?'':'on'}">Показать</button></div>
   <div class="small muted" style="margin-top:14px">Рацион ${APP_VERSION} · работает без интернета.<br>${sa?'':'Установить: Chrome → ⋮ → «Установить приложение». '}<button class="link" data-a="updcheck">Проверить обновление</button></div>`)}`;
 }
 
@@ -1014,6 +1015,7 @@ const A={
   wsave:()=>{const v=parseNum(document.getElementById('w-in').value);if(v<30||v>250){toast('Введи вес в кг, например 83,4');return true}
     const k=dkey(new Date());S.w=S.w.filter(x=>x.d!==k);S.w.push({d:k,w:Math.round(v*10)/10});save();toast('Вес записан: '+kg(v)+' кг')},
   wdel:d=>{if(!confirm('Удалить запись за '+fmtDate(pkey(d.v))+'?'))return true;S.w=S.w.filter(x=>x.d!==d.v);save()},
+  showmac:d=>{S.showMac=d.v==='1';save();toast(S.showMac?'КБЖУ у продуктов показано':'КБЖУ у продуктов скрыто')},
   grams:d=>{S.grams=d.v==null?!S.grams:d.v==='1';save();toast(S.grams?'Порции в граммах':'Порции в ладонях и чашках')},
   swapall:()=>{swapAll=!swapAll},
   shopmode:async()=>{shopMode=!shopMode;window.scrollTo&&window.scrollTo(0,0);
