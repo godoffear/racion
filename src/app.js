@@ -1,4 +1,4 @@
-const APP_VERSION='5.15';
+const APP_VERSION='5.16';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -419,7 +419,16 @@ function useAfter(ts,until){ // сколько уйдёт по плану с м�
 function homeEntry(id,ck){return PR[id].keep?(S.pantry||{})[id]:(S.left[ck]||{})[id]}
 function setHome(id,q){const ck=dkey(shopCycle()),B=PR[id].keep?(S.pantry=S.pantry||{}):(S.left[ck]=S.left[ck]||{});if(q>0)B[id]={q,at:Date.now()};else delete B[id]}
 // 5.13: где покупать — в GO! (мясо, рыба, яйца, консервы, сухое) или рядом с домом по факту (овощи и фрукты); можно переключить у каждой строки
-function placeOf(id){const o=(S.place||{})[id];if(o)return o;const p=PR[id];return p&&!p.bulk&&(p.sec==='veg'||p.sec==='fruit')?'near':'go'}
+// 5.16: долго хранящееся (неделя и больше) — в GO! в понедельник; остальное свежее — у дома: чт на чт–пт, сб на сб–пн, а на вт–ср — из GO! в понедельник
+const LONG=['potato','pumpkin','cabbage','carrot','onion','apple','orange','sweet'];
+const NEARWIN=[['Понедельник · в GO!','на вт–ср',0,2],['Четверг · лавка у дома','на чт–пт',2,4],['Суббота · лавка у дома','на сб–пн',4,7]];
+function placeOf(id){const o=(S.place||{})[id];if(o)return o;const p=PR[id];return p&&!p.bulk&&(p.sec==='veg'||p.sec==='fruit')&&!LONG.includes(id)?'near':'go'}
+function nearWin(L){const out=NEARWIN.map(()=>[]);
+  L.rows.filter(r=>r.buy>0&&placeOf(r.id)==='near').forEach(r=>{const wn=NEARWIN.map(([,,a,b])=>{let t=0;for(let i=a;i<b;i++)dayPlan(addDays(L.cs,i)).meals.forEach(m=>m.items.forEach(x=>{if(x.p===r.id)t+=x.q}));return t});
+    let h=r.home;wn.forEach((w,k)=>{const t=Math.min(h,w);h-=t;const b=w-t;if(b<=0)return;const buy=Math.ceil(Math.round(b*10)/10/r.p.shop)*r.p.shop;
+      out[k].push({id:r.id,key:r.id+'@'+k,n:nameOf(r.p),q:r.p.u==='шт'&&r.p.shop===10?buy+' шт':fq(buy,r.p.u),vi:(r.p.vi||'').split(' (')[0],sec:r.p.sec,u:r.p.u})})});
+  return out}
+function nearLi(x,C){const on=!!C[x.key];return `<li class="shl ${on?'bought':''}"><button class="sm-row" data-a="chk" data-p="${x.key}" aria-pressed="${on}"><span class="cb ${on?'on':''}">${on?'✓':''}</span><span class="grow"><b>${esc(x.n)}</b><span class="vi">${esc(x.vi||'')}</span></span><span class="q">${esc(x.q)}</span></button><button class="shm" data-a="shsheet" data-p="${x.id}" aria-label="Изменить: ${esc(x.n)}">⋯</button></li>`}
 function shopList(cs0){
   const cs=cs0||shopCycle(),ck=dkey(cs),need=needFor(cs),rows=[],ua={};
   Object.keys(PR).forEach(id=>{const p=PR[id],l=!p.bulk&&homeEntry(id,ck);if(p.bulk||p.nobuy||p.daily||(!need[id]&&!l))return;
@@ -576,6 +585,9 @@ function vToday(){
   const dis=k=>!!(S.dismiss||{})[k+'|'+tk],skipB=k=>`<button class="btn sm ghost" data-a="dismiss" data-v="${k}">Пропустить</button>`; // «Пропустить» скрывает карточку на сегодня
   if(isToday&&twd===6&&backupAge()>30&&!dis('backup'))h+=`<div class="card due small"><b>Раз в месяц: сохрани копию данных</b><div class="btns"><button class="btn sm" data-a="bsave">Сохранить копию</button>${skipB('backup')}</div></div>`;
   if(isToday&&twd===4&&(S.cal||[]).length&&Math.round((appNow()-pkey(S.cal.slice().sort((a,b)=>a.d<b.d?-1:1).pop().d))/864e5)>=13&&!dis('cal'))h+=`<div class="card due small"><b>Сегодня замер калипером</b> — живот и бок.<div class="btns"><button class="btn sm" data-a="tab" data-v="weight">Записать</button>${skipB('cal')}</div></div>`;
+  if(isToday&&(twd===3||twd===5)&&!dis('lavka')){const days=twd===3?2:3,fr={};for(let i=0;i<days;i++)dayPlan(addDays(pkey(dkey(appNow())),i)).meals.forEach(m=>m.items.forEach(it=>{const p=PR[it.p];if(p&&!p.bulk&&!p.daily&&placeOf(it.p)==='near')fr[it.p]=(fr[it.p]||0)+it.q}));
+    const fl=Object.keys(fr).map(id=>cap(PR[id].s)+' '+(PR[id].u==='шт'?Math.ceil(fr[id]):Math.ceil(fr[id]/PR[id].shop)*PR[id].shop)+' '+PR[id].u);
+    if(fl.length)h+=`<div class="card due xcard"><button class="xcl" data-a="dismiss" data-v="lavka" aria-label="Скрыть: сходить в лавку">✕</button><b>Сегодня в лавку: свежее на ${twd===3?'чт–пт':'сб–пн'}</b><div class="small muted">${esc(fl.join(', '))}. Минус то, что ещё осталось дома.</div><div class="btns"><button class="btn ghost" data-a="dismiss" data-v="lavka">Купил</button></div></div>`}
   if(isToday&&!dis('fresh')){const fr={};meals.forEach(m=>{if(done(m)||(S.skip||{})[dk_(viewDate,m.slot)])return;m.items.forEach(it=>{if(PR[it.p]&&PR[it.p].daily)fr[it.p]=(fr[it.p]||0)+it.q})});
     const fl=Object.keys(fr).map(id=>cap(PR[id].s)+' '+r0(fr[id])+' '+PR[id].u);
     if(fl.length)h+=`<div class="card due xcard"><button class="xcl" data-a="dismiss" data-v="fresh" aria-label="Скрыть: купить свежее">✕</button><b>Купить свежее сегодня</b><div class="small muted">${esc(fl.join(', '))} — в закупку на неделю не входит, берёшь в день приготовления.</div><div class="btns"><button class="btn ghost" data-a="dismiss" data-v="fresh">Купил</button></div></div>`}
@@ -868,7 +880,7 @@ function vShop(){if(shopMode)return vShopMode();
   if(its.length)sl+=`<button class="btn pri wide2" data-a="shopmode" style="margin:10px 0 4px">🛒 В магазине — экран не гаснет</button>`;
   SECS.concat([['zz','Запасы']]).forEach(([sec,t])=>{const g=its.filter(x=>x.sec===sec);if(g.length)sl+=`<div class="cat">${t}</div><ul class="smlist">${g.map(li).join('')}</ul>`});
   sl+=`${T.sp?`<div class="small muted">Спортпит отдельно ≈ ${vnd(T.sp)}</div>`:''}${nOn2?`<div class="btns"><button class="btn ghost sm" data-a="chkreset">Снять галочки</button></div>`:''}</section>`;
-  if(nearIts.length){const nN=nearIts.filter(x=>C[x.id]).length;sl+=`<section class="card"><div class="bh"><h3>У дома, по факту · ${nN} из ${nearIts.length}</h3></div><div class="small muted" style="margin-bottom:6px">Свежее берёшь рядом с домом в нужный день. В закупку GO! и в сумму не входит. Нажми «⋯», чтобы перенести продукт в GO!.</div><ul class="smlist">${nearIts.sort((a,b)=>SECS.findIndex(x=>x[0]===a.sec)-SECS.findIndex(x=>x[0]===b.sec)).map(li).join('')}</ul></section>`}
+  if(nearIts.length){const NW=nearWin(L),all=NW.flat(),nN=all.filter(x=>C[x.key]).length;sl+=`<section class="card"><div class="bh"><h3>Свежее: овощи и фрукты · ${nN} из ${all.length}</h3></div><div class="small muted" style="margin-bottom:6px">Покупаешь на 2–3 дня, чтобы не лежало. В сумму GO! не входит. Нажми «⋯», чтобы перенести продукт в GO! на всю неделю.</div>${NW.map((g,k)=>g.length?`<div class="cat">${NEARWIN[k][0]} <small class="muted">${NEARWIN[k][1]}</small></div><ul class="smlist">${g.sort((a,b)=>SECS.findIndex(x=>x[0]===a.sec)-SECS.findIndex(x=>x[0]===b.sec)).map(x=>nearLi(x,C)).join('')}</ul>`:'').join('')}</section>`}
   return H0+AD+sl+more;
 
 }
