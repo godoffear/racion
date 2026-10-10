@@ -475,6 +475,8 @@ nav.tabs button{min-width:0;font-size:.7rem}
 .xcl{position:absolute;top:6px;right:6px;width:44px;height:44px;border:0;background:none;color:var(--muted);font-size:1.15rem;line-height:1;border-radius:50%}
 .xwhere{margin-top:6px}.xit{display:flex;gap:6px;align-items:center;margin-top:6px;font-size:.92rem}.xit .grow{min-width:0;overflow-wrap:anywhere}.xwarn{color:var(--warn);font-weight:600}
 .il .grow{min-width:0;overflow-wrap:anywhere}.il .im{display:block;font-size:.74rem;font-style:italic;color:var(--muted);font-weight:400;margin-top:1px}
+.frg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.frg .field{margin:0;min-width:0}.frg .field label{font-size:.72rem}.frg .field input{width:100%;min-width:0;padding:8px 4px;text-align:center;font-size:1rem}
+.frcard .bh{align-items:center}.shp .il li .im{display:block}
 </style>
 </head>
 <body>
@@ -482,7 +484,7 @@ nav.tabs button{min-width:0;font-size:.7rem}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='5.18';
+const APP_VERSION='5.19';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -953,6 +955,55 @@ function qStr(v){return String(v).replace('.',',')}
 function subCands(id,L){const p=PR[id],c=useClass(id),need=L.need[id]||0;
   return Object.keys(PR).filter(x=>x!==id&&!PR[x].bulk&&x!=='veg'&&(!PR[x].keep||c==='prot')&&(PR[x].sec===p.sec||(c&&useClass(x)===c)))
     .map(x=>({id:x,same:+!!(c&&useClass(x)===c),q:convQ(id,need,x)})).sort((a,b)=>b.same-a.same||PR[a.id].s.localeCompare(PR[b.id].s,'ru')).slice(0,14)}
+/* ===== 5.19 Свободный приём: «Ещё → Свободный приём» — заменяет приём дня, остальные подгоняются под норму ===== */
+let F=null;
+const FCUT=['rice','oats','sweet','potato','bread','nuts','oil','banana','apple','mango','orange','pineapple','dragon','roseapple','papaya','jackfruit','watermelon','corn'],FLEAN=['chicken','thigh','beef','pork','fish','shrimp','squid','mince'];
+const fOpen=(day,m)=>!S.done[dk_(day,m.slot)]&&!(S.skip||{})[dk_(day,m.slot)];
+function fPlan(){const day=F.d,k=parseNum(F.k);if(!(k>0)||!F.s)return null;
+  const ms=dayPlan(pkey(day)).meals,T={k:0,p:0,f:0,c:0},add=x=>['k','p','f','c'].forEach(a=>T[a]+=x[a]||0);
+  ms.filter(m=>S.done[dk_(day,m.slot)]).forEach(m=>add(macros(m.items)));((S.extra||{})[day]||[]).forEach(add);
+  add({k,p:parseNum(F.p),f:parseNum(F.f),c:parseNum(F.c)});
+  const R=ms.filter(m=>fOpen(day,m)&&m.slot!==F.s).map(m=>({slot:m.slot,items:m.items.map(i=>({p:i.p,q:i.q})),base:m.items.map(i=>({p:i.p,q:i.q}))}));
+  const tot=()=>{const t=Object.assign({},T);R.forEach(r=>{const x=macros(r.items);['k','p','f','c'].forEach(a=>t[a]+=x[a])});return t};
+  let t=tot(),g=0;
+  while(t.p<194&&g++<20){let done=false;
+    for(const r of R){if(done)break;const i=r.items.find(x=>FLEAN.includes(x.p)&&x.q<280&&x.q>0);if(i&&(r.slot==='lunch'||r.slot==='dinner')){i.q=Math.min(280,i.q+40);done=true}}
+    if(!done){const r=R.find(x=>x.slot==='snack'),i=r&&r.items.find(x=>x.p==='protein'&&x.q<40);if(i){i.q=Math.min(40,i.q+10);done=true}}
+    if(!done){const r=R.find(x=>(x.slot==='lunch'||x.slot==='dinner')&&!x.items.some(i=>i.p==='tunaw'));if(r){r.items.push({p:'tunaw',q:1});done=true}}
+    if(!done)break;t=tot()}
+  g=0;
+  while((t.k>1960||t.c>145||t.f>66)&&g++<40){let best=null;
+    R.forEach(r=>r.items.forEach(i=>{if(!FCUT.includes(i.p)||i.q<=0)return;const x=macros([i]),w={snack:1.3,dinner:1.3,lunch:1.1,bf:1,pre:.5}[r.slot]||1,
+      nk=t.k>1960?(t.k-1960)/Math.max(x.k,1):0,nc=t.c>145&&x.c>=2?(t.c-145)/x.c:0,nf=t.f>66&&x.f>=2?(t.f-66)/x.f:0,need=Math.max(nk,nc,nf);
+      if(need<=0)return;const gain=((nk?x.k/20:0)+(nc?x.c*2:0)+(nf?x.f*2:0))*w,sc=gain/(1+x.p);if(!best||sc>best.sc)best={i,sc,need:Math.min(1,need)}}));
+    if(!best)break;const i=best.i,q0=i.q;
+    i.q=PR[i.p].u==='шт'?(best.need>=0.5?0:q0):Math.max(0,Math.round(q0*(1-best.need)/5)*5);if(i.q===q0)i.q=0;t=tot()}
+  g=0; // если перерезали и день ушёл ниже нормы — возвращаем часть обратно
+  while(t.k<1895&&g++<40){let ok=false;
+    for(const r of R){if(ok)break;for(const i of r.items){const b=r.base.find(x=>x.p===i.p);if(!b||!FCUT.includes(i.p)||i.q>=b.q)continue;const st=PR[i.p].u==='шт'?1:5,q0=i.q;i.q=Math.min(b.q,q0+st);const y=tot();if(y.c<=145&&y.f<=66&&y.k<=1960){t=y;ok=true;break}i.q=q0}}
+    if(!ok)break}
+  const adj=[];R.forEach(r=>{r.items.forEach(i=>{const b=r.base.find(x=>x.p===i.p),q0=b?b.q:0;if(i.q!==q0)adj.push({slot:r.slot,p:i.p,from:q0,to:i.q,m:macros([{p:i.p,q:i.q-q0}])})})});
+  return {R,t,adj}}
+function fResHtml(){const pl=F&&fPlan();if(!pl)return '<div class="small muted">Выбери приём и впиши ккал — покажу, что поправить в остальных приёмах дня.</div>';
+  const t=pl.t,ok=(v,a,b)=>v>=a&&v<=b,sg=v=>(v>0?'+':'−')+r0(Math.abs(v));
+  const rows=pl.adj.map(a=>{const u=PR[a.p].u,tx=a.from===0?'+ '+(u==='шт'?a.to+' шт':a.to+' г'):a.to===0?`${a.from} → 0 ${u==='шт'?'шт':'г'}`:`${a.from} → ${a.to} ${u==='шт'?'шт':'г'}`;
+    return `<li><span class="grow"><b>${SLOTS[a.slot]}</b> · ${esc(cap(PR[a.p].s))}<small class="im">${sg(a.m.k)} ккал${Math.abs(a.m.p)>=2?' · Б '+sg(a.m.p):''}${Math.abs(a.m.c)>=3?' · У '+sg(a.m.c):''}${Math.abs(a.m.f)>=3?' · Ж '+sg(a.m.f):''}</small></span><b>${tx}</b></li>`}).join('');
+  const bad=!ok(t.k,1880,2010)||t.c>150||t.p<185;
+  const cell=(v,l,rg,good)=>`<div class="nt"><b class="${good?'':'over'}">${r0(v)}</b><div class="nl">${l}</div><div class="nn">${rg}</div></div>`;
+  return `<div class="ph" style="margin-top:12px">Что поправить в остальных приёмах</div>${rows?`<ul class="il">${rows}</ul>`:'<div class="small muted">Ничего менять не нужно — день в норме.</div>'}
+  <div class="eh" style="margin-top:12px">День с учётом свободного приёма<span>прогноз</span></div><div class="ng">${cell(t.k,'ккал','1900–2000',ok(t.k,1880,2010))}${cell(t.p,'белки, г','190–205',t.p>=185)}${cell(t.f,'жиры, г','55–60',t.f<=64)}${cell(t.c,'углев., г','120–145',t.c<=150)}</div>
+  ${bad?'<div class="small flag" style="margin-top:6px">Полностью уложить день не получается — часть приёмов уже съедена. Можно применить как есть или выбрать приём полегче.</div>':''}
+  <div class="btns" style="margin-top:12px"><button class="btn pri" data-a="fapply">Применить к дню</button><button class="btn ghost" data-a="fclose">Отмена</button></div>`}
+function fSugHtml(){if(F.fromList||String(F.n||'').trim().length<3)return '';const ids=xFind(F.n),all=xAll();return ids.length?`<div class="picks">${ids.slice(0,3).map(i=>`<button class="pick" data-a="fsug" data-i="${i}">${esc(all[i][0])} <small>${all[i][2]} ккал</small></button>`).join('')}</div>`:''}
+function fUpd(){const a=document.getElementById('fsug'),b=document.getElementById('fres');if(a)a.innerHTML=fSugHtml();if(b)b.innerHTML=fResHtml()}
+function freeHtml(){if(!F)return '';const today=pkey(dkey(appNow())),days=[0,1,2,3,4,5,6].map(i=>addDays(today,i)),ms=dayPlan(pkey(F.d)).meals.filter(m=>fOpen(F.d,m));
+  return `<div class="shbg" data-a="fclose"></div><section class="shp" role="dialog" aria-label="Свободный приём"><div class="bh"><h3>Свободный приём</h3><button class="xcl" data-a="fclose" aria-label="Закрыть">✕</button></div>
+  <div class="small muted" style="margin-bottom:8px">Съешь что хочется — остальные приёмы дня подстроятся под норму, белок сохраняется.</div>
+  <div class="field"><label for="fday">День</label><select id="fday" data-in="fday">${days.map(d=>`<option value="${dkey(d)}" ${dkey(d)===F.d?'selected':''}>${dkey(d)===dkey(today)?'Сегодня':DAYS[wd(d)]+' '+d.getDate()}</option>`).join('')}</select></div>
+  <div class="ph">Какой приём заменяем</div><div class="picks">${ms.length?ms.map(m=>`<button class="pick ${F.s===m.slot?'on':''}" data-a="fslot" data-s="${m.slot}">${SLOTS[m.slot]} · ${m.time}</button>`).join(''):'<span class="small muted">В этот день все приёмы уже отмечены</span>'}</div>
+  <div class="ph" style="margin-top:12px">Что съел</div><div class="xrow"><input id="fn" data-in="ff" data-k="n" value="${esc(F.n)}" placeholder="Например: шаурма с курицей" aria-label="Что съел"><button class="btn pri sm" data-a="fmic" aria-label="Продиктовать">🎤</button></div><div id="fsug">${fSugHtml()}</div>
+  <div class="frg">${[['k','Ккал'],['p','Белки'],['f','Жиры'],['c','Углев.']].map(([k,l])=>`<div class="field"><label for="f${k}">${l}</label><input id="f${k}" inputmode="decimal" data-in="ff" data-k="${k}" value="${esc(F[k])}"></div>`).join('')}</div>
+  <div id="fres">${fResHtml()}</div></section>`}
 function sheetHtml(){if(!SH||tab!=='shop')return '';
   const L=shopList(),ck=L.ck,C=S.chk[ck]||{};let b='';
   if(SH.t==='row'){const id=SH.id,p=PR[id];if(!p){SH=null;return ''}
@@ -1014,7 +1065,7 @@ function render(){
   {const tk=dkey(appNow());if(lastTk&&tk!==lastTk&&viewDate===lastTk)viewDate=tk;lastTk=tk} // день сменился — «Сегодня» переходит на новый
   const bd=[6,0].includes(wd(new Date()))?shopLeftCount():0;
   document.getElementById('tabs').innerHTML=TABS.map(([id,l])=>`<button data-a="tab" data-v="${id}" class="${tab===id?'on':''}" aria-current="${tab===id?'page':'false'}"><span class="ic" aria-hidden="true">${ICONS[id]}${id==='shop'&&bd?`<i class="badge">${bd}</i>`:''}</span>${l}${id==='shop'&&bd?`<span class="sr">, осталось купить ${bd}</span>`:''}</button>`).join('');
-  document.getElementById('app').innerHTML=(updReady?`<div class="bar-top"><span>Вышла новая версия приложения.</span><button class="btn" data-a="upd">Обновить</button></div>`:'')+({today:vToday,menu:vMenu,shop:vShop,prep:vPrep,weight:vWeight}[tab])()+sheetHtml();
+  document.getElementById('app').innerHTML=(updReady?`<div class="bar-top"><span>Вышла новая версия приложения.</span><button class="btn" data-a="upd">Обновить</button></div>`:'')+({today:vToday,menu:vMenu,shop:vShop,prep:vPrep,weight:vWeight}[tab])()+sheetHtml()+freeHtml();
   document.body.classList.toggle('shopmode',tab==='shop'&&shopMode);
   if(popKey)setTimeout(()=>{popKey=''},600);
 }
@@ -1427,6 +1478,7 @@ function vWeight(){
   <div class="small muted" style="margin-top:6px">${wd(t)===4?'Сегодня пятница.':'Следующее взвешивание: пятница, '+fmtDate(nextFri)+'.'} <a class="link" href="${gcal('⚖️ Взвешивание натощак',4,'09:05','Взвесься до еды и воды и запиши вес в «Рационе».')}" target="_blank" rel="noopener">Напоминание</a></div>
   ${ws.length?`<details style="margin-top:6px"><summary class="small muted">История веса</summary><ul class="list">${ws.slice().reverse().slice(0,12).map(x=>`<li><div class="grow">${fmtDate(pkey(x.d))}</div><b>${kg(x.w)} кг</b><button class="link" data-a="wdel" data-v="${x.d}">Удалить</button></li>`).join('')}</ul></details>`:''}`)}
   ${sec('c','Калипер',((S.cal||[]).length?String(S.cal.slice().sort((a,b)=>a.d<b.d?-1:1).pop().b).replace('.',',')+' ед.':'нет замеров'),calCard())}
+  <section class="card frcard"><div class="bh"><h3>Свободный приём</h3><button class="btn sm" data-a="fopen">Открыть</button></div><div class="small muted">Шаурма, бургер, что угодно — приложение подгонит остальные приёмы дня под норму.</div></section>
   ${sec('s','Итог недели','',summaryCard().replace('<section class="card sum"><h3>Итог недели</h3>','<div class="sum">').replace(/<\/section>$/,'</div>'))}
   ${sec('r','Напоминания на телефон','7 приёмов',`<ul class="notes"><li>Нажми на приём — откроется Google Календарь с повторяющимся событием</li><li>Перед «Сохранить» нажми <b>Уведомление → за 30 минут</b> (для протеина и перекуса — «во время события»)</li><li>Samsung Календарь показывает события Google-аккаунта — напоминание придёт как обычное</li></ul>
   <ul class="list rem">${REM.map(([t,time,days,lbl,cook])=>`<li><div class="grow"><div class="nm">${cook?'🍳':'🍽'} ${t} · ${time}</div><div class="sub">${lbl}</div></div><a class="btn sm" href="${gcal((cook?'🍳 ':'🍽 ')+t+' — открой Рацион',days,time,(cook?'Через 30 минут '+t.toLowerCase()+' — начинай готовить. ':'')+'Что есть и сколько — в приложении «Рацион».')}" target="_blank" rel="noopener">Добавить</a></li>`).join('')}</ul>
@@ -1571,6 +1623,16 @@ const A={
     it[1]=Math.max(st,Math.round((it[1]+Number(d.v)*st)*10)/10);S.edits=S.edits||{};S.edits[dk+'|'+d.s]=its;ED=null;cleanOld();save()},
   cooked:()=>{S.cooked=!S.cooked;save();toast(S.cooked?'В скобках — вес в готовом виде':'Вес в сыром и сухом виде')},
   xsug:d=>{const p=xAll()[+d.i];if(!p)return true;Object.assign(X,{n:p[0],k:String(p[2]),p:String(p[3]),f:String(p[4]),c:String(p[5]),por:'1',fromList:1})},
+  fopen:()=>{const d=dkey(appNow()),ms=dayPlan(pkey(d)).meals.filter(m=>fOpen(d,m)),m=ms.find(x=>x.slot==='dinner')||ms[0];F={d,s:m?m.slot:'',n:'',k:'',p:'',f:'',c:'',fromList:0}},
+  fclose:()=>{F=null},
+  fslot:d=>{F.s=d.s},
+  fsug:d=>{const p=xAll()[+d.i];if(!p)return true;Object.assign(F,{n:p[0],k:String(p[2]),p:String(p[3]),f:String(p[4]),c:String(p[5]),fromList:1})},
+  fmic:()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast('Голос не поддерживается — напиши название');return true}
+    try{const r=new SR();r.lang='ru-RU';r.interimResults=false;toast('Говори…');r.onresult=e=>{F.n=e.results[0][0].transcript;F.fromList=0;const el=document.getElementById('fn');if(el)el.value=F.n;fUpd()};r.onerror=()=>toast('Не расслышал — попробуй ещё раз');r.start()}catch(_){toast('Не получилось включить микрофон')}return true},
+  fapply:()=>{const pl=fPlan();if(!pl){toast('Впиши ккал');return true}const day=F.d,m=dayPlan(pkey(day)).meals.find(x=>x.slot===F.s);
+    S.skip=S.skip||{};S.skip[dk_(day,F.s)]=1;const L=S.extra[day]=S.extra[day]||[];L.push({id:Date.now().toString(36),n:(F.n||'Свободный приём').trim().slice(0,80),k:r0(parseNum(F.k)),p:r0(parseNum(F.p)),f:r0(parseNum(F.f)),c:r0(parseNum(F.c)),t:m?m.time:'13:00',s:F.s});
+    pl.R.forEach(r=>{if(r.items.some((i,n)=>!r.base[n]||i.q!==r.base[n].q)||r.items.length!==r.base.length){S.edits=S.edits||{};S.edits[dk_(day,r.slot)]=r.items.filter(i=>i.q>0).map(i=>[i.p,i.q])}});
+    ED=null;F=null;cleanOld();save();toast('Свободный приём добавлен, день подогнан')},
   xmic:()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast('Голос не поддерживается — напиши название');return true}
     try{const r=new SR();r.lang='ru-RU';r.interimResults=false;r.maxAlternatives=1;toast('Говори…');
       r.onresult=e=>{const t=e.results[0][0].transcript;X.n=t;X.fromList=0;const el=document.getElementById('xn');if(el)el.value=t;xSugUpd()};
@@ -1605,7 +1667,7 @@ document.addEventListener('touchstart',e=>{if(tab!=='today'||e.touches.length!==
 document.addEventListener('touchend',e=>{if(!tsok)return;tsok=false;const t=e.changedTouches[0],dx=t.clientX-tsx,dy=t.clientY-tsy;
   if(Math.abs(dx)>70&&Math.abs(dy)<Math.abs(dx)*0.5){viewDate=dkey(addDays(pkey(viewDate),dx<0?1:-1));editOpen='';xOpen='';const app=document.getElementById('app');app.classList.remove('sl','sr');render();void app.offsetWidth;app.classList.add(dx<0?'sl':'sr')}},{passive:true});
 document.addEventListener('toggle',e=>{if(e.target.id&&e.target.id.startsWith('mo-'))moreOpen[e.target.id.slice(3)]=e.target.open;if(e.target.id==='wkbox')window._openWk=e.target.open;if(e.target.id==='xmore')X.more=e.target.open;if(e.target.id==='shopmore')window._openMore=e.target.open;if(e.target.id==='leftbox')window._openLeft=e.target.open;if(e.target.id==='bulkbox')window._openBulk=e.target.open},true);
-document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset.in;if(k==='shf'&&SH)SH[el.dataset.k]=el.value;if(k==='hometext')window._homeText=el.value;if(k==='homeall')window._homeAll=el.checked;if(k==='xf'){X[el.dataset.k]=el.value;if(el.dataset.k==='line')fillFromLine();if(el.dataset.k==='n'){X.fromList=0;xSugUpd()}}
+document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset.in;if(k==='shf'&&SH)SH[el.dataset.k]=el.value;if(k==='hometext')window._homeText=el.value;if(k==='homeall')window._homeAll=el.checked;if(k==='ff'&&F){F[el.dataset.k]=el.value;if(el.dataset.k==='n')F.fromList=0;fUpd()}if(k==='fday'&&F){F.d=el.value;const ms=dayPlan(pkey(F.d)).meals.filter(m=>fOpen(F.d,m)),m=ms.find(x=>x.slot==='dinner')||ms[0];F.s=m?m.slot:'';render()}if(k==='xf'){X[el.dataset.k]=el.value;if(el.dataset.k==='line')fillFromLine();if(el.dataset.k==='n'){X.fromList=0;xSugUpd()}}
   if(k==='recsel'){const dk=el.dataset.d,key=dk+'|'+el.dataset.s;if(!guard(dk)){render();return}S.rec=S.rec||{};if(el.value)S.rec[key]=el.value;else delete S.rec[key];delete S.edits[key];delete S.swaps[key];ED=null;save();render();toast(el.value?'Блюдо: '+RECBY[el.value][1]:'По плану')}
   if(k==='edg'&&ED){ED.items[+el.dataset.i][1]=Math.max(0,parseNum(el.value))}
   if(k==='edadd'&&ED&&el.value){const p=PR[el.value];ED.items.push([el.value,p.u==='шт'?1:(el.value==='oil'?5:el.value==='protein'?30:100)]);render()}
