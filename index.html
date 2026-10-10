@@ -484,7 +484,7 @@ nav.tabs button{min-width:0;font-size:.7rem}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='5.19';
+const APP_VERSION='5.20';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -1045,6 +1045,18 @@ function gcal(title,days,time,details){
   const BY=['MO','TU','WE','TH','FR','SA','SU'],tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Ho_Chi_Minh';
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title)+'&dates='+f(s)+'/'+f(e)+'&ctz='+encodeURIComponent(tz)+'&recur='+encodeURIComponent(days.length===7?'RRULE:FREQ=DAILY':'RRULE:FREQ=WEEKLY;BYDAY='+days.map(d=>BY[d]).join(','))+'&details='+encodeURIComponent(details)}
 
+// 5.20: все напоминания одним файлом .ics — постоянные UID, повторный импорт обновляет события, а не дублирует
+function remIcs(){
+  const BY=['MO','TU','WE','TH','FR','SA','SU'],tz='Asia/Ho_Chi_Minh',t=new Date(),f=d=>d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00',
+    stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,''),L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Racion//RU','CALSCALE:GREGORIAN','X-WR-CALNAME:Рацион','X-WR-TIMEZONE:'+tz];
+  REM.forEach(([title,time,days,lbl,cook])=>{const [h,mi]=time.split(':').map(Number);let s=null;
+    for(let i=0;i<8&&!s;i++){const d=addDays(t,i);if(days.includes(wd(d))){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),h,mi);if(x>t)s=x}}
+    const e=new Date(s.getTime()+15*6e4),id='racion-'+time.replace(':','')+'-'+days.join('')+'@racion';
+    L.push('BEGIN:VEVENT','UID:'+id,'DTSTAMP:'+stamp,'DTSTART;TZID='+tz+':'+f(s),'DTEND;TZID='+tz+':'+f(e),'RRULE:'+(days.length===7?'FREQ=DAILY':'FREQ=WEEKLY;BYDAY='+days.map(d=>BY[d]).join(',')),
+      'SUMMARY:'+(cook?'🍳 ':'🍽 ')+title+' — открой Рацион','DESCRIPTION:'+(cook?'Через 30 минут '+title.toLowerCase()+' — начинай готовить. ':'')+'Что есть и сколько — в приложении Рацион.',
+      'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+title,'TRIGGER:'+(cook?'-PT30M':'PT0S'),'END:VALARM','END:VEVENT')});
+  L.push('END:VCALENDAR');return L.join('\r\n')+'\r\n'}
+
 /* ===== UI ===== */
 let openDone=new Set(),popKey='',shopMode=false,wakeLock=null;
 const moreOpen={w:true};
@@ -1480,7 +1492,7 @@ function vWeight(){
   ${sec('c','Калипер',((S.cal||[]).length?String(S.cal.slice().sort((a,b)=>a.d<b.d?-1:1).pop().b).replace('.',',')+' ед.':'нет замеров'),calCard())}
   <section class="card frcard"><div class="bh"><h3>Свободный приём</h3><button class="btn sm" data-a="fopen">Открыть</button></div><div class="small muted">Шаурма, бургер, что угодно — приложение подгонит остальные приёмы дня под норму.</div></section>
   ${sec('s','Итог недели','',summaryCard().replace('<section class="card sum"><h3>Итог недели</h3>','<div class="sum">').replace(/<\/section>$/,'</div>'))}
-  ${sec('r','Напоминания на телефон','7 приёмов',`<ul class="notes"><li>Нажми на приём — откроется Google Календарь с повторяющимся событием</li><li>Перед «Сохранить» нажми <b>Уведомление → за 30 минут</b> (для протеина и перекуса — «во время события»)</li><li>Samsung Календарь показывает события Google-аккаунта — напоминание придёт как обычное</li></ul>
+  ${sec('r','Напоминания на телефон',REM.length+' приёмов',`<div class="btns" style="margin-bottom:8px"><button class="btn pri" data-a="remics">Скачать все напоминания одним файлом</button></div><ul class="notes"><li><b>Файл .ics:</b> открой его на телефоне и выбери <b>новый отдельный календарь «Рацион»</b> — все приёмы добавятся сразу, а старые можно будет удалить вместе с календарём. Повторный импорт обновляет события, а не дублирует</li><li>Нажми на приём — откроется Google Календарь с повторяющимся событием</li><li>Перед «Сохранить» нажми <b>Уведомление → за 30 минут</b> (для протеина и перекуса — «во время события»)</li><li>Samsung Календарь показывает события Google-аккаунта — напоминание придёт как обычное</li></ul>
   <ul class="list rem">${REM.map(([t,time,days,lbl,cook])=>`<li><div class="grow"><div class="nm">${cook?'🍳':'🍽'} ${t} · ${time}</div><div class="sub">${lbl}</div></div><a class="btn sm" href="${gcal((cook?'🍳 ':'🍽 ')+t+' — открой Рацион',days,time,(cook?'Через 30 минут '+t.toLowerCase()+' — начинай готовить. ':'')+'Что есть и сколько — в приложении «Рацион».')}" target="_blank" rel="noopener">Добавить</a></li>`).join('')}</ul>
   <p class="small muted" style="margin-bottom:0">Нет уведомлений? Настройки телефона → Приложения → Календарь → Батарея → «Без ограничений», и проверь, что уведомления Календаря включены.</p>`)}
   ${sec('b','Копия данных',S.lastBackup?(backupAge()>30?'<span class="flag">пора сохранить</span>':'сохранена '+fmtDate(new Date(S.lastBackup))):'ещё не делал',`<div class="small muted">Вес, калипер, отметки и правки меню хранятся только в Chrome на этом телефоне. Раз в месяц сохраняй копию — файл попадёт в «Загрузки». При смене телефона или очистке браузера загрузи её обратно.</div>
@@ -1571,6 +1583,7 @@ const A={
   csave:()=>{const b=parseNum(document.getElementById('c-b').value),sd=parseNum(document.getElementById('c-s').value);if(!(b>0&&b<100)){toast('Впиши число с калипера, например 15');return true}
     const k=dkey(new Date());S.cal=(S.cal||[]).filter(x=>x.d!==k);S.cal.push({d:k,b:Math.round(b*10)/10,s:sd>0&&sd<100?Math.round(sd*10)/10:null});moreOpen.c=true;save();toast('Замер записан')},
   cdel:d=>{if(!confirm('Удалить замер?'))return true;S.cal=(S.cal||[]).filter(x=>x.d!==d.v);save()},
+  remics:()=>{const b=new Blob([remIcs()],{type:'text/calendar'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='racion-reminders.ics';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Файл «racion-reminders.ics» скачан — открой его');return true},
   bsave:()=>{S.lastBackup=Date.now();save();const b=new Blob([JSON.stringify(S)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='Рацион_'+(d=>dkey(d)+'_'+String(d.getHours()).padStart(2,'0')+'-'+String(d.getMinutes()).padStart(2,'0'))(new Date())+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);moreOpen.b=true;if(ghCfg().token){toast('Файл в «Загрузки», отправляю в GitHub…');ghPush().then(ok=>{toast(ok?'Копия сохранена в GitHub':'В GitHub не ушло: '+ghCfg().err);if(!document.activeElement.matches('input,textarea,select'))render()})}else toast('Копия сохранена в «Загрузки»')},
   ghon:()=>{const repo=(document.getElementById('ghrepo').value||'').trim(),token=(document.getElementById('ghtok').value||'').trim();
     if(!/^[\w.-]+\/[\w.-]+$/.test(repo)){toast('Репозиторий в виде владелец/имя');return true}if(token.length<20){toast('Вставь токен целиком');return true}
