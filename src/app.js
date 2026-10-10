@@ -1,4 +1,4 @@
-const APP_VERSION='5.17';
+const APP_VERSION='5.18';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -101,8 +101,8 @@ const OVERRIDES={
  '2026-10-08':{pre:[['protein',30],['creatine',5]],bf:[['egg',3],['oats',30],['banana',1],'oatban'],lunch:[['shrimp',170],['rice',30],['carrot',80],['cabbage',150],['cucumber',1],['kimchi',150],'shrimpcab2'],snack:[['protein',35],['roseapple',240],['nuts',25]],dinner:[['thigh',130],['tofu',150],['greens',300],['kimchi',100],'thighgreenstofu'],late:[['tunaw',1],['cucumber',1],['tomato',100],'tunaveg']},
  '2026-10-09':{pre:[['protein',30],['creatine',5],['banana',1]],bf:[['sweet',120],['egg',3],['cucumber',1],'sweeteggs'],lunch:[['chicken',190],['pumpkin',150],['onion',50],['rice',30],['oil',5],['kimchi',150],'chickpump'],snack:[['protein',30],['dragon',150],['nuts',10]],dinner:[['fish',280],['tomato',200],['zucchini',150],'fishtomz'],late:[['egg',3],['cucumber',1],['tomato',100],'eggcuke']},
  '2026-10-10':{bf:[['egg',3],['tomato',100],['bread',1],['creatine',5],'omtom'],lunch:[['thigh',220],['potato',150],['cabbage',150],['tomato',100],['kimchi',150],'thighpot'],snack:[['protein',30],['pineapple',120],['nuts',10]],dinner:[['chicken',210],['tofu',150],['cabbage',200],['carrot',100],['kimchi',100],'chickcabtofu'],late:[['tunaw',1],['cucumber',1],['tomato',100],'tunaveg']},
- '2026-10-11':{bf:[['sweet',160],['egg',3],['cucumber',1],['creatine',5],'sweeteggs'],lunch:[['chicken',220],['broccoli',250],['rice',40],['tomato',100],['kimchi',150],'chickbroc'],snack:[['protein',30],['roseapple',200],['nuts',15]],dinner:[['thigh',200],['tofu',150],['tomato',200],['zucchini',150],['onion',50],['kimchi',100],'thightomtofu'],late:[['tunaw',1],['cucumber',1],['tomato',100],'tunaveg']},
- '2026-10-12':{pre:[['protein',30],['creatine',5]],bf:[['oats',40],['mango',1],['yogurt',1],['egg',2],'oatmango'],lunch:[['fish',270],['pumpkin',200],['broccoli',200],['kimchi',150],'fishpump'],snack:[['protein',35],['orange',1],['nuts',15]],dinner:[['shrimp',140],['tofu',100],['tomato',200],['kimchi',100],'shrimptofu'],late:[['egg',3],['cucumber',1],['tomato',100],'eggcuke']},
+ '2026-10-11':{bf:[['sweet',210],['egg',3],['cucumber',1],['creatine',5],'sweeteggs'],lunch:[['chicken',280],['broccoli',250],['rice',45],['tomato',100],['kimchi',150],'chickbroc'],snack:[['protein',40],['roseapple',200],['nuts',15]],dinner:[['thigh',220],['tofu',130],['tomato',200],['zucchini',150],['onion',50],['kimchi',100],'thightomtofu']},
+ '2026-10-12':{pre:[['protein',40],['creatine',5]],bf:[['oats',60],['mango',1],['yogurt',1],['egg',3],'oatmango'],lunch:[['fish',280],['pumpkin',200],['broccoli',200],['kimchi',150],['egg',1],'fishpump'],snack:[['protein',35],['orange',1],['nuts',15]],dinner:[['shrimp',110],['tofu',130],['tomato',200],['kimchi',100],'shrimptofu']},
 };
 // разовые задачи «Заготовок» по неделям: [id, что, подробно]
 const PREP_EXTRA={}; // разовые задачи «Заготовок» по неделям: {ГГГГ-ММ-ДД: [[id, что, подробно], ...]}
@@ -220,8 +220,8 @@ function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast('�
 
 /* ===== Даты ===== */
 const pad=n=>String(n).padStart(2,'0');
-// до 2:00 ещё идёт вчерашний день (поздний перекус в 00:30), но как только поздний перекус отмечен — уже новый день
-function appNow(){const d=new Date();if(d.getHours()<2){const y=new Date(d);y.setDate(y.getDate()-1);let m=false;try{const k=dkey(y)+'|late';m=!!((S.done||{})[k]||(S.skip||{})[k])}catch(_){}if(!m)return y}return d}
+// до 2:00 ещё идёт вчерашний день (поздний перекус в 00:30; с 11 окт 2026 позднего перекуса нет — новый день сразу после полуночи), но как только поздний перекус отмечен — уже новый день
+function appNow(){const d=new Date();if(d.getHours()<2){const y=new Date(d);y.setDate(y.getDate()-1);if(dkey(y)>='2026-10-11')return d;let m=false;try{const k=dkey(y)+'|late';m=!!((S.done||{})[k]||(S.skip||{})[k])}catch(_){}if(!m)return y}return d}
 function dkey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function pkey(k){const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)}
 function wd(d){return (d.getDay()+6)%7}
@@ -688,7 +688,7 @@ function xForm(m){
   <div class="field"><label for="xl">Строка от Claude</label><textarea id="xl" rows="2" data-in="xf" data-k="line" placeholder="РАЦИОН: Phở bò | 450 | 25 | 10 | 60">${esc(X.line)}</textarea></div>
   ${navigator.clipboard&&navigator.clipboard.readText?'<button class="link small" data-a="xclip">Вставить из буфера</button>':''}</details></section>`;
 }
-const REM=[['Протеин до тренировки','09:30',[0,1,3,4],'Пн, Вт, Чт, Пт',0],['Завтрак','11:30',[0,1,3,4],'Пн, Вт, Чт, Пт',1],['Завтрак','10:00',[2,5,6],'Ср, Сб, Вс',1],['Обед','16:00',[0,1,2,3,4,5,6],'каждый день',1],['Перекус','19:30',[0,1,2,3,4,5,6],'каждый день',0],['Ужин','22:30',[0,1,2,3,4,5,6],'каждый день',1],['Поздний перекус','00:30',[0,1,2,3,4,5,6],'каждую ночь',1]];
+const REM=[['Протеин до тренировки','09:30',[0,1,3,4],'Пн, Вт, Чт, Пт',0],['Завтрак','11:30',[0,1,3,4],'Пн, Вт, Чт, Пт',1],['Завтрак','10:00',[2,5,6],'Ср, Сб, Вс',1],['Обед','16:00',[0,1,2,3,4,5,6],'каждый день',1],['Перекус','19:30',[0,1,2,3,4,5,6],'каждый день',0],['Ужин','22:30',[0,1,2,3,4,5,6],'каждый день',1]];
 function weekSummary(){
   const end=addDays(appNow(),-1),days=[];let cnt=0,ok=0,sk=0,sp=0;
   for(let i=6;i>=0;i--){const d=addDays(end,-i),k=dkey(d),pl=dayPlan(d).meals,ex=(S.extra||{})[k]||[],dn=pl.filter(m=>S.done[dk_(k,m.slot)]),skn=pl.filter(m=>(S.skip||{})[dk_(k,m.slot)]).length;
