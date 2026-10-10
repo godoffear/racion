@@ -1,4 +1,4 @@
-const APP_VERSION='5.16';
+const APP_VERSION='5.17';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -585,9 +585,9 @@ function vToday(){
   const dis=k=>!!(S.dismiss||{})[k+'|'+tk],skipB=k=>`<button class="btn sm ghost" data-a="dismiss" data-v="${k}">Пропустить</button>`; // «Пропустить» скрывает карточку на сегодня
   if(isToday&&twd===6&&backupAge()>30&&!dis('backup'))h+=`<div class="card due small"><b>Раз в месяц: сохрани копию данных</b><div class="btns"><button class="btn sm" data-a="bsave">Сохранить копию</button>${skipB('backup')}</div></div>`;
   if(isToday&&twd===4&&(S.cal||[]).length&&Math.round((appNow()-pkey(S.cal.slice().sort((a,b)=>a.d<b.d?-1:1).pop().d))/864e5)>=13&&!dis('cal'))h+=`<div class="card due small"><b>Сегодня замер калипером</b> — живот и бок.<div class="btns"><button class="btn sm" data-a="tab" data-v="weight">Записать</button>${skipB('cal')}</div></div>`;
-  if(isToday&&(twd===3||twd===5)&&!dis('lavka')){const days=twd===3?2:3,fr={};for(let i=0;i<days;i++)dayPlan(addDays(pkey(dkey(appNow())),i)).meals.forEach(m=>m.items.forEach(it=>{const p=PR[it.p];if(p&&!p.bulk&&!p.daily&&placeOf(it.p)==='near')fr[it.p]=(fr[it.p]||0)+it.q}));
-    const fl=Object.keys(fr).map(id=>cap(PR[id].s)+' '+(PR[id].u==='шт'?Math.ceil(fr[id]):Math.ceil(fr[id]/PR[id].shop)*PR[id].shop)+' '+PR[id].u);
-    if(fl.length)h+=`<div class="card due xcard"><button class="xcl" data-a="dismiss" data-v="lavka" aria-label="Скрыть: сходить в лавку">✕</button><b>Сегодня в лавку: свежее на ${twd===3?'чт–пт':'сб–пн'}</b><div class="small muted">${esc(fl.join(', '))}. Минус то, что ещё осталось дома.</div><div class="btns"><button class="btn ghost" data-a="dismiss" data-v="lavka">Купил</button></div></div>`}
+  if(isToday&&(twd===3||twd===5)&&!dis('lavka')&&dkey(cycleStart(appNow()))>='2026-10-13'){ // новая схема покупок — с недели, которую закупаешь в пн 12 окт
+    const cs=cycleStart(appNow()),ck=dkey(cs),C=S.chk[ck]||{},k=twd===3?1:2,fl=nearWin(shopList(cs))[k].filter(x=>!C[x.key]).map(x=>x.n+' '+x.q);
+    if(fl.length)h+=`<div class="card due xcard"><button class="xcl" data-a="dismiss" data-v="lavka" aria-label="Скрыть: сходить в лавку">✕</button><b>Сегодня в лавку: свежее на ${twd===3?'чт–пт':'сб–пн'}</b><div class="small muted">${esc(fl.join(', '))}. Галочки — во вкладке «Покупки».</div><div class="btns"><button class="btn ghost" data-a="dismiss" data-v="lavka">Купил</button></div></div>`}
   if(isToday&&!dis('fresh')){const fr={};meals.forEach(m=>{if(done(m)||(S.skip||{})[dk_(viewDate,m.slot)])return;m.items.forEach(it=>{if(PR[it.p]&&PR[it.p].daily)fr[it.p]=(fr[it.p]||0)+it.q})});
     const fl=Object.keys(fr).map(id=>cap(PR[id].s)+' '+r0(fr[id])+' '+PR[id].u);
     if(fl.length)h+=`<div class="card due xcard"><button class="xcl" data-a="dismiss" data-v="fresh" aria-label="Скрыть: купить свежее">✕</button><b>Купить свежее сегодня</b><div class="small muted">${esc(fl.join(', '))} — в закупку на неделю не входит, берёшь в день приготовления.</div><div class="btns"><button class="btn ghost" data-a="dismiss" data-v="fresh">Купил</button></div></div>`}
