@@ -1,4 +1,4 @@
-const APP_VERSION='5.21';
+const APP_VERSION='5.22';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -89,6 +89,8 @@ const BULK=['rice','oats','protein','creatine','nuts','oil','oilveg','salt','spi
 const WEEKS=__WEEKS__;
 const OLD_WEEKS=__OLDWEEKS__; // меню до 4.9 — только для недель до EPOCH, где Андрей выбрал «Меню N» вручную
 const TIMES={pre:'09:30',bf_S:'11:30',bf_W:'10:00',bf_R:'10:00',lunch:'16:00',snack:'19:30',dinner:'22:30',late:'00:30'};
+// 5.22: с 12 окт 2026 день ровнее: обед 15:00 (силовые) / 14:30, перекус 18:30; завтрак и ужин как были
+function mealTime(slot,type,dk){if(slot==='bf')return TIMES['bf_'+type];if(dk>='2026-10-12'){if(slot==='lunch')return type==='S'?'15:00':'14:30';if(slot==='snack')return '18:30'}return TIMES[slot]}
 const NORM={k:[1900,2000],p:[190,205],f:[55,60],c:[120,145]}; // с 6 окт 2026: больше белка — набор мышц на дефиците
 const LEGACY=[["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["thigh",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["apple",1]]],["dinner",[["shrimp",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1],["creatine",5]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["banana",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["squid",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["fish",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["chicken",200],["veg",200],["oil",5]]],["late",[["tofu",150]]]]],["W",[["bf",[["egg",4],["oats",60],["apple",1],["creatine",5]]],["lunch",[["shrimp",200],["rice",40],["veg",200]]],["snack",[["protein",30],["cucumber",1],["banana",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["egg",3]]]]],["R",[["bf",[["egg",4],["oats",60],["banana",1],["creatine",5]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",200]]]]],["S",[["pre",[["protein",30],["creatine",5]]],["bf",[["egg",4],["oats",40],["banana",1]]],["lunch",[["chicken",200],["rice",40],["veg",200]]],["snack",[["protein",30],["apple",1],["nuts",20]]],["dinner",[["fish",200],["veg",200],["oil",5]]],["late",[["tofu",150]]]]]]; // базовое меню, по которому была закупка до 6 окт
 // разовые замены приёмов по датам: {дата:{приём:[[продукт,кол-во],...,'id блюда'?]}}
@@ -264,7 +266,7 @@ function dayPlan(date){
     const rc=(S.rec||{})[k];if(rc&&RECBY[rc])its=RECBY[rc][3].map(([p,q])=>({p,q}));
     const ed=(S.edits||{})[k];if(ed)its=ed.map(([p,q])=>({p,q}));
     const swp=sw&&its.some(i=>i.p===sw.to)?sw:null;if(swp||wsw||huc||!RECBY[dish])dish=null; // при замене белка шаги блюда уже не подходят
-    return {slot,time:slot==='bf'?TIMES['bf_'+type]:TIMES[slot],items:its,swap:swp,wswap:wsw,edited:!!ed,rec:rc&&RECBY[rc]?rc:null,dish,huse:!!hu,meth:(S.meth||{})[k]||null,dswap:ds||null}})};
+    return {slot,time:mealTime(slot,type,dk),items:its,swap:swp,wswap:wsw,edited:!!ed,rec:rc&&RECBY[rc]?rc:null,dish,huse:!!hu,meth:(S.meth||{})[k]||null,dswap:ds||null}})};
 }
 function mealAt(date,m){const t=tmin(m.time);return new Date(date.getFullYear(),date.getMonth(),date.getDate(),Math.floor(t/60),t%60)}
 
@@ -795,7 +797,7 @@ function xForm(m){
   <div class="field"><label for="xl">Строка от Claude</label><textarea id="xl" rows="2" data-in="xf" data-k="line" placeholder="РАЦИОН: Phở bò | 450 | 25 | 10 | 60">${esc(X.line)}</textarea></div>
   ${navigator.clipboard&&navigator.clipboard.readText?'<button class="link small" data-a="xclip">Вставить из буфера</button>':''}</details></section>`;
 }
-const REM=[['Протеин до тренировки','09:30',[0,1,3,4],'Пн, Вт, Чт, Пт',0],['Завтрак','11:30',[0,1,3,4],'Пн, Вт, Чт, Пт',1],['Завтрак','10:00',[2,5,6],'Ср, Сб, Вс',1],['Обед','16:00',[0,1,2,3,4,5,6],'каждый день',1],['Перекус','19:30',[0,1,2,3,4,5,6],'каждый день',0],['Ужин','22:30',[0,1,2,3,4,5,6],'каждый день',1]];
+const REM=[['Протеин до тренировки','09:30',[0,1,3,4],'Пн, Вт, Чт, Пт',0],['Завтрак','11:30',[0,1,3,4],'Пн, Вт, Чт, Пт',1],['Завтрак','10:00',[2,5,6],'Ср, Сб, Вс',1],['Обед','15:00',[0,1,3,4],'Пн, Вт, Чт, Пт',1],['Обед','14:30',[2,5,6],'Ср, Сб, Вс',1],['Перекус','18:30',[0,1,2,3,4,5,6],'каждый день',0],['Ужин','22:30',[0,1,2,3,4,5,6],'каждый день',1]];
 function weekSummary(){
   const end=addDays(appNow(),-1),days=[];let cnt=0,ok=0,sk=0,sp=0;
   for(let i=6;i>=0;i--){const d=addDays(end,-i),k=dkey(d),pl=dayPlan(d).meals,ex=(S.extra||{})[k]||[],dn=pl.filter(m=>S.done[dk_(k,m.slot)]),skn=pl.filter(m=>(S.skip||{})[dk_(k,m.slot)]).length;
