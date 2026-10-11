@@ -484,7 +484,7 @@ nav.tabs button{min-width:0;font-size:.7rem}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='5.23';
+const APP_VERSION='5.24';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -511,6 +511,9 @@ const PR={
  tomato:{vi:'Cà chua (помидоры)',sec:'veg',pk:'На развес',n:'Помидоры',s:'помидоры',u:'г',k:18,p:0.9,f:0.2,c:3.9,cat:'Овощи и фрукты',shop:100},
  mushroom:{vi:'Nấm rơm / nấm bào ngư (грибы)',sec:'veg',pk:'Лоток 200–300 г',n:'Грибы',s:'грибы',u:'г',k:25,p:3,f:0.3,c:3.5,cat:'Овощи и фрукты',shop:100},
  burger:{vi:'Бургер (готовый): говяжья котлета, сыр, яйцо',sec:'dry',n:'Бургер (котлета, сыр, яйцо)',s:'бургер',u:'шт',pg:300,k:283,p:16.7,f:17.3,c:15,cat:'Готовое',shop:1,nobuy:1},
+ ramen_j:{vi:'Mì xốt tương đen (лапша с чёрным соевым соусом, CJ)',sec:'dry',n:'Лапша Jjajang (чёрный соевый соус)',s:'лапша jjajang',u:'шт',pg:88,k:414.8,p:8.8,f:16.1,c:57.7,cat:'Готовое',shop:1,nobuy:1,keep:1,how:'Лапшу варить 4–5 минут, воду слить (оставить 2 ложки), добавить соус из пакетика, перемешать'},
+ ramen_c:{vi:'Cheesy Ramen (лапша с сырным порошком, Otoki)',sec:'dry',n:'Лапша Cheesy Ramen (сырная)',s:'лапша сырная',u:'шт',pg:120,k:433.3,p:7.8,f:18.4,c:57.8,cat:'Готовое',shop:1,nobuy:1,keep:1,how:'Лапшу варить 3 минуты 30 секунд, воду слить (оставить 2 ложки), добавить соус и сырный порошок, перемешать'},
+ ramen_b:{vi:'Buldak Habanero Lime (острая лапша с курицей, Samyang)',sec:'dry',n:'Лапша Buldak Habanero Lime (острая)',s:'лапша buldak',u:'шт',pg:135,k:377.8,p:8.9,f:10.4,c:61.5,cat:'Готовое',shop:1,nobuy:1,keep:1,how:'Лапшу варить 5 минут, воду слить (оставить 2 ложки), добавить соус, перемешать'},
  ricenoodle:{vi:'Bánh phở khô (сухая рисовая лапша)',sec:'dry',pk:'Пачка 200–400 г',n:'Рисовая лапша сухая',s:'рисовая лапша',u:'г',k:360,p:6,f:0.6,c:80,cat:'Крупы',shop:100},
  // ---- 4.8.1: расширенный справочник; keep — долго хранится (консервы, сухое), остаток помнится между неделями
  beef:{vi:'Thịt bò nạc vai / đùi bò (говядина: лопатка или бедро)',sec:'meat',pk:'Лоток 300–500 г',n:'Говядина',s:'говядина',u:'г',m:'palm',mg:100,k:150,p:21,f:7,c:0,cat:'Белок',shop:100,how:'Говядина: тонкими ломтиками 2–3 мин на сильном огне, перец и чеснок.'},
@@ -591,6 +594,11 @@ const OVERRIDES={
  '2026-10-10':{bf:[['egg',3],['tomato',100],['bread',1],['creatine',5],'omtom'],lunch:[['thigh',220],['potato',150],['cabbage',150],['tomato',100],['kimchi',150],'thighpot'],snack:[['protein',30],['pineapple',120],['nuts',10]],dinner:[['chicken',210],['tofu',150],['cabbage',200],['carrot',100],['kimchi',100],'chickcabtofu'],late:[['tunaw',1],['cucumber',1],['tomato',100],'tunaveg']},
  '2026-10-11':{bf:[['sweet',210],['egg',3],['cucumber',1],['creatine',5],'sweeteggs'],lunch:[['chicken',280],['broccoli',250],['rice',45],['tomato',100],['kimchi',150],'chickbroc'],snack:[['protein',40],['roseapple',200],['nuts',15]],dinner:[['thigh',220],['tofu',130],['tomato',200],['zucchini',150],['onion',50],['kimchi',100],'thightomtofu']},
  '2026-10-12':{pre:[['protein',40],['creatine',5]],bf:[['oats',60],['mango',1],['yogurt',1],['egg',3],'oatmango'],lunch:[['fish',280],['pumpkin',200],['broccoli',200],['kimchi',150],['egg',1],'fishpump'],snack:[['protein',35],['orange',1],['nuts',15]],dinner:[['shrimp',110],['tofu',130],['tomato',200],['kimchi',100],'shrimptofu']},
+ // 5.24: дни с лапшой (по пачке целиком в обед): Jjajang, Cheesy, Buldak, ещё раз Jjajang — остальные приёмы подогнаны под норму
+ '2026-10-14':{bf:[['sweet',120],['egg',3],['cucumber',1],['creatine',5],'sweeteggs'],lunch:[['ramen_j',1],['chicken',250],['broccoli',200],['kimchi',150]],snack:[['protein',30],['pineapple',190],['nuts',20]],dinner:[['tunaw',2],['egg',1],['cucumber',1],['tomato',150],['oil',5],'tunasalad']},
+ '2026-10-17':{bf:[['mango',1],['yogurt',1],['egg',3],['creatine',5],['tunaw',1],'oatmango'],lunch:[['ramen_c',1],['chicken',220],['broccoli',200],['kimchi',150]],snack:[['protein',35]],dinner:[['squid',280],['cucumber',1],['tomato',100],['oil',5],'squidsalad']},
+ '2026-10-18':{bf:[['tunaw',1],['egg',2],['cucumber',1],['creatine',5],'tunabm'],lunch:[['ramen_b',1],['chicken',210],['broccoli',200],['kimchi',150]],snack:[['protein',30],['nuts',10],['apple',1]],dinner:[['pork',260],['greens',250],['oil',10],['kimchi',100],'porkgreens']},
+ '2026-10-21':{bf:[['egg',3],['oats',40],['banana',1],['creatine',5],'oatban'],lunch:[['ramen_j',1],['chicken',260],['broccoli',200],['kimchi',150]],snack:[['protein',40],['nuts',25]],dinner:[['fish',280],['tomato',200],['beans',100],'fishtom']},
 };
 // разовые задачи «Заготовок» по неделям: [id, что, подробно]
 const PREP_EXTRA={}; // разовые задачи «Заготовок» по неделям: {ГГГГ-ММ-ДД: [[id, что, подробно], ...]}
@@ -1325,7 +1333,7 @@ function fillFromLine(){const L=parseLines(X.line);if(L.length!==1||L[0].plan)re
 /* ===== «Что дома» голосом или строкой ДОМА: от Claude ===== */
 // порядок важен: сначала более точные названия
 const HOME_WORDS=[['kimchi',/кимч/],['pbutter',/арахисов\S* паст/],['tunao',/тун(ец|ц)\S*.{0,12}масл/],['tunaw',/тун(ец|ц)/],['sardine',/сардин/],['corncan',/кукуруз\S*.{0,12}(банк|консерв)|(банк|консерв)\S*.{0,12}кукуруз/],['corn',/кукуруз|почат/],
- ['glassnoodle',/стеклян|миен|фунчоз/],['eggnoodle',/яичн\S* лапш/],['ricenoodle',/лапш|фо\b/],['oats',/овсян|овес|овёс|геркулес/],['rice',/(^|[^а-я])рис(а|у|ом)?([^а-я]|$)/],
+ ['glassnoodle',/стеклян|миен|фунчоз/],['eggnoodle',/яичн\S* лапш/],['ramen_j',/jjajang|джаджан|чер\S* соев|чёр\S* соев/],['ramen_c',/сырн\S* лапш|лапш\S* сырн|cheesy|чиз/],['ramen_b',/buldak|булдак|бульдак|хабанеро|остр\S* лапш/],['ricenoodle',/лапш|фо\b/],['oats',/овсян|овес|овёс|геркулес/],['rice',/(^|[^а-я])рис(а|у|ом)?([^а-я]|$)/],
  ['thigh',/бедр|бёдр/],['chicken',/кур(иц|ин|ятин)|грудк|филе/],['mince',/фарш/],['beef',/говя/],['pork',/свин/],['shrimp',/кревет/],['squid',/кальмар/],['fish',/рыб|тилапи|пангасиус|баса|basa/],
  ['tofu',/тофу/],['egg',/яйц|яиц|яичк/],['yogurt',/йогурт/],['milk',/молок/],['protein',/протеин/],['creatine',/креатин/],['nuts',/орех|кешью|арахис/],
  ['oil',/оливк\S* масл|масл\S* оливк|оливков/],['oilveg',/масл/],['salt',/(^|[^а-я])сол[ьи]/],['spice',/специ|приправ|куркум|паприк/],['garlic',/чеснок|лайм|лимон/],
