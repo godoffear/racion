@@ -1,4 +1,4 @@
-const APP_VERSION='5.31';
+const APP_VERSION='5.32';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -433,6 +433,8 @@ function prepModel(cs){const D0=prepDone(dkey(cs)),days=[0,1,2,3,4,5,6].map(i=>{
     if(e===5)T.push({id:'ev5:home',t:'Надиктовать «Что дома» → список на GO!',d:'Перед закупкой в понедельник'});
     return {e,d:days[e].d,T}});
   return {cs,big,eve,boils,cook,bank,b0}}
+const PDET={}; // какие спойлеры в «Заготовках» открыты — не закрываются при отметке пакета
+document.addEventListener('toggle',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.pid)PDET[el.dataset.pid]=el.open},true);
 function prepDone(ck){return (S.prepDone||{})[ck]||{}}
 function packKeys(ex){const o=[];ex.forEach(g=>[['fr',g.fr],['fz',g.fz],['rest',g.rest]].forEach(([kind,cl])=>cl.forEach(c=>o.push([`pk|${g.id}|${kind}|${c.size}`,c.n]))));return o}
 function prepTask(t,ck){const on=!!prepDone(ck)[t.id];let x='';
@@ -448,7 +450,7 @@ function prepTask(t,ck){const on=!!prepDone(ck)[t.id];let x='';
   if(t.id==='big:bags2'){const n=t.extra,tot=n.rows.reduce((a,b)=>a+b.q,0)+n.rest.reduce((a,b)=>a+b.all,0);x=`<table class="bags">${n.rows.map(b=>`<tr><td><b>${DAYS[wd(b.d)]} ${b.d.getDate()} · ${SLOTS[b.slot].toLowerCase()}</b> ${esc(PR[b.id].s)}${b.id==='thigh'?' <small class="muted">(снять кожу)</small>':''}</td><td>${fq(b.q,PR[b.id].u)} <span class="tg fz">мороз.</span></td></tr>`).join('')}${n.rest.map(b=>`<tr><td><b>Запас · ${esc(PR[b.id].s)}</b>${b.id==='thigh'?' <small class="muted">(снять кожу)</small>':''}<br><small class="muted">${b.n>1?b.n+' пакета':'1 пакет'} по ≈ ${fq(b.q,PR[b.id].u)}, подписать «запас · вес»</small></td><td>${fq(b.all,PR[b.id].u)} <span class="tg fz">мороз.</span></td></tr>`).join('')}</table><div class="hint">Всего в морозилку ≈ ${fq(tot,'г')}. Вечером перед нужным днём — в холодильник один пакет.</div>`}
   if(t.id==='big:greens'){const g=t.extra;x=`<table class="bags">${g.rows.map(b=>`<tr><td><b>${DAYS[wd(b.d)]} · ${SLOTS[b.slot].toLowerCase()}</b> ${esc(PR[b.id].s)}</td><td>${fq(b.q,PR[b.id].u)} <span class="tg ${b.fz?'fz':'fr'}">${b.fz?'бланш. + мороз.':'холод.'}</span></td></tr>`).join('')}${g.rest.map(b=>`<tr><td><b>Лишнее</b> ${esc(PR[b.id].s)}<br><small class="muted">порциями по 150 г</small></td><td>${fq(b.q,PR[b.id].u)} <span class="tg fz">бланш. + мороз.</span></td></tr>`).join('')}</table>`}
   if(t.id==='big:rice'&&t.extra.cook){const r=t.extra,used=r.rice.reduce((a,x)=>a+x.a,0),spare=r.cook+r.bank-used;x=`<table class="bags">${r.rice.map(z=>`<tr><td><b>${DAYS[wd(z.d)]} ${z.d.getDate()}</b> · обед</td><td>${cookedRice(z.a)} г <span class="tg ${z.fz?'fz':'fr'}">${z.fz?'мороз.':'холод.'}</span></td></tr>`).join('')}${spare>20?`<tr><td>Остальное — «запас» на следующие недели</td><td>${cookedRice(spare)} г <span class="tg fz">мороз.</span></td></tr>`:''}</table><div class="hint">В холодильнике до 3 дней, в морозилке до месяца. Разогреть: на сковороду с ложкой воды под крышку 2–3 мин.</div>`}
-  const det=x?`<details class="howd pdet"><summary>Подробнее</summary>${x}</details>`:'';
+  const det=x?`<details class="howd pdet" data-pid="${t.id}" ${PDET[t.id]?'open':''}><summary>Подробнее</summary>${x}</details>`:'';
   return `<div class="ptask ${on?'done':''}"><button class="pcb" data-a="ptask" data-v="${t.id}" data-d="${ck}" aria-pressed="${on}" aria-label="Готово: ${esc(t.t)}">${on?'✓':''}</button><div class="grow"><div class="tt">${esc(t.t)}</div>${t.d?`<div class="td">${esc(t.d)}</div>`:''}${det}</div></div>`}
 /* ===== Покупки ===== */
 function shopCycle(){return addDays(cycleStart(appNow()),7)} // следующая неделя меню
@@ -671,7 +673,7 @@ function vPrep(){const cs=prepCycle(),ck=dkey(cs),M=prepModel(cs),dn=prepDone(ck
   const nb=M.big.filter(t=>dn[t.id]).length;
   let h=`<header class="top"><h1>Заготовки</h1><div class="date">Неделя ${fmtDate(cs)} – ${fmtDate(addDays(cs,6))} · ${menuName(cs)}</div></header>
   <div class="seg two" role="tablist"><button class="${pt==='big'?'on':''}" data-a="ptab" data-v="big">Пн — большая</button><button class="${pt==='eve'?'on':''}" data-a="ptab" data-v="eve">Каждый вечер</button></div>`;
-  if(pt==='big'){h+=`<section class="card"><div class="bh"><h3>Понедельник ${fmtDate(addDays(cs,-1))}, после GO!</h3><span class="small muted">${nb} из ${M.big.length}</span></div><div class="prog"><i style="width:${M.big.length?nb/M.big.length*100:0}%"></i></div>${M.big.filter(t=>!dn[t.id]).map(t=>prepTask(t,ck)).join('')||(M.big.length?'<p class="small muted">Всё сделано 🎉</p>':'<p class="small muted">На эту неделю заготавливать нечего.</p>')}${nb?`<details class="howd donebox"><summary>Сделано · ${nb}</summary>${M.big.filter(t=>dn[t.id]).map(t=>prepTask(t,ck)).join('')}</details>`:''}</section>`;
+  if(pt==='big'){h+=`<section class="card"><div class="bh"><h3>Понедельник ${fmtDate(addDays(cs,-1))}, после GO!</h3><span class="small muted">${nb} из ${M.big.length}</span></div><div class="prog"><i style="width:${M.big.length?nb/M.big.length*100:0}%"></i></div>${M.big.filter(t=>!dn[t.id]).map(t=>prepTask(t,ck)).join('')||(M.big.length?'<p class="small muted">Всё сделано 🎉</p>':'<p class="small muted">На эту неделю заготавливать нечего.</p>')}${nb?`<details class="howd donebox" data-pid="_done" ${PDET._done?'open':''}><summary>Сделано · ${nb}</summary>${M.big.filter(t=>dn[t.id]).map(t=>prepTask(t,ck)).join('')}</details>`:''}</section>`;
     if(S.homeFor!==dkey(shopCycle())&&mon)h+=`<div class="card due small">Сначала «Что дома» в «Покупках» — тогда меню и заготовки будут точными. <button class="link" data-a="tab" data-v="shop">Открыть</button></div>`}
   else{h+=`<section class="card"><h3>Каждый вечер — пара минут</h3><div class="small muted">Взял из морозилки пакеты с завтрашним днём — и всё.</div></section><div class="evl">`;
     M.eve.forEach(x=>{const tt=dkey(x.d)===tk;h+=`<div class="pday ${tt?'today':''} ${x.d<pkey(tk)?'past':''}"><div class="dh">${DAYS[wd(x.d)]} ${x.d.getDate()} <small>вечер → на ${DAYS_ACC[wd(addDays(x.d,1))]}</small></div>${x.T.map(t=>prepTask(t,ck)).join('')||'<div class="small muted">Ничего — всё на завтра уже в холодильнике</div>'}</div>`});
