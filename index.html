@@ -485,7 +485,7 @@ nav.tabs button{min-width:0;font-size:.7rem}
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='5.32';
+const APP_VERSION='5.33';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -1413,10 +1413,10 @@ function seedReceipt(){try{if(S.seed2||!S.seed1)return;const ck=RECEIPT.ck,cs=pk
     if(r&&r.buy>0){if(C[id]||X[id])return;C[id]=1;if(q!==r.buy)X[id]={q};return}
     if(!homeNew)return;const e=homeEntry(id,ck);if(e&&e.at>=RECEIPT.at)return;addHomeQ(id,q,cs,RECEIPT.at)});
   S.seed2=1;save()}catch(_){}}
-function homeSummary(L){const n=L.rows.filter(r=>r.q>0).length;return n?'Внесено позиций: '+n:'ничего не внесено'}
+function homeSummary(L){const n=L.rows.filter(r=>r.q>0).length,G=(S.go||{})[L.ck];return (n?'Внесено позиций: '+n:'ничего не внесено')+(G?` · покупки из GO! (${G.b} поз.) уже записаны сами`:'')}
 function homePanel(L){const ck=L.ck;
   let h=`<section class="card homec ${S.homeFor===ck?'':'due'}" id="homebox"><div class="bh"><h3>${S.homeFor===ck?'Что дома':'Шаг 1 — скажи, что дома'}</h3>${S.homeAt?`<span class="small muted">${fmtDate(new Date(S.homeAt))}</span>`:''}</div>`;
-  if(!window._homeOpen){h+=`<div class="small">${homeSummary(L)}</div><div class="btns"><button class="btn sm pri" data-a="homeopen">🎤 Обновить</button></div></section>`;return h}
+  if(!window._homeOpen){h+=`<div class="small">${homeSummary(L)}</div><div class="small muted" style="margin-top:4px">После «Закончил в GO!» купленное добавляется само. Поправь остатки только если что-то изменилось сверх покупок: съел вне плана или нашёл дома.</div><div class="btns"><button class="btn sm pri" data-a="homeopen">🎤 Поправить остатки</button></div></section>`;return h}
   if(S.homeFor!==ck)h+=`<p class="small" style="margin:2px 0 4px">Потом соберу список покупок — только то, чего не хватает.</p>`;
   h+=`<p class="small muted" style="margin:2px 0 6px">Нажми 🎤 на клавиатуре и скажи, что есть: «курица 300 грамм, тунец в соку 5 банок, бананы 2, рис много, масла нет». Или вставь строку <b>ДОМА:</b> от Claude.</p>
   <textarea id="hometext" rows="3" data-in="hometext" placeholder="курица 300 г, яйца 6, тунец в масле 3 банки, рис много">${esc(window._homeText||'')}</textarea>
