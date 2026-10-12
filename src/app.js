@@ -1,4 +1,4 @@
-const APP_VERSION='5.28';
+const APP_VERSION='5.29';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -115,7 +115,11 @@ const OVERRIDES={
  '2026-10-15':{pre:[['protein',30],['creatine',5]],bf:[['egg',3],['tomato',100],['bread',1],'omtom'],lunch:[['mince',230],['beans',200],['rice',30],['kimchi',150],'mincebeans'],snack:[['protein',40],['jackfruit',125],['nuts',20]],dinner:[['shrimp',280],['broccoli',200],['kimchi',100],'shrimpbroc']},
  '2026-10-17':{bf:[['mango',1],['yogurt',1],['egg',3],['creatine',5],['tunaw',1],'oatmango'],lunch:[['ramen_c',1],['chicken',220],['broccoli',200],['kimchi',150]],snack:[['protein',35]],dinner:[['squid',280],['cucumber',1],['tomato',100],['oil',5],'squidsalad']},
  '2026-10-18':{bf:[['tunaw',1],['egg',2],['cucumber',1],['creatine',5],'tunabm'],lunch:[['ramen_b',1],['chicken',210],['broccoli',200],['kimchi',150]],snack:[['protein',30],['nuts',10],['apple',1]],dinner:[['pork',260],['greens',250],['oil',10],['kimchi',100],'porkgreens']},
+ // 5.29: тунец доедаем (дома 4 в соку + 4 в масле), с 27 окт его в меню нет: 19 окт — 2 банки в масле, 24 и 25 окт — по одной
+ '2026-10-19':{pre:[['protein',40],['creatine',5]],bf:[['egg',1],['oats',40],['banana',1],'oatban'],lunch:[['tunao',2],['rice',30],['egg',1],['cucumber',1],['tomato',100],['kimchi',150],'tunarice'],snack:[['protein',35],['mango',1]],dinner:[['beef',190],['bellpep',150],['onion',50],['oil',5],['kimchi',100],'beefpep']},
  '2026-10-21':{bf:[['egg',3],['oats',40],['banana',1],['creatine',5],'oatban'],lunch:[['ramen_j',1],['chicken',260],['broccoli',200],['kimchi',150]],snack:[['protein',40],['nuts',25]],dinner:[['fish',280],['tomato',200],['beans',100],'fishtom']},
+ '2026-10-24':{bf:[['bread',1],['tunao',1],['egg',2],['cucumber',1],['creatine',5],'tunabm'],lunch:[['beef',200],['rice',50],['greens',150],['cucumber',1],['kimchi',150],'beefgreens'],snack:[['protein',40],['orange',1],['nuts',10]],dinner:[['fish',270],['broccoli',200],['oil',5],'fishpan']},
+ '2026-10-25':{bf:[['sweet',180],['egg',2],['cucumber',1],['creatine',5],'sweeteggs'],lunch:[['bread',1],['chicken',230],['cucumber',1],['carrot',50],['kimchi',150],['tunao',1],['egg',1],'banhmichick'],snack:[['protein',30],['pineapple',120],['nuts',25]],dinner:[['shrimp',230],['broccoli',200],['oil',10],['kimchi',100],'shrimpbroc']},
 };
 // разовые задачи «Заготовок» по неделям: [id, что, подробно]
 const PREP_EXTRA={}; // разовые задачи «Заготовок» по неделям: {ГГГГ-ММ-ДД: [[id, что, подробно], ...]}
