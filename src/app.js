@@ -1,4 +1,4 @@
-const APP_VERSION='5.27';
+const APP_VERSION='5.28';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -300,7 +300,11 @@ function cap(t){return t.charAt(0).toUpperCase()+t.slice(1)}
 const COOKED={rice:2.8,ricenoodle:2.5,oats:2.5,chicken:.75,thigh:.7,pork:.75,fish:.8,shrimp:.8,squid:.7,tofu:.9};
 function cookedTxt(i){const f=S.cooked&&S.grams&&COOKED[i.p];return f?` <small class="ckd">(≈ ${Math.round(i.q*f/5)*5} г)</small>`:''}
 function itemMac(i){if(S.showMac===false)return '';const m=macros([i]);if(m.k<15)return '';return `<small class="im">${r0(m.k)} ккал · Б ${r0(m.p)} · Ж ${r0(m.f)} · У ${r0(m.c)}</small>`}
-function itemsList(items){return `<ul class="il">${items.map(i=>`<li><span class="grow">${esc(cap(PR[i.p].s))}${itemMac(i)}</span><b>${esc(qtyText(i))}${cookedTxt(i)}</b></li>`).join('')}</ul>`}
+function itemsList(items,nomac){return `<ul class="il">${items.map(i=>`<li><span class="grow">${esc(cap(PR[i.p].s))}${nomac?'':itemMac(i)}</span><b>${esc(qtyText(i))}${cookedTxt(i)}</b></li>`).join('')}</ul>`}
+// 5.28: на жёлтой карточке КБЖУ продуктов — под спойлером «КБЖУ»
+function kbjuBox(items){const row=(n,m)=>`<li><span class="grow">${n}</span><b>${r0(m.k)} ккал · Б ${r0(m.p)} · Ж ${r0(m.f)} · У ${r0(m.c)}</b></li>`,
+  its=items.filter(i=>macros([i]).k>=1);if(!its.length)return '';
+  return `<details class="howd kbd"><summary>КБЖУ</summary><ul class="il kbl">${its.map(i=>row(esc(cap(PR[i.p].s)),macros([i]))).join('')}${row('<b>Всего</b>',macros(items))}</ul></details>`}
 function itemsText(items){return items.map(i=>PR[i.p].s+' '+qtyText(i)).join(', ')}
 function chips(m){return `<div class="chips"><span>${r0(m.k)} ккал</span><span class="p">Б ${r0(m.p)}</span><span class="f">Ж ${r0(m.f)}</span><span class="c">У ${r0(m.c)}</span></div>`}
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -689,7 +693,7 @@ function vToday(){
   const skipped=m=>!!(S.skip||{})[dk_(viewDate,m.slot)];
   const next=isToday?meals.find(m=>!done(m)&&!skipped(m)):null;
   if(next){const diff=tmin(next.time)-nowMin(),eta=diff>0?'через '+(diff>=60?Math.floor(diff/60)+' ч'+(diff%60?' ':''):'')+(diff%60?(diff%60)+' мин':''):diff>-30?'сейчас':'время прошло';
-    h+=`<section class="hero"><div class="hh"><div class="when">${next.time}</div><div class="what">${SLOTS[next.slot]}${mealTag(next)}</div></div>${itemsList(next.items)}<details class="howd"><summary>Как готовить</summary>${stepsList(next)}</details><div class="row"><span class="eta">${eta}</span><span class="hb"><button class="skipx hx" data-a="skip" data-s="${next.slot}" aria-label="Пропустил: ${SLOTS[next.slot]}">✕</button><button class="btn" data-a="eat" data-s="${next.slot}">Съел</button></span></div></section>`}
+    h+=`<section class="hero"><div class="hh"><div class="when">${next.time}</div><div class="what">${SLOTS[next.slot]}${mealTag(next)}</div></div>${itemsList(next.items,1)}${kbjuBox(next.items)}<details class="howd"><summary>Как готовить</summary>${stepsList(next)}</details><div class="row"><span class="eta">${eta}</span><span class="hb"><button class="skipx hx" data-a="skip" data-s="${next.slot}" aria-label="Пропустил: ${SLOTS[next.slot]}">✕</button><button class="btn" data-a="eat" data-s="${next.slot}">Съел</button></span></div></section>`}
   else if(isToday)h+=`<div class="card"><b>Все приёмы на сегодня отмечены.</b></div>`;
   const extras=(S.extra||{})[viewDate]||[];
   {const e={k:0,p:0,f:0,c:0};meals.forEach(m=>{if(done(m)){const x=macros(m.items);['k','p','f','c'].forEach(k=>e[k]+=x[k])}});extras.forEach(x=>['k','p','f','c'].forEach(k=>e[k]+=x[k]||0));
