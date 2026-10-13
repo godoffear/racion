@@ -1,4 +1,4 @@
-const APP_VERSION='5.33';
+const APP_VERSION='5.34';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -245,7 +245,7 @@ function xRemember(n,k,p,f,c){const e=xParse(n,k,p,f,c);if(!e.n||!(e.k>0))return
   if(PRESETS.some(x=>xnorm(x[0])===key))return;S.myfoods.unshift(row);if(S.myfoods.length>200)S.myfoods.length=200}
 // выбрал продукт из списка и внёс — запоминаем вес и поднимаем наверх
 function xUse(i,q){const all=xAll(),e=all[i];if(!e)return;S.myfoods=S.myfoods||[];const k=S.myfoods.indexOf(e);let x=e;if(k>=0)S.myfoods.splice(k,1);else x=[e[0],'',e[2],e[3],e[4],e[5],1,'порц',1,0,0];x[8]=q;x[9]=(x[9]||0)+1;x[10]=Date.now();S.myfoods.unshift(x);if(S.myfoods.length>200)S.myfoods.length=200}
-function def(){return {rec:{},meth:{},dswap:{},wmenu:{},reviewed:{},v:3,done:{},skip:{},edits:{},w:[],left:{},bulk:{},chk:{},swaps:{},extra:{},excl:{},wswaps:{},treatBuy:{},grams:true,gv:2,cooked:false,stock:{},sv:0,pantry:{},price:{},homeAt:0,homeFor:'',huse:{},adaptOff:{},boiled:{q:0,at:0},riceBank:{q:0,at:0},prepDone:{},dismiss:{},shx:{},custom:{},eaten:[],place:{},myfoods:[],showMac:true,go:{},pkSkip:{chicken:1}}}
+function def(){return {rec:{},meth:{},dswap:{},wmenu:{},reviewed:{},v:3,done:{},skip:{},edits:{},w:[],left:{},bulk:{},chk:{},swaps:{},extra:{},excl:{},wswaps:{},treatBuy:{},grams:true,gv:2,cooked:false,stock:{},sv:0,pantry:{},price:{},homeAt:0,homeFor:'',huse:{},adaptOff:{},boiled:{q:0,at:0},riceBank:{q:0,at:0},prepDone:{},dismiss:{},shx:{},custom:{},eaten:[],place:{},myfoods:[],showMac:true,go:{},pkSkip:{chicken:1},med:{}}}
 let S;try{S=Object.assign(def(),JSON.parse(localStorage.getItem(LS)||'null')||{})}catch(e){S=def()}
 // 4.8: отметки запасов больше не сбрасываются каждую неделю — переносим «Купить» из S.bulk
 function migrate(){if(S.gv!==2){S.grams=true;S.gv=2}if(S.sv!==1){S.stock=S.stock||{};Object.values(S.bulk||{}).forEach(B=>Object.keys(B||{}).forEach(id=>{S.stock[id]=1}));S.sv=1}applyCustom()}
@@ -433,6 +433,11 @@ function prepModel(cs){const D0=prepDone(dkey(cs)),days=[0,1,2,3,4,5,6].map(i=>{
     if(e===5)T.push({id:'ev5:home',t:'Надиктовать «Что дома» → список на GO!',d:'Перед закупкой в понедельник'});
     return {e,d:days[e].d,T}});
   return {cs,big,eve,boils,cook,bank,b0}}
+// Лекарства по рецепту 13 окт 2026 (воспаление левого уха): после еды на завтраке и ужине, с ужина 13 окт по завтрак 18 окт
+const MEDS={from:'2026-10-13|1',to:'2026-10-18|0',list:[['Цефдинир 300 мг','Cefdinir 300 mg (Dentimex)','1 таблетка'],['Парацетамол 500 мг','Paracetamol 500 mg (Efferalgan)','1 таблетка'],['Фексофенадин 120 мг','Fexofenadine 120 mg (Fatelmed)','1 таблетка'],['Метилпреднизолон 16 мг','Methylprednisolone 16 mg (Medrol)','½ таблетки']],drops:['Капли в левое ухо','Ciprofloxacin ear drops 0,3% (Ciprofloxacin BĐ)']};
+function medsOn(dk,slot){const i=slot==='bf'?0:slot==='dinner'?1:-1;if(i<0)return false;const k=dk+'|'+i;return k>=MEDS.from&&k<=MEDS.to}
+function medsBox(dk,slot){if(!medsOn(dk,slot))return '';const k=dk+'|'+slot,ok=!!(S.med||{})[k],pid='med'+k;
+  return `<details class="howd meds ${ok?'medok':''}" data-pid="${pid}" ${PDET[pid]?'open':''}><summary>💊 Лекарства после еды${ok?' · выпито ✓':''}</summary><ul class="il">${MEDS.list.map(x=>`<li><span class="grow">${esc(x[0])}<small class="im">${esc(x[1])}</small></span><b>${esc(x[2])}</b></li>`).join('')}<li><span class="grow">${esc(MEDS.drops[0])}<small class="im">${esc(MEDS.drops[1])}</small></span><b>2 раза в день</b></li></ul><button class="btn sm ${ok?'ghost':''}" data-a="med" data-v="${dk}" data-s="${slot}">${ok?'Отменить отметку':'Выпил'}</button></details>`}
 const PDET={}; // какие спойлеры в «Заготовках» открыты — не закрываются при отметке пакета
 document.addEventListener('toggle',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.pid)PDET[el.dataset.pid]=el.open},true);
 function prepDone(ck){return (S.prepDone||{})[ck]||{}}
@@ -706,7 +711,7 @@ function vToday(){
   const skipped=m=>!!(S.skip||{})[dk_(viewDate,m.slot)];
   const next=isToday?meals.find(m=>!done(m)&&!skipped(m)):null;
   if(next){const diff=tmin(next.time)-nowMin(),eta=diff>0?'через '+(diff>=60?Math.floor(diff/60)+' ч'+(diff%60?' ':''):'')+(diff%60?(diff%60)+' мин':''):diff>-30?'сейчас':'время прошло';
-    h+=`<section class="hero"><div class="hh"><div class="when">${next.time}</div><div class="what">${SLOTS[next.slot]}${mealTag(next)}</div></div>${itemsList(next.items,1)}${kbjuBox(next.items)}<details class="howd"><summary>Как готовить</summary>${stepsList(next)}</details><div class="row"><span class="eta">${eta}</span><span class="hb"><button class="skipx hx" data-a="skip" data-s="${next.slot}" aria-label="Пропустил: ${SLOTS[next.slot]}">✕</button><button class="btn" data-a="eat" data-s="${next.slot}">Съел</button></span></div></section>`}
+    h+=`<section class="hero"><div class="hh"><div class="when">${next.time}</div><div class="what">${SLOTS[next.slot]}${mealTag(next)}</div></div>${itemsList(next.items,1)}${kbjuBox(next.items)}${medsBox(viewDate,next.slot)}<details class="howd"><summary>Как готовить</summary>${stepsList(next)}</details><div class="row"><span class="eta">${eta}</span><span class="hb"><button class="skipx hx" data-a="skip" data-s="${next.slot}" aria-label="Пропустил: ${SLOTS[next.slot]}">✕</button><button class="btn" data-a="eat" data-s="${next.slot}">Съел</button></span></div></section>`}
   else if(isToday)h+=`<div class="card"><b>Все приёмы на сегодня отмечены.</b></div>`;
   const extras=(S.extra||{})[viewDate]||[];
   {const e={k:0,p:0,f:0,c:0};meals.forEach(m=>{if(done(m)){const x=macros(m.items);['k','p','f','c'].forEach(k=>e[k]+=x[k])}});extras.forEach(x=>['k','p','f','c'].forEach(k=>e[k]+=x[k]||0));
@@ -721,7 +726,8 @@ function vToday(){
   const ents=meals.map(m=>({t:tmin(m.time),m})).concat(extras.filter(x=>!xin(x)).map(x=>({t:tmin(x.t),x}))).sort((a,b)=>a.t-b.t);
   const kcol=k=>`<span class="mk">${r0(k)}<small> ккал</small></span>`,gap='<span class="skipx gap" aria-hidden="true"></span>';
   const addb=m=>'';const addb_old=m=>`<button class="addx" data-a="xopen" data-s="${m.slot}" aria-label="Съел вне плана: ${SLOTS[m.slot]}" aria-expanded="${xOpen===m.slot}">+</button>`;
-  const xrows=m=>{const xs=extras.filter(x=>x.s===m.slot);return (xs.length?`<ul class="xl">${xs.map(x=>`<li><span class="grow">${esc(x.n)}</span><span class="xk">+${r0(x.k||0)} ккал</span><button class="xdel" data-a="xdel" data-id="${x.id}" aria-label="Удалить: ${esc(x.n)}">✕</button></li>`).join('')}</ul>`:'')};
+  const xrows=m=>xrows0(m)+medsBox(viewDate,m.slot);
+  const xrows0=m=>{const xs=extras.filter(x=>x.s===m.slot);return (xs.length?`<ul class="xl">${xs.map(x=>`<li><span class="grow">${esc(x.n)}</span><span class="xk">+${r0(x.k||0)} ккал</span><button class="xdel" data-a="xdel" data-id="${x.id}" aria-label="Удалить: ${esc(x.n)}">✕</button></li>`).join('')}</ul>`:'')};
   const walk=m=>plan.type==='W'&&m.slot==='snack'?`</ul><div class="walk"><b>Ходьба 45–60 мин.</b> Пульс 110–130. До ужина (закончить до 22:00) или через 1–1,5 ч после него.</div><ul class="tl">`:'';
   ents.forEach(en=>{
     if(en.x){const x=en.x;
@@ -1054,6 +1060,7 @@ const A={
   tab:d=>{if(shopMode&&d.v!=='shop'){shopMode=false;try{wakeLock&&wakeLock.release()}catch(_){}wakeLock=null}tab=d.v;SH=null;if(tab==='today')viewDate=dkey(appNow());window._openLeft=false;window.scrollTo&&window.scrollTo(0,0)},
   pick:d=>{viewDate=d.v;xOpen=''},
   cyc:d=>{xOpen='';viewDate=dkey(addDays(cycleStart(pkey(viewDate)),Number(d.v)))},
+  med:d=>{S.med=S.med||{};const k=d.v+'|'+d.s;if(S.med[k])delete S.med[k];else{S.med[k]=1;buzz()}save()},
   eat:d=>{const k=dk_(viewDate,d.s);if(S.done[k])delete S.done[k];else{S.done[k]=1;if(S.skip)delete S.skip[k];popKey=k;buzz()}
     const cut=dkey(addDays(appNow(),-120));Object.keys(S.done).forEach(x=>{if(x<cut)delete S.done[x]});save()},
   goleft:()=>{tab='shop';window._openLeft=true},
