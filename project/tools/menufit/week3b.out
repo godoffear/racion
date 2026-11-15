@@ -1,0 +1,40 @@
+2026-11-03 [1900.4, 204.5, 59.3, 143.5] viol 0
+    pre [['protein', 30], ['creatine', 5]]
+    bf [['oats', 35], ['egg', 3], ['banana', 1], ['yogurt', 1]]
+    lunch [['pork', 180], ['zucchini', 200], ['rice', 40], ['kimchi', 120], ['oil', 10]]
+    dinner [['chicken', 300], ['cabbage', 160], ['zucchini', 195], ['kimchi', 100], ['oil', 10]]
+    snack [['protein', 40], ['apple', 1]]
+2026-11-04 [1911.7, 204.7, 59.2, 144.9] viol 0
+    bf [['oats', 40], ['egg', 3], ['mango', 1], ['yogurt', 1], ['creatine', 5]]
+    lunch [['chicken', 260], ['broccoli', 130], ['rice', 45], ['kimchi', 120], ['oil', 10]]
+    dinner [['chicken', 170], ['tunaw', 1], ['cabbage', 130], ['tomato', 90], ['kimchi', 100], ['oil', 15]]
+    snack [['protein', 35], ['orange', 1]]
+2026-11-05 [1907.9, 204.4, 59.9, 144.7] viol 0
+    pre [['protein', 30], ['creatine', 5]]
+    bf [['oats', 30], ['egg', 3], ['apple', 1], ['yogurt', 1]]
+    lunch [['chicken', 230], ['cucumber', 1], ['tomato', 90], ['rice', 45], ['kimchi', 120], ['oil', 10]]
+    dinner [['chicken', 256], ['broccoli', 110], ['bellpep', 100], ['kimchi', 100], ['oil', 10]]
+    snack [['protein', 35], ['banana', 1], ['oil', 5]]
+2026-11-06 [1906.0, 204.9, 59.7, 143.6] viol 0
+    pre [['protein', 30], ['creatine', 5]]
+    bf [['oats', 50], ['egg', 3], ['banana', 1], ['yogurt', 1]]
+    lunch [['chicken', 140], ['tunaw', 1], ['egg', 1], ['cucumber', 1], ['rice', 20], ['kimchi', 120], ['oil', 10]]
+    dinner [['chicken', 170], ['cabbage', 140], ['pumpkin', 150], ['kimchi', 100], ['oil', 10]]
+    snack [['protein', 35], ['mango', 1]]
+2026-11-07 [1904.9, 198.4, 59.9, 144.8] viol 0
+    bf [['oats', 55], ['egg', 3], ['orange', 1], ['yogurt', 1], ['creatine', 5]]
+    lunch [['chicken', 243], ['egg', 1], ['bellpep', 80], ['rice', 45], ['kimchi', 110], ['oil', 10]]
+    dinner [['chicken', 280], ['broccoli', 110], ['tomato', 100], ['kimchi', 80], ['oil', 10]]
+    snack [['protein', 35], ['apple', 1]]
+2026-11-08 [1917.5, 205.0, 59.3, 144.6] viol 0
+    bf [['oats', 45], ['egg', 3], ['mango', 1], ['yogurt', 1], ['creatine', 5]]
+    lunch [['chicken', 250], ['cabbage', 140], ['rice', 40], ['kimchi', 120], ['oil', 15]]
+    dinner [['chicken', 190], ['tunaw', 1], ['pumpkin', 120], ['bellpep', 80], ['kimchi', 100], ['oil', 10]]
+    snack [['protein', 35], ['orange', 1]]
+2026-11-09 [1904.8, 202.6, 59.9, 144.8] viol 0
+    pre [['protein', 30], ['creatine', 5]]
+    bf [['oats', 35], ['egg', 3], ['banana', 1], ['yogurt', 1]]
+    lunch [['chicken', 260], ['cucumber', 1], ['tomato', 100], ['rice', 45], ['kimchi', 110], ['oil', 15]]
+    dinner [['chicken', 220], ['bellpep', 80], ['broccoli', 90], ['kimchi', 80], ['oil', 10]]
+    snack [['protein', 35], ['apple', 1]]
+{'protein': 370, 'creatine': 35, 'oats': 290, 'egg': 23, 'banana': 4, 'yogurt': 7, 'pork': 180, 'zucchini': 395, 'rice': 280, 'kimchi': 1480, 'oil': 160, 'chicken': 2969, 'cabbage': 570, 'apple': 4, 'mango': 3, 'broccoli': 440, 'tunaw': 3, 'tomato': 380, 'orange': 3, 'cucumber': 3, 'bellpep': 340, 'pumpkin': 270}

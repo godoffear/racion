@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Рацион</title>
+<style>html,body{margin:0;background:#EEF2EE}@media (prefers-color-scheme:dark){html,body{background:#0E1613}}</style></head>
+<body><script>
+/* Загрузчик APK: открывает встроенный app.html, а если приложение скачало версию новее — файл обновления
+   (его хранит Android рядом с приложением). Если новая версия не дозапустилась (флаг racion-boot остался «try»),
+   она отбрасывается и работает встроенная. */
+(async()=>{
+  let go='app.html';
+  try{
+    const ver=t=>{const m=String(t).match(/APP_VERSION='([^']+)'/);return m?m[1].split('.').map(Number):[0]};
+    const gt=(a,b)=>{for(let i=0;i<Math.max(a.length,b.length);i++){const d=(a[i]||0)-(b[i]||0);if(d)return d>0}return false};
+    const R=window.Capacitor&&(Capacitor.Plugins&&Capacitor.Plugins.RacionNative||(Capacitor.registerPlugin&&Capacitor.registerPlugin('RacionNative')));
+    if(R){
+      const o=await R.getOverride();
+      if(o&&o.path){
+        const bv=ver(await (await fetch('app.html')).text());
+        if(localStorage.getItem('racion-boot')==='try'||!gt(String(o.ver).split('.').map(Number),bv))await R.clearOverride();
+        else{go=Capacitor.convertFileSrc(o.path);localStorage.setItem('racion-boot','try')}
+      }
+    }
+    if(go==='app.html')localStorage.setItem('racion-boot','ok');
+  }catch(_){}
+  location.replace(go);
+})();
+</script></body></html>

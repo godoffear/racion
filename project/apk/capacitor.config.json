@@ -1,0 +1,10 @@
+{
+  "appId": "com.godoffear.racion",
+  "appName": "Рацион",
+  "webDir": "www",
+  "android": { "backgroundColor": "#EEF2EE" },
+  "plugins": {
+    "LocalNotifications": { "smallIcon": "ic_stat_racion", "iconColor": "#1E6B55" },
+    "SystemBars": { "insetsHandling": "css" }
+  }
+}

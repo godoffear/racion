@@ -1,0 +1,28 @@
+# Ключи и сборки (по требованию владельца)
+*.apk
+*.aab
+*.keystore
+*.jks
+keys-backup/
+node_modules/
+build/
+.gradle/
+out/
+*.zip
+*.tar.gz
+.DS_Store
+
+# Локальный архив старых версий и копий
+_archive/
+
+# Личные данные владельца и готовые APK (репозиторий публичный)
+data-copy/
+ready-apk/
+
+# Служебное и генерируемое
+local.properties
+*.log
+project/release/
+project/apk/www/
+project/apk/android/app/src/main/assets/public/
+project/apk/android/capacitor-cordova-android-plugins/

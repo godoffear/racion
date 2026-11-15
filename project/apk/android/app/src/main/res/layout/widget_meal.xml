@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/wroot" android:layout_width="match_parent" android:layout_height="match_parent">
+    <ImageView android:id="@+id/wbg" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:src="@drawable/widget_bg" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp">
+        <TextView android:id="@+id/mtime" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="1" android:textSize="28sp" android:textStyle="bold" />
+        <TextView android:id="@+id/mname" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end" android:textSize="14sp" android:textStyle="bold" />
+        <TextView android:id="@+id/mitems" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="3dp" android:ellipsize="end" android:maxLines="5" android:textSize="11sp" />
+        <TextView android:id="@+id/mfoot" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="1" android:textSize="11sp" />
+    </LinearLayout>
+</FrameLayout>

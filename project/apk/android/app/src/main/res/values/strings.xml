@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Рацион</string>
+    <string name="title_activity_main">Рацион</string>
+    <string name="package_name">com.godoffear.racion</string>
+    <string name="custom_url_scheme">com.godoffear.racion</string>
+    <string name="widget_desc_day">Все приёмы дня списком, ближайший выделен, внизу калории и белок</string>
+    <string name="widget_desc_line">Ближайший приём со списком продуктов, калории и белок за день</string>
+    <string name="widget_desc_ring">Кольца: калории и белок за день</string>
+    <string name="widget_desc_meal">Ближайший приём: время, название и состав</string>
+</resources>
