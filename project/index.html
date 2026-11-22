@@ -545,7 +545,7 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:var(--sat);ba
 <nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
 <div id="toast" class="toast" hidden></div>
 <script>
-const APP_VERSION='10.3';
+const APP_VERSION='10.4';
 /* ===== Справочники ===== */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const DAYS_ACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
@@ -702,6 +702,13 @@ const OVERRIDES={
  '2026-11-21':{pre:[['protein',30],['creatine',5]],bf:[['egg',3],['oats',35],['yogurt',1],['dragon',110],'oatfruit'],lunch:[['ramen_o',1],['chicken',250],['zucchini',140],['oil',5]],snack:[['protein',30]],dinner:[['tunaw',1],['chicken',80],['pumpkin',150]]},
  '2026-11-22':{bf:[['egg',3],['oats',40],['yogurt',1],['dragon',100],['creatine',5],'oatfruit'],lunch:[['phobo',1]],snack:[['protein',40],['pineapple',50]],dinner:[['tunaw',1],['chicken',160],['zucchini',100],['rice',30],['oil',5],['egg',2]]},
  '2026-11-23':{pre:[['protein',40],['creatine',5]],bf:[['egg',3],['oats',50],['yogurt',1],['mango',1],'oatfruit'],lunch:[['chicken',280],['rice',30],['pumpkin',150],['cucumber',1],['oil',10]],snack:[['protein',30],['dragon',100]],dinner:[['chicken',170],['bellpep',150],['onion',50],['pumpkin',130],['oil',10]]},
+ '2026-11-24':{pre:[['protein',40],['creatine',5]],bf:[['egg',3],['oats',60],['yogurt',1],['dragon',150],'oatfruit'],lunch:[['chicken',280],['rice',35],['pumpkin',150],['oil',15]],snack:[['protein',30],['mango',1]],dinner:[['chicken',170],['bellpep',120],['oil',10]]},
+ '2026-11-25':{bf:[['egg',3],['oats',55],['yogurt',1],['mango',1],['creatine',5],'oatfruit'],lunch:[['chicken',240],['rice',30],['zucchini',100],['oil',15],['egg',1]],snack:[['protein',45],['pineapple',200]],dinner:[['tunaw',1],['chicken',150],['tomato',200],['onion',50],['oil',5]]},
+ '2026-11-26':{pre:[['protein',40],['creatine',5]],bf:[['egg',3],['oats',60],['yogurt',1],['dragon',150],'oatfruit'],lunch:[['chicken',220],['rice',30],['broccoli',150],['oil',10]],snack:[['protein',20],['pineapple',200]],dinner:[['chicken',270],['broccoli',150],['oil',15]]},
+ '2026-11-27':{pre:[['protein',40],['creatine',5]],bf:[['egg',3],['oats',45],['yogurt',1],['mango',1],'oatfruit'],lunch:[['chicken',220],['egg',1],['rice',30],['pumpkin',120],['oil',5]],snack:[['protein',10],['dragon',150]],dinner:[['tunaw',1],['chicken',140],['broccoli',250],['oil',15]]},
+ '2026-11-28':{pre:[['protein',30],['creatine',5]],bf:[['egg',3],['oats',55],['yogurt',1],['mango',1],'oatfruit'],lunch:[['chicken',250],['rice',30],['bellpep',130],['egg',2],['oil',10]],snack:[['protein',25],['dragon',150]],dinner:[['chicken',200],['broccoli',170],['oil',5]]},
+ '2026-11-29':{bf:[['egg',3],['oats',35],['yogurt',1],['mango',1],['creatine',5],'oatfruit'],lunch:[['chicken',130],['rice',30],['cucumber',1],['oil',10],['tunaw',1]],snack:[['protein',45],['dragon',150]],dinner:[['chicken',280],['rice',30],['cucumber',1],['tomato',90],['oil',15]]},
+ '2026-11-30':{pre:[['protein',40],['creatine',5]],bf:[['egg',3],['oats',50],['yogurt',1],['mango',1],'oatfruit'],lunch:[['chicken',280],['rice',30],['onion',50],['cucumber',1],['oil',10]],snack:[['protein',35],['pineapple',150]],dinner:[['chicken',170],['tomato',200],['beans',100],['oil',15]]},
 };
 // разовые задачи «Заготовок» по неделям: [id, что, подробно]
 const PREP_EXTRA={}; // разовые задачи «Заготовок» по неделям: {ГГГГ-ММ-ДД: [[id, что, подробно], ...]}
@@ -1535,6 +1542,9 @@ const EGGS_AT=new Date(2026,9,7,11,40).getTime();
 // 7 окт: у Андрея осталось 1 варёное яйцо + купил 30 → всего 31 (считать расход «по плану» для яиц здесь не нужно)
 function eggsFix(){const ck='2026-10-06';S.left[ck]=S.left[ck]||{};const e=S.left[ck].egg;if(!e||e.at<=EGGS_AT)S.left[ck].egg={q:31,at:EGGS_AT};if(!(S.boiled&&S.boiled.at>EGGS_AT))S.boiled={q:1,at:EGGS_AT};S.seed4=1}
 function seedFix7b(){try{if(S.seed4||!S.seed3)return;eggsFix();save()}catch(_){}}
+function seedFix21(){try{const ck='2026-11-24';if(S.seed21||S.homeFor===ck)return; // 23 ноя: что дома перед закупкой на 24–30 ноября (пакеты целиком)
+  const r=parseHome('ДОМА: тунец в соку 3 банки; йогурт 2 шт; рис есть; овсянка есть; РАСФАСОВАНО: курица 170, 280; рис варёный 85, 85, 85, 85, 85, 100, 85, 85; тыква 150, 120; кабачки 100');
+  applyHome(r.res,Date.now(),true,ck);S.bags=S.bags||{};S.bags[ck]=r.bags||{};S.homeFor=ck;S.seed21=1;save()}catch(_){}}
 function seedFix20(){try{const ck='2026-11-17';if(S.seed20||S.homeFor===ck)return; // 15 ноя: что дома перед закупкой на 17–23 ноября (пакеты из морозилки целиком)
   const r=parseHome('ДОМА: тунец в соку 7 банок; яйца 4 шт; йогурт 3 шт; лапша 3 шт; кимчи есть; овсянка есть; рис есть; протеин есть; креатин есть; РАСФАСОВАНО: курица 280, 280; рис варёный 87, 87, 87; тыква 150, 130, 150, 260, 120; кабачки 140, 150, 150, 100, 100; фасоль 90, 150; капуста 190');
   applyHome(r.res,Date.now(),true,ck);S.bags=S.bags||{};S.bags[ck]=r.bags||{};S.homeFor=ck;S.seed20=1;save()}catch(_){}}
@@ -2716,7 +2726,7 @@ seedFix12();
 seedFix13();
 seedFix14();
 seedFix15();
-seedFix16();seedFix17();seedFix18();seedFix19();seedFix20();
+seedFix16();seedFix17();seedFix18();seedFix19();seedFix20();seedFix21();
 applyTheme();
 render();
 tmTick(true);tmAwake();
